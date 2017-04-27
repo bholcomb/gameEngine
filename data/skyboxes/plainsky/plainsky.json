@@ -1,0 +1,13 @@
+{
+	"skybox":{
+		"name": "plainsky",
+		"cubemap":{
+			"+x": "plainsky_rt.jpg",
+			"-x": "plainsky_lf.jpg",
+			"+y": "plainsky_up.jpg",
+			"-y": "plainsky_dn.jpg",
+			"+z": "plainsky_bk.jpg",
+			"-z": "plainsky_ft.jpg",
+		}
+	}
+}

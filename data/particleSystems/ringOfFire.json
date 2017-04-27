@@ -1,0 +1,47 @@
+{
+	"material": "../data/textures/fire_A.png",
+	"position": {"x": 2.5, "y": 0, "z"	: 2.5},
+	"maxParticles": 3000,
+	"continuous": true,
+	"lifetime": 0,
+
+	"features": {
+		"emitter": {
+			"emitterType": "circle",
+			"continuous": true,
+			"emissionRate": 800,
+			"p1": {"x": 5, "y": 5, "z": 0},
+			"p1Variance": {"x": 0, "y": 0, "z": 0},
+			"p2": {"x": 0, "y": 0, "z": 0},
+			"p2Variance": {"x": 0, "y": 0, "z": 0},
+			"velocity": {"x": 0, "y": 1, "z": 0},
+			"velocityVariance": {"x": 1, "y": 1, "z": 1},
+			"size": {"x": 0.5, "y": 0.5, "z": 0.5},
+			"sizeVariance": {"x": 0.25, "y": 0.25, "z": 0.25},
+			"color": {"r": 1, "g": 1, "b": 1, "a": 1},
+			"colorVariance": {"r": 0, "g": 0, "b": 0, "a": 0},
+			"rotation": 0, 
+			"rotationVariance": 0,
+			"mass": 1, 
+			"massVariance": 0.5, 
+			"lifetime": 1.5, 
+			"lifetimeVariance": 0.5
+		},
+		"linear": {
+			"force": {"x": 0, "y": 1, "z": 0}
+		},
+		"tangent": {
+			"magnitude": 1
+		},
+		"radial": {
+			"magnitude": 1
+		},
+		"rotation": {
+			"value": 0.5
+		},
+		"scale": {
+			"scale": {"x": 0.25, "y": 0.25, "z": 0.25}
+		},
+		"alphaFromLife": {}
+		}
+}

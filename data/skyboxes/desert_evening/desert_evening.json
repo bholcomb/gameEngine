@@ -1,0 +1,13 @@
+{
+	"skybox":{
+		"name": "desert_evening",
+		"cubemap":{
+			"+x": "desert_evening_east.jpg",
+			"-x": "desert_evening_west.jpg",
+			"+y": "desert_evening_up.jpg",
+			"-y": "desert_evening_down.jpg",
+			"+z": "desert_evening_south.jpg",
+			"-z": "desert_evening_north.jpg",
+		}
+	}
+}

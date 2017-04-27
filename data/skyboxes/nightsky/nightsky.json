@@ -1,0 +1,13 @@
+{
+	"skybox":{
+		"name": "nightsky",
+		"cubemap":{
+			"+x": "nightsky_east.jpg",
+			"-x": "nightsky_west.jpg",
+			"+y": "nightsky_up.jpg",
+			"-y": "nightsky_down.jpg",
+			"+z": "nightsky_south.jpg",
+			"-z": "nightsky_north.jpg",
+		}
+	}
+}

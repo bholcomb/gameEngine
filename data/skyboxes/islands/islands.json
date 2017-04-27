@@ -1,0 +1,13 @@
+{
+	"skybox":{
+		"name": "islands",
+		"cubemap":{
+			"+x": "islands_east.jpg",
+			"-x": "islands_west.jpg",
+			"+y": "islands_up.jpg",
+			"-y": "islands_down.jpg",
+			"+z": "islands_south.jpg",
+			"-z": "islands_north.jpg",
+		}
+	}
+}

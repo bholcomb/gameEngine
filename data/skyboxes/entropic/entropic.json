@@ -1,0 +1,13 @@
+{
+	"skybox":{
+		"name": "entropic",
+		"cubemap":{
+			"+x": "entropic_east.jpg",
+			"-x": "entropic_west.jpg",
+			"+y": "entropic_up.jpg",
+			"-y": "entropic_down.jpg",
+			"+z": "entropic_south.jpg",
+			"-z": "entropic_north.jpg",
+		}
+	}
+}

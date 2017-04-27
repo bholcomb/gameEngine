@@ -1,0 +1,13 @@
+{
+	"skybox":{
+		"name": "alpine",
+		"cubemap":{
+			"+x": "east.jpg",
+			"-x": "west.jpg",
+			"+y": "up.jpg",
+			"-y": "down.jpg",
+			"+z": "south.jpg",
+			"-z": "north.jpg",
+		}
+	}
+}

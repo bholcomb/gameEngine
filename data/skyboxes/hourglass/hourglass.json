@@ -1,0 +1,13 @@
+{
+	"skybox":{
+		"name": "hourglass",
+		"cubemap":{
+			"+x": "hourglass_east.jpg",
+			"-x": "hourglass_west.jpg",
+			"+y": "hourglass_up.jpg",
+			"-y": "hourglass_down.jpg",
+			"+z": "hourglass_south.jpg",
+			"-z": "hourglass_north.jpg",
+		}
+	}
+}

@@ -1,0 +1,13 @@
+{
+	"skybox":{
+		"name": "noonclouds",
+		"cubemap":{
+			"+x": "noonclouds_rt.png",
+			"-x": "noonclouds_lf.png",
+			"+y": "noonclouds_up.png",
+			"-y": "noonclouds_dn.png",
+			"+z": "noonclouds_bk.png",
+			"-z": "noonclouds_ft.png",
+		}
+	}
+}

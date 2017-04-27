@@ -1,0 +1,55 @@
+--[[/*********************************************************************************
+
+Copyright (c) 2014 Bionic Dog Studios LLC
+
+*********************************************************************************/]]--
+
+EVENT{
+	fileName="playSound";
+	eventName="audio.sound.play";
+	className="PlaySoundEvent";
+	namespace="Engine";
+	libs={"Audio"};
+	serialize=false;
+	attributes={
+		{type="Sound", name="sound"};
+	}
+}
+
+EVENT{
+	fileName="pauseSound";
+	eventName="audio.sound.pause";
+	className="PauseSoundEvent";
+	namespace="Engine";
+	libs={"Audio"};
+	serialize=false;
+	attributes={
+		{type="Sound", name="sound"};
+	}
+}
+
+EVENT{
+	fileName="stopSound";
+	eventName="audio.sound.stop";
+	className="StopSoundEvent";
+	namespace="Engine";
+	libs={"Audio"};
+	serialize=false;
+	attributes={
+		{type="Sound", name="sound"};
+	}
+}
+
+EVENT{
+	fileName="setListener";
+	eventName="audio.listener.set";
+	className="SetListenerEvent";
+   namespace="Engine";
+	libs={"OpenTK"};
+	serialize=true;
+	attributes={
+		{type="Vector3", name="position"};
+		{type="Vector3", name="velocity"};
+	}
+}
+

@@ -1,0 +1,28 @@
+# Blender MTL File: 'fir.blend'
+# Material Count: 2
+newmtl foliage
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd 32\diffuse.png
+map_Ks 32\\specular.png
+map_Bump 32\\normal.png
+
+
+newmtl trunk
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.640000 0.640000 0.640000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd 117\diffuse.png
+map_Ks 117\\specular.png
+map_Bump 117\\normal.png
+
+

@@ -1,0 +1,13 @@
+{
+	"skybox":{
+		"name": "desert",
+		"cubemap":{
+			"+x": "desert_rt.jpg",
+			"-x": "desert_lf.jpg",
+			"+y": "desert_up.jpg",
+			"-y": "desert_dn.jpg",
+			"+z": "desert_bk.jpg",
+			"-z": "desert_ft.jpg",
+		}
+	}
+}

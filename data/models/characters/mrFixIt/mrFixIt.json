@@ -1,0 +1,21 @@
+{
+	"iqm":{
+		"name": "mrFixIt",
+		"file" : "mrFixIt.iqm",
+		"initialTransform":{
+			"translate":[0,0,0],
+			"rotate":[0,-90,0],
+			"scale":[0.1,0.1,0.1]
+		},
+		"events": {
+			"walk1": [
+				{"time": 0.0,  "event": "lfoot"},
+				{"time": 0.2, "event": "rfoot"}
+			],
+			"walk2":[
+				{"time": 0.0,  "event": "lfoot"},
+				{"time": 0.2, "event": "rfoot"}
+			]
+		}
+	}
+}

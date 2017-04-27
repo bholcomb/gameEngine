@@ -1,0 +1,13 @@
+{
+	"skybox":{
+		"name": "lostvalley",
+		"cubemap":{
+			"+x": "lostvalley_east.jpg",
+			"-x": "lostvalley_west.jpg",
+			"+y": "lostvalley_up.jpg",
+			"-y": "lostvalley_down.jpg",
+			"+z": "lostvalley_south.jpg",
+			"-z": "lostvalley_north.jpg",
+		}
+	}
+}

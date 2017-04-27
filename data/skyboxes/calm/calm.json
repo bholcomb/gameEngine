@@ -1,0 +1,13 @@
+{
+	"skybox":{
+		"name": "calm",
+		"cubemap":{
+			"+x": "calm_east.jpg",
+			"-x": "calm_west.jpg",
+			"+y": "calm_up.jpg",
+			"-y": "calm_down.jpg",
+			"+z": "calm_south.jpg",
+			"-z": "calm_north.jpg",
+		}
+	}
+}

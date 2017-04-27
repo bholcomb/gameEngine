@@ -1,0 +1,36 @@
+{
+	"ms3d":{
+		"name": "zombie",
+		"file": "zombie.ms3d",
+		"initialTransform":{
+			"translate":[0,0, 0],
+			"rotate":[180 ,0, 0],
+			"scale":[0.1,0.1,0.1]
+		},
+		"animations": [
+			{"name": "walk1", 		"start":2,  "end":20, "loop":true},
+			{"name": "walk2", 		"start":22,"end":36, "loop":true},
+			{"name": "attacked1", 	"start":38,"end":47, "loop":false},
+			{"name": "attacked2", 	"start":48, "end":57, "loop":false},
+			{"name": "fall", 			"start":59,"end":75, "loop":false},
+			{"name": "twitch", 		"start":78, "end":88, "loop":true},
+			{"name": "die", 			"start":91, "end":103,"loop": false},
+			{"name": "kick", 			"start":106, "end":115, "loop":false},
+			{"name": "punch", 		"start":117, "end":128, "loop":false},
+			{"name": "headButt",	"start":129, "end":136, "loop":false},
+			{"name": "idle1", 			"start":137,"end":169, "loop":true}, 
+			{"name": "idle2", 			"start":170, "end":200, "loop":true}
+		],
+		
+		"events": {
+			"walk1": [
+				{"time": 0.0,  "event": "lfoot"},
+				{"time": 0.2, "event": "rfoot"}
+			],
+			"walk2":[
+				{"time": 0.0,  "event": "lfoot"},
+				{"time": 0.2, "event": "rfoot"}
+			]
+		}
+	}
+}

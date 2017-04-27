@@ -1,0 +1,196 @@
+--[[/*********************************************************************************
+
+Copyright (c) 2014 Bionic Dog Studios LLC
+
+*********************************************************************************/]]--
+
+--state request
+EVENT{
+	fileName="entityStateRequestEvent";
+	eventName="entity.state.request";
+	className="EntityStateRequestMessage";
+   namespace="Sim";
+	libs={"OpenTK"};
+	attributeChange=false;	
+	serialize=true;
+	attributes={
+		{type="UInt64", name="entity"}
+	}
+}
+
+--state response
+EVENT{
+	fileName="entityStateResponseEvent";
+	eventName="entity.state.response";
+	className="EntityStateResponseMessage";
+   namespace="Sim";
+	libs={"OpenTK"};
+	attributeChange=false;	
+	serialize=true;
+	attributes={
+		{type="UInt64", name="entity"};
+		{type="String", name="type"};
+		{type="Vector3", name="position"};
+		{type="Quaternion", name="orientation"};
+		{type="bool", name="dynamic"};
+		{type="String", name="state"};
+		{type="UInt64", name="parent"};
+	}
+}
+
+
+--position attribute change
+EVENT{
+	fileName="entityPositionEvent";
+	eventName="entity.attribute.position";
+	className="PositionChangeEvent";
+   namespace="Sim";
+	libs={"Engine", "OpenTK"};
+	attributeChange=true;	
+	serialize=true;
+	attributes={
+		{type="UInt64", name="entity"};
+		{type="Vector3", name="position"};
+	}
+}
+
+--orientation attribute change
+EVENT{
+	fileName="entityOrientationEvent";
+	eventName="entity.attribute.orientation";
+	className="OrientationChangeEvent";
+   namespace="Sim";
+	libs={"Engine", "OpenTK"};
+	attributeChange=true;	
+	serialize=true;
+	attributes={
+		{type="UInt64", name="entity"};
+		{type="Quaternion", name="orientation"};
+	}
+}
+
+--dynamic attribute change
+EVENT{
+	fileName="entityDynamicEvent";
+	eventName="entity.attribute.dynamic";
+	className="DynamicChangeEvent";
+   namespace="Sim";
+	libs={"Engine"};
+	attributeChange=true;	
+	serialize=true;
+	attributes={
+		{type="UInt64", name="entity"};
+		{type="bool", name="dynamic"};
+	}
+}
+
+--state parameter change
+EVENT{
+	fileName="entityStateEvent";
+	eventName="entity.attribute.state";
+	className="StateChangeEvent";
+   namespace="Sim";
+	libs={"Engine"};
+	attributeChange=true;	
+	serialize=true;
+	attributes={
+		{type="UInt64", name="entity"};
+		{type="String", name="state"};
+	}
+}
+
+--parent parameter change
+EVENT{
+	fileName="entityParentEvent";
+	eventName="entity.attribute.parent";
+	className="ParentChangeEvent";
+   namespace="Sim";
+	libs={"Engine"};
+	attributeChange=true;
+	serialize=true;
+	attributes={
+		{type="UInt64", name="entity"};
+		{type="UInt64", name="parent"};
+	}
+}
+
+--entity added
+EVENT{
+	fileName="entityAdded";
+	eventName="entity.added";
+	className="EntityAddedEvent";
+   namespace="Sim";
+	libs={};
+	serialize=true;
+	attributes={
+		{type="UInt64", name="entity"};
+		{type="String", name="type"};
+	}
+}
+
+--entity removed
+EVENT{
+	fileName="entityRemoved";
+	eventName="entity.removed";
+	className="EntityRemovedEvent";
+   namespace="Sim";
+	libs={};
+	serialize=true;
+	attributes={
+		{type="UInt64", name="entity"};
+	}
+}
+
+--behavior added
+EVENT{
+	fileName="entityBehaviorAdded";
+	eventName="entity.behavior.added";
+	className="EntityBehaviorAddedEvent";
+   namespace="Sim";
+	libs={};
+	serialize=true;
+	attributes={
+		{type="UInt64", name="entity"};
+		{type="String", name="behavior"};
+	}
+}
+
+--behavior removed
+EVENT{
+	fileName="entityBehaviorRemoved";
+	eventName="entity.behavior.removed";
+	className="EntityBehaviorRemovedEvent";
+   namespace="Sim";
+	libs={};
+	serialize=true;
+	attributes={
+		{type="UInt64", name="entity"};
+		{type="String", name="behavior"};
+	}
+}
+
+--start animation
+EVENT{
+	fileName="entityAnimiationStart";
+	eventName="entity.animation.start";
+	className="EntityAnimationStartEvent";
+   namespace="Sim";
+	libs={};
+	serialize=true;
+	attributes={
+		{type="UInt64", name="entity"};
+	}
+}
+
+--stop animation
+EVENT{
+	fileName="entityAnimiationStop";
+	eventName="entity.animation.stop";
+	className="EntityAnimationStopEvent";
+   namespace="Sim";
+	libs={};
+	serialize=true;
+	attributes={
+		{type="UInt64", name="entity"};
+	}
+}

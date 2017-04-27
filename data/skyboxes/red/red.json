@@ -1,0 +1,13 @@
+{
+	"skybox":{
+		"name": "red",
+		"cubemap":{
+			"+x": "red_east.jpg",
+			"-x": "red_west.jpg",
+			"+y": "red_up.jpg",
+			"-y": "red_down.jpg",
+			"+z": "red_south.jpg",
+			"-z": "red_north.jpg",
+		}
+	}
+}

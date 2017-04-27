@@ -1,0 +1,168 @@
+EVENT{
+	fileName="terrainRequestEvent";
+	eventName="terrain.chunk.request";
+	className="TerrainRequestEvent";
+	namespace="Terrain";
+	libs={"OpenTK"};	
+	serialize=true;
+	attributes={
+		{type="UInt64", name="chunkId"};
+	}
+}
+
+EVENT{
+	fileName="terrainRebuildEvent";
+	eventName="terrain.chunk.rebuild";
+	className="TerrainRebuildEvent";
+	namespace="Terrain";
+	libs={"OpenTK"};	
+	serialize=true;
+	attributes={
+		{type="UInt64", name="chunkId"};
+	}
+}
+
+EVENT{
+	fileName="terrainResponseEvent";
+	eventName="terrain.chunk.response";
+	className="TerrainResponseEvent";
+	namespace="Terrain";
+	libs={"OpenTK", "System.Collections.Generic"};
+	serialize=true;
+	attributes={
+		{type="UInt64", name="chunkId"};
+		{type="List<byte>", name="data"};
+	}
+}
+
+EVENT{
+	fileName="terrainResetEvent";
+	eventName="terrain.reset";
+	className="TerrainResetEvent";
+	namespace="Terrain";
+	libs={"OpenTK"};
+	serialize=true;
+	attributes={
+		{type="bool", name="reload"};
+	}
+}
+
+EVENT{
+	fileName="addBlocksEvent";
+	eventName="terrain.edit.addBlocks";
+	className="AddBlocksEvent";
+	namespace="Terrain";
+	libs={"OpenTK", "System.Collections.Generic"};
+	serialize=true;
+	attributes={
+		{type="UInt32", name="materialId"};
+		{type="List<NodeLocation>", name="blocks"};
+	}
+}
+
+EVENT{
+	fileName="removeBlocksEvent";
+	eventName="terrain.edit.removeBlocks";
+	className="RemoveBlocksEvent";
+	namespace="Terrain";
+	libs={"OpenTK", "System.Collections.Generic"};
+	serialize=true;
+	attributes={
+		{type="UInt64", name="chunkId"};
+		{type="List<NodeLocation>", name="blocks"};
+	}
+}
+
+EVENT{
+	fileName="assignMaterialEvent";
+	eventName="terrain.edit.setMaterial";
+	className="AssignMaterialEvent";
+	namespace="Terrain";
+	libs={"OpenTK", "System.Collections.Generic"};
+	serialize=true;
+	attributes={
+		{type="UInt32", name="materialId"};
+		{type="List<NodeLocation>", name="blocks"};
+	}
+}
+
+EVENT{
+	fileName="adjustVertexEvent";
+	eventName="terrain.edit.adjustVertex";
+	className="AdjustVertexEvent";
+	namespace="Terrain";
+	libs={"OpenTK", "System.Collections.Generic"};
+	serialize=true;
+	attributes={
+		{type="NodeLocation", name="block"};
+		{type="Int32", name="edge"};
+		{type="Int32", name="vert"};
+		{type="Int32", name="amount"};
+	}
+}
+
+EVENT{
+	fileName="adjustEdgeEvent";
+	eventName="terrain.edit.adjustEdge";
+	className="AdjustEdgeEvent";
+	namespace="Terrain";
+	libs={"OpenTK", "System.Collections.Generic"};
+	serialize=true;
+	attributes={
+		{type="NodeLocation", name="block"};
+		{type="Int32", name="edge"};
+		{type="Int32", name="face"};
+		{type="Int32", name="amount"};
+	}
+}
+
+EVENT{
+	fileName="adjustFaceEvent";
+	eventName="terrain.edit.adjustFace";
+	className="AdjustFaceEvent";
+	namespace="Terrain";
+	libs={"OpenTK", "System.Collections.Generic"};
+	serialize=true;
+	attributes={
+		{type="NodeLocation", name="block"};
+		{type="Int32", name="face"};
+		{type="Int32", name="amount"};
+	}
+}
+
+EVENT{
+	fileName="splitEvent";
+	eventName="terrain.edit.split";
+	className="SplitEvent";
+	namespace="Terrain";
+	libs={"OpenTK", "System.Collections.Generic"};
+	serialize=true;
+	attributes={
+		{type="NodeLocation", name="block"};
+	}
+}
+
+EVENT{
+	fileName="joinEvent";
+	eventName="terrain.edit.join";
+	className="JoinEvent";
+	namespace="Terrain";
+	libs={"OpenTK", "System.Collections.Generic"};
+	serialize=true;
+	attributes={
+		{type="NodeLocation", name="block"};
+	}
+}
+
+EVENT{
+	fileName="resetBlockEvent";
+	eventName="terrain.edit.resetBlock";
+	className="ResetBlockEvent";
+	namespace="Terrain";
+	libs={"OpenTK", "System.Collections.Generic"};
+	serialize=true;
+	attributes={
+		{type="NodeLocation", name="block"};
+	}
+}
+
