@@ -10,7 +10,7 @@ Mesh-set of verticies that are all rendered at once with the same material
 Renderqueue-A render queue is a list of commands that are to be exeuted with a specific pipeline.  Since pipelines are shader specific, this also implies renderqueues are visualizer specific.
 
 Top-Down Description
-The renderer maintains a list of scene graphs and a list of renderables.  Each scene graph renders all the renderable objects registered with the renderer.  A scene graph consists of a list of render stages that are executed in order.  Render stages implement a render pass type and contain a list of one or more views.  A view is a camera, viewport, render target.  Views subsribe for types of renderables that they want to render using any registered visualizers.  Visualizer use the current render stages pass type and renderable to select the correct shader technique and build up any buffer data and draw commands.
+The renderer maintains a list of scene graphs and a list of renderables (note: scene graph in this context is more of an inside joke about real scene graphs, and I didn't have a better name at the time).  Each scene graph renders all the renderable objects registered with the renderer.  A scene graph consists of a list of render stages that are executed in order.  Render stages implement a render pass type and contain a list of one or more views.  A view is a camera, viewport, render target.  Views subsribe for types of renderables that they want to render using any registered visualizers.  Visualizer use the current render stages pass type and renderable to select the correct shader technique and build up any buffer data and draw commands.
 
 Renderable objects reference a model.  Models are loaded using the resource manager and added to the renderer.
 
