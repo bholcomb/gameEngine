@@ -1,0 +1,12 @@
+The Audio library is used to load and play 3d audio sounds using the OpenAL API (through OpenTK).  The audio system allows for multiple sounds to be playing at the same time an allows for music to play.  It is capable of loading WAV, OGG, and composite sound files called soundscapes.
+
+To play a sound, you need both a source to play (the waveform data) and a sound object to be instance of the sound.   Sound objects may be 3d and have a posiiton, or 2d and not have any 3d processing on the sound. . There may be many instances of a sound referencing the same sourcee playing a differnt locations. 
+
+Sound sources consist of audio buffers, which contain the PCM data.  Streaming sources, such as OGG files or network audio streams (player radio data for example) page the audio buffers to the sound system without the user needing to worry about it.
+
+The Listener class, of which there is only one at any given time, is how the sound system knows where the "ears" are and how they're oriented in the 3d environment.
+
+Sounds play their souce data using a voice.  The AudioManager class owns the voices and gives them to sounds when they want to play.  Sounds too far from listener may not be able to get a voice.  Sounds with higher priorty such as dialog will bump lower priority sounds such as background ambient sounds in a soundscape and take the voice so it can be heard.  
+
+Soundscape are a composite sound made up of several sound effects.  They allow periodic 3d sounds to be played at random intervals and locations (relative to the player) as well as background sounds that loop.  Background and periodic sounds can be configured to play with with variation in their pitch and gain to keep from sounding too repetative.
+

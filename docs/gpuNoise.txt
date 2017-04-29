@@ -1,0 +1,23 @@
+GPU noise is a OpenGL Compute shader implementation of the super awesome liNoise project.  It provides several modules that can be combined together in a module tree used to create textures. 
+
+The library contains the following modules
+
+AutoCorrect-
+	AutoCorrect takes an input texture (heightmap) and rescales all the values so that they fit in the range 0..1.  For example, an input noise texture may have values between 0..1.5, but needs to be rescaled to 0..1.  AutoCorrect will find the min/max value in the texture and then rescale every value so they in the range.s
+
+Bias-Biases the input value towards the bias value
+
+Combiner-Combines multiple (up to 8) values into a single value using a math operation (add, subtract, mult, max, min, avg)
+
+Constant-generate a constant values
+
+Fractal-Using multiple values of simplex noise, generates different types of fractal brownian motion.  Supports fBm, multifractal, ridgedmultifractal, and hybridmultifractal
+
+Gradient-Generate a gradient along an arbitrary axis 
+
+Scale-Scale the input value by a either a constant value or the value of an input image
+
+Select-Given two inputs, blend between them using a third input image to determine how much of each of the inputs to use
+
+Translate-Translate the input input image in the x,y directions
+
