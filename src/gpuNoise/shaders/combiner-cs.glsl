@@ -1,20 +1,45 @@
-#version 430
+#version 450
 
 layout(local_size_x = 32, local_size_y = 32) in;
 
-layout(binding = 0) uniform readonly image2D input0;
-layout(binding = 1) uniform readonly image2D input1;
-layout(binding = 2) uniform readonly image2D input2;
-layout(binding = 3) uniform readonly image2D input3;
-layout(binding = 4) uniform readonly image2D input4;
-layout(binding = 5) uniform readonly image2D input5;
-layout(binding = 6) uniform readonly image2D input6;
-layout(binding = 7) uniform readonly image2D input7;
+layout(r32f, binding = 0) uniform readonly image2D input0;
+layout(r32f, binding = 1) uniform readonly image2D input1;
+layout(r32f, binding = 2) uniform readonly image2D input2;
+layout(r32f, binding = 3) uniform readonly image2D input3;
 
-layout(rgba32f, binding = 8) uniform writeonly image2D output;
+layout(r32f, binding = 4) uniform writeonly image2D outTex;
 
 layout(location = 0) uniform int numInputs;
 layout(location = 1) uniform int action;
+
+float sampledImageValue(ivec2 outTexPos, int image)
+{
+	ivec2 outSize = imageSize(outTex);
+
+	ivec2 inSize;
+	switch (image)
+	{
+		case 0: inSize = imageSize(input0); break;
+		case 1: inSize = imageSize(input1); break;
+		case 2: inSize = imageSize(input2); break;
+		case 3: inSize = imageSize(input3); break;
+	}
+
+	vec2 ratio = vec2(outTexPos) / vec2(outSize);
+	vec2 sampledLoc = vec2(inSize) * ratio;
+	ivec2 inputPos = ivec2(floor(sampledLoc.x), floor(sampledLoc.y));
+
+	float val = 0;
+	switch (image)
+	{
+	case 0: val = imageLoad(input0, inputPos).r; break;
+	case 1: val = imageLoad(input1, inputPos).r; break;
+	case 2: val = imageLoad(input2, inputPos).r; break;
+	case 3: val = imageLoad(input3, inputPos).r; break;
+	}
+
+	return val;
+}
 
 
 float add(ivec2 pixelLoc)
@@ -22,14 +47,10 @@ float add(ivec2 pixelLoc)
    float ret = 0.0;
    switch (numInputs)
    {
-      case 8: ret += imageLoad(input7, pixelLoc).r; //fallthrough
-      case 7: ret += imageLoad(input6, pixelLoc).r; //fallthrough
-      case 6: ret += imageLoad(input5, pixelLoc).r; //fallthrough
-      case 5: ret += imageLoad(input4, pixelLoc).r; //fallthrough
-      case 4: ret += imageLoad(input3, pixelLoc).r; //fallthrough
-      case 3: ret += imageLoad(input2, pixelLoc).r; //fallthrough
-      case 2: ret += imageLoad(input1, pixelLoc).r; //fallthrough
-      case 1: ret += imageLoad(input0, pixelLoc).r;
+		case 4: ret += sampledImageValue(pixelLoc, 3); //fallthrough
+		case 3: ret += sampledImageValue(pixelLoc, 2); //fallthrough
+		case 2: ret += sampledImageValue(pixelLoc, 1); //fallthrough
+		case 1: ret += sampledImageValue(pixelLoc, 0);
    }
 
    return ret;
@@ -40,50 +61,38 @@ float mul(ivec2 pixelLoc)
    float ret = 1.0;
    switch (numInputs)
    {
-   case 8: ret *= imageLoad(input7, pixelLoc).r; //fallthrough
-   case 7: ret *= imageLoad(input6, pixelLoc).r; //fallthrough
-   case 6: ret *= imageLoad(input5, pixelLoc).r; //fallthrough
-   case 5: ret *= imageLoad(input4, pixelLoc).r; //fallthrough
-   case 4: ret *= imageLoad(input3, pixelLoc).r; //fallthrough
-   case 3: ret *= imageLoad(input2, pixelLoc).r; //fallthrough
-   case 2: ret *= imageLoad(input1, pixelLoc).r; //fallthrough
-   case 1: ret *= imageLoad(input0, pixelLoc).r;
+	case 4: ret *= sampledImageValue(pixelLoc, 3); //fallthrough
+	case 3: ret *= sampledImageValue(pixelLoc, 2); //fallthrough
+	case 2: ret *= sampledImageValue(pixelLoc, 1); //fallthrough
+	case 1: ret *= sampledImageValue(pixelLoc, 0);
    }
 
    return ret;
 }
 
-float max(ivec2 pixelLoc)
+float maximum(ivec2 pixelLoc)
 {
    float ret = -1000.0;
    switch (numInputs)
    {
-   case 8: ret = max(ret, imageLoad(input7, pixelLoc).r); //fallthrough
-   case 7: ret = max(ret, imageLoad(input6, pixelLoc).r); //fallthrough
-   case 6: ret = max(ret, imageLoad(input5, pixelLoc).r); //fallthrough
-   case 5: ret = max(ret, imageLoad(input4, pixelLoc).r); //fallthrough
-   case 4: ret = max(ret, imageLoad(input3, pixelLoc).r); //fallthrough
-   case 3: ret = max(ret, imageLoad(input2, pixelLoc).r); //fallthrough
-   case 2: ret = max(ret, imageLoad(input1, pixelLoc).r); //fallthrough
-   case 1: ret = max(ret, imageLoad(input0, pixelLoc).r);
+	case 4: ret = max(ret, sampledImageValue(pixelLoc, 3)); //fallthrough
+	case 3: ret = max(ret, sampledImageValue(pixelLoc, 2)); //fallthrough
+	case 2: ret = max(ret, sampledImageValue(pixelLoc, 1)); //fallthrough
+	case 1: ret = max(ret, sampledImageValue(pixelLoc, 0));
    }
 
    return ret;
 }
 
-float min(ivec2 pixelLoc)
+float minimum(ivec2 pixelLoc)
 {
    float ret = 1000.0;
    switch (numInputs)
    {
-   case 8: ret = min(ret, imageLoad(input7, pixelLoc).r); //fallthrough
-   case 7: ret = min(ret, imageLoad(input6, pixelLoc).r); //fallthrough
-   case 6: ret = min(ret, imageLoad(input5, pixelLoc).r); //fallthrough
-   case 5: ret = min(ret, imageLoad(input4, pixelLoc).r); //fallthrough
-   case 4: ret = min(ret, imageLoad(input3, pixelLoc).r); //fallthrough
-   case 3: ret = min(ret, imageLoad(input2, pixelLoc).r); //fallthrough
-   case 2: ret = min(ret, imageLoad(input1, pixelLoc).r); //fallthrough
-   case 1: ret = min(ret, imageLoad(input0, pixelLoc).r);
+	case 4: ret = min(ret, sampledImageValue(pixelLoc, 3)); //fallthrough
+	case 3: ret = min(ret, sampledImageValue(pixelLoc, 2)); //fallthrough
+	case 2: ret = min(ret, sampledImageValue(pixelLoc, 1)); //fallthrough
+	case 1: ret = min(ret, sampledImageValue(pixelLoc, 0));
    }
 
    return ret;
@@ -116,10 +125,10 @@ void main()
    {
       case 0: val = add(pixelLoc); break;
       case 1: val = mul(pixelLoc); break;
-      case 2: val = max(pixelLoc); break;
-      case 3: val = min(pixelLoc); break;
+      case 2: val = maximum(pixelLoc); break;
+      case 3: val = minimum(pixelLoc); break;
       case 4: val = avg(pixelLoc); break;
    }
 
-   imageStore(tex, outPos, vec4(dp));
+   imageStore(outTex, pixelLoc, vec4(val));
 }

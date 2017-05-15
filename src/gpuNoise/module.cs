@@ -13,14 +13,27 @@ namespace GpuNoise
 {
    public abstract class Module
    {
-      public enum Type {AutoCorect, Bias, Combiner, Constant, Fractal, Gradient, Scale, Select, Translate };
-      public Type myType;
+      public enum Type {Output, AutoCorect, Bias, Combiner, Constant, Fractal, Gradient, Scale, Select, Translate };
+
+		public Type myType;
+		public Texture output;
       public string myName;
+		public int myX;
+		public int myY;
 
-      
-      public Module(Type type)
+		public Module(Type type, int x, int y)
       {
-
+			myType = type;
+			myX = x;
+			myY = y;	
       }
-   }
+
+		//returns true if its data changed, allows connected modules to not have to rerun
+		public abstract bool update();
+
+		public virtual void Dispose()
+		{
+			output.Dispose();
+		}
+	}
 }

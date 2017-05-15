@@ -2,7 +2,7 @@
 
 layout(local_size_x = 32, local_size_y = 32) in;
 
-layout(rgba32f, binding = 0) uniform writeonly image2D tex;
+layout(r32f, binding = 0) uniform writeonly image2D tex;
 
 layout(location = 0) uniform float x0;
 layout(location = 1) uniform float x1;

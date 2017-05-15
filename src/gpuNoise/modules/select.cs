@@ -16,49 +16,62 @@ namespace GpuNoise
    {
       ShaderProgram myShaderProgram;
 
-      public float threshold = 0.5f;
-      public float falloff = 0.0f;
+      public float threshold =0.5f;
+		float lastThreshold = -1.0f;
+      public float falloff = 0.5f;
+		float lastFalloff = -1.0f;
 
-      public Texture lowImg = null;
-      public Texture highImg = null;
-      public Texture controlImg = null;
-      
-      public float lowVal = 0.0f;
-      public float highVal = 1.0f;
+      public Module low;
+      public Module high;
+      public Module control;
 
-      public Select() : base(Type.Select)
+      public Select(int x, int y) : base(Type.Select, x, y)
       {
-         List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
+			output = new Texture(x, y, PixelInternalFormat.R32f);
+
+			List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
          shadersDesc.Add(new ShaderDescriptor(ShaderType.ComputeShader, "GpuNoise.shaders.select-cs.glsl"));
          ShaderProgramDescriptor sd = new ShaderProgramDescriptor(shadersDesc);
          myShaderProgram = Renderer.resourceManager.getResource(sd) as ShaderProgram;
       }
 
-      public void generate(Texture output)
-      {
-         ComputeCommand cmd = new ComputeCommand(myShaderProgram, output.width / 32, output.height / 32);
-         cmd.renderState.setUniform(new UniformData(0, Uniform.UniformType.Float, lowVal));
-         cmd.renderState.setUniform(new UniformData(1, Uniform.UniformType.Float, highVal));
-         cmd.renderState.setUniform(new UniformData(2, Uniform.UniformType.Float, threshold));
-         cmd.renderState.setUniform(new UniformData(3, Uniform.UniformType.Float, falloff));
+		public override bool update()
+		{
+			if(didChange() == true)
+			{
+				ComputeCommand cmd = new ComputeCommand(myShaderProgram, output.width / 32, output.height / 32);
 
-         cmd.renderState.setUniform(new UniformData(4, Uniform.UniformType.Bool, lowImg != null));
-         if (lowImg != null)
-         {
-            cmd.addImage(lowImg, TextureAccess.ReadOnly, 0);
-         }
+				cmd.renderState.setUniform(new UniformData(0, Uniform.UniformType.Float, threshold));
+				cmd.renderState.setUniform(new UniformData(1, Uniform.UniformType.Float, falloff));
+				
+				cmd.addImage(low.output, TextureAccess.ReadOnly, 0);
+				cmd.addImage(high.output, TextureAccess.ReadOnly, 1);
+				cmd.addImage(control.output, TextureAccess.ReadOnly, 2);
+				cmd.addImage(output, TextureAccess.WriteOnly, 3);				
 
-         cmd.renderState.setUniform(new UniformData(5, Uniform.UniformType.Bool, highImg != null));
-         if (highImg != null)
-         {
-            cmd.addImage(highImg, TextureAccess.ReadOnly, 1);
-         }
-         
-         cmd.addImage(controlImg, TextureAccess.ReadOnly, 2);
-         cmd.addImage(output, TextureAccess.WriteOnly, 3);
+				cmd.execute();
+				GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
 
-         cmd.execute();
-         GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
-      }
+				return true;
+			}
+
+			return false;
+		}
+
+		bool didChange()
+		{
+			bool needsUpdate = false;
+			if (low.update()) needsUpdate = true;
+			if (high.update()) needsUpdate = true;
+			if (control.update()) needsUpdate = true;
+			if (threshold != lastFalloff || falloff != lastFalloff)
+			{
+				lastThreshold = threshold;
+				lastFalloff = falloff;
+				needsUpdate = true;
+			}
+
+			return needsUpdate;
+		}
    }
 }

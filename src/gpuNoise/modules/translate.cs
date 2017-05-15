@@ -16,48 +16,48 @@ namespace GpuNoise
    {
       ShaderProgram myShaderProgram;
 
-      public float transXVal = 0.0f;
-      public float transYVal = 0.0f;
+      public Module x = null;
+      public Module y = null;
+      public Module input = null;
 
-      public Texture transXImg = null;
-      public Texture transYImg = null;
-      public Texture inputImg = null;
-
-      public float lowVal = 0.0f;
-      public float highVal = 1.0f;
-
-      public Translate() : base(Type.Translate)
+      public Translate(int x, int y) : base(Type.Translate, x, y)
       {
-         List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
+			output = new Texture(x, y, PixelInternalFormat.R32f);
+
+			List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
          shadersDesc.Add(new ShaderDescriptor(ShaderType.ComputeShader, "GpuNoise.shaders.translate-cs.glsl"));
          ShaderProgramDescriptor sd = new ShaderProgramDescriptor(shadersDesc);
          myShaderProgram = Renderer.resourceManager.getResource(sd) as ShaderProgram;
       }
 
-      public void generate(Texture output)
-      {
-         ComputeCommand cmd = new ComputeCommand(myShaderProgram, output.width / 32, output.height / 32);
-         
-         cmd.renderState.setUniform(new UniformData(0, Uniform.UniformType.Float, transXVal));
-         cmd.renderState.setUniform(new UniformData(1, Uniform.UniformType.Float, transYVal));
-         
-         cmd.renderState.setUniform(new UniformData(2, Uniform.UniformType.Bool, transXImg != null));
-         if (transXImg != null)
-         {
-            cmd.addImage( transXImg, TextureAccess.ReadOnly, 0);
-         }
+		public override bool update()
+		{
+			if(didChange())
+			{
+				ComputeCommand cmd = new ComputeCommand(myShaderProgram, output.width / 32, output.height / 32);
 
-         cmd.renderState.setUniform(new UniformData(3, Uniform.UniformType.Bool, transYImg != null));
-         if (transYImg != null)
-         {
-            cmd.addImage(transYImg, TextureAccess.ReadOnly, 1);
-         }
+				cmd.addImage(x.output, TextureAccess.ReadOnly, 0);
+				cmd.addImage(y.output, TextureAccess.ReadOnly, 1);
+				cmd.addImage(input.output, TextureAccess.ReadOnly, 2);
+				cmd.addImage(output, TextureAccess.WriteOnly, 3);
 
-         cmd.addImage(inputImg, TextureAccess.ReadOnly, 2);
-         cmd.addImage(output, TextureAccess.WriteOnly, 3);
+				cmd.execute();
+				GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
 
-         cmd.execute();
-         GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
-      }
+				return true;
+			}
+
+			return false;
+		}
+
+		bool didChange()
+		{
+			bool needsUpdate = false;
+			if (x.update()) needsUpdate = true;
+			if (y.update()) needsUpdate = true;
+			if (input.update()) needsUpdate = true;
+
+			return needsUpdate;
+		}
    }
 }

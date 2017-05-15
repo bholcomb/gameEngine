@@ -1,4 +1,4 @@
-#version 430
+#version 450
 
 layout(local_size_x = 32) in;
 

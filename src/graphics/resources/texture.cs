@@ -191,20 +191,21 @@ namespace Graphics
          if (generateMipmaps == false)
          {
             GL.TexParameter(target, TextureParameterName.TextureMaxLevel, 0); //needed since no mip maps are created
-         }
+				setMinMagFilters(TextureMinFilter.Nearest, TextureMagFilter.Nearest);
+			}
 
-         GL.TexParameter(target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-         GL.TexParameter(target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-         GL.TexParameter(target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-         GL.TexParameter(target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+			setWrapping(TextureWrapMode.ClampToEdge, TextureWrapMode.ClampToEdge);
          
          if(myData==null)
             Info.print("Created empty texture with id: " + myId);
          else
             Info.print("Created user defined texture with id: " + myId);
 
-         if (generateMipmaps)
-            createMipMaps();
+			if (generateMipmaps)
+			{
+				createMipMaps();
+				setMinMagFilters(TextureMinFilter.LinearMipmapLinear, TextureMagFilter.Linear);
+			}
 
 			unbind();
 		}

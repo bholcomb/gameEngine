@@ -15,7 +15,7 @@
 float snoise(vec3 v, float seed);
 
 layout(local_size_x = 32, local_size_y = 32) in;
-layout(rgba32f, binding = 0) uniform image2D tex;
+layout(r32f, binding = 0) uniform image2D tex;
 
 layout(location = 0 ) uniform float seed;
 layout(location = 1 ) uniform int function;

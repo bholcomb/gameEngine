@@ -137,7 +137,7 @@ namespace UI
          alpha = 1.0f;             // Global alpha applies to everything in ImGui
          windowPadding = new Vector2(8, 8);      // Padding within a window
          windowMinSize = new Vector2(32, 32);    // Minimum window size
-         windowRounding = 9.0f;             // Radius of window corners rounding. Set to 0.0f to have rectangular windows
+         windowRounding = 4.5f;             // Radius of window corners rounding. Set to 0.0f to have rectangular windows
          windowTitleAlign = Alignment.Left;  // Alignment for title bar text
          childWindowRounding = 0.0f;             // Radius of child window corners rounding. Set to 0.0f to have rectangular windows
          framePadding = new Vector2(4, 3);      // Padding within a framed rectangle (used by most widgets)

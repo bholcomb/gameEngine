@@ -14,6 +14,7 @@ namespace GpuNoise
 {
    public class Combiner : Module
    {
+		const int MAX_INPUTS = 4;
       ShaderProgram myShaderProgram;
       public enum CombinerType
       {
@@ -25,32 +26,57 @@ namespace GpuNoise
       }
 
       public CombinerType action;
-      public List<Texture> inputs = new List<Texture>();
-      public Texture output;
-      public Combiner() : base(Type.Combiner)
+      public Module[] inputs = new Module[MAX_INPUTS]; //max inputs
+
+      public Combiner(int x, int y) : base(Type.Combiner, x, y)
       {
-         List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
+			output = new Texture(x, y, PixelInternalFormat.R32f);
+
+			List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
          shadersDesc.Add(new ShaderDescriptor(ShaderType.ComputeShader, "GpuNoise.shaders.combiner-cs.glsl"));
          ShaderProgramDescriptor sd = new ShaderProgramDescriptor(shadersDesc);
          myShaderProgram = Renderer.resourceManager.getResource(sd) as ShaderProgram;
       }
 
-      public void combine()
-      {
-         ComputeCommand cmd = new ComputeCommand(myShaderProgram, output.width / 32, output.height / 32);
+		public override bool update()
+		{
+			bool needsUpdate = false;
+			foreach (Module m in inputs)
+			{
+				if (m != null && m.update() == true)
+				{
+					needsUpdate = true;
+				}
+			}
 
-			cmd.renderState.setUniform(new UniformData(0, Uniform.UniformType.Int, inputs.Count));
-         cmd.renderState.setUniform(new UniformData(1, Uniform.UniformType.Int, (int)action));
-         
-         for(int i = 0; i < inputs.Count; i++)
-         {
-            cmd.addImage(inputs[i], TextureAccess.ReadOnly, i);
-         }
+			if (needsUpdate == true)
+			{
+				ComputeCommand cmd = new ComputeCommand(myShaderProgram, output.width / 32, output.height / 32);
 
-         cmd.addImage(output, TextureAccess.WriteOnly, 8);
+				
+				cmd.renderState.setUniform(new UniformData(1, Uniform.UniformType.Int, (int)action));
 
-         cmd.execute();
-         GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
-      }
+				int inputCount = 0;
+				for (int i = 0; i < MAX_INPUTS; i++)
+				{
+					if (inputs[i] != null)
+					{
+						cmd.addImage(inputs[i].output, TextureAccess.ReadOnly, i);
+						inputCount++;
+					}
+				}
+
+				cmd.renderState.setUniform(new UniformData(0, Uniform.UniformType.Int, inputCount));
+
+				cmd.addImage(output, TextureAccess.WriteOnly, 4);
+
+				cmd.execute();
+				GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
+
+				return true;
+			}
+
+			return false;
+		}
    }
 }

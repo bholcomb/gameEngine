@@ -14,28 +14,39 @@ namespace GpuNoise
 {
    public class Constant : Module
    {
-      ShaderProgram myShaderProgram;
+		public float val = 0.5f;
+		float lastVal = -1.0f;
 
-      public float val = 0.5f;
+      public Constant(int x, int y) :  this(0.5f, x, y)  { }
 
-      public Constant() : base(Type.Constant)
-      {
-         List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
-         shadersDesc.Add(new ShaderDescriptor(ShaderType.ComputeShader, "GpuNoise.shaders.constant-cs.glsl"));
-         ShaderProgramDescriptor sd = new ShaderProgramDescriptor(shadersDesc);
-         myShaderProgram = Renderer.resourceManager.getResource(sd) as ShaderProgram;
-      }
+		public Constant(float val, int x, int y) : base(Type.Constant, x, y)
+		{
+			output = new Texture(1, 1, PixelInternalFormat.R32f);
+			this.val = val;
+		}
 
-      public void generate(Texture output)
-      {
-         ComputeCommand cmd = new ComputeCommand(myShaderProgram, output.width / 32, output.height / 32);
+		public override bool update()
+		{
+			if(didChange())
+			{
+				float[] data = new float[] { val };
 
-			cmd.renderState.setUniform(new UniformData(0, Uniform.UniformType.Float, val));
-         
-         cmd.addImage(output, TextureAccess.ReadWrite, 0);
+				output.paste(data, Vector2.Zero, Vector2.One, PixelFormat.Red);
+				return true;
+			}
 
-         cmd.execute();
-         GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
-      }
+			return false;
+		}
+
+		bool didChange()
+		{
+			if(lastVal != val)
+			{
+				lastVal = val;
+				return true;
+			}
+
+			return false;
+		}
    }
 }

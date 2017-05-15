@@ -16,33 +16,42 @@ namespace GpuNoise
    {
       ShaderProgram myShaderProgram;
 
-      public float scaleVal = 1.0f;
-      public Texture scaleImg = null;
+      public Module scale = null;
+		public Module input = null;
 
-      public Scale() : base(Type.Scale)
+      public Scale(int x, int y) : base(Type.Scale, x, y)
       {
-         List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
+			output = new Texture(x, y, PixelInternalFormat.R32f);
+
+			List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
          shadersDesc.Add(new ShaderDescriptor(ShaderType.ComputeShader, "GpuNoise.shaders.scale-cs.glsl"));
          ShaderProgramDescriptor sd = new ShaderProgramDescriptor(shadersDesc);
          myShaderProgram = Renderer.resourceManager.getResource(sd) as ShaderProgram;
       }
 
-      public void generate(Texture output)
-      {
-         ComputeCommand cmd = new ComputeCommand(myShaderProgram, output.width / 32, output.height / 32);
-         
-         cmd.renderState.setUniform(new UniformData(0, Uniform.UniformType.Float, scaleVal));
+		public override bool update()
+		{
+			if(didChange() == true)
+			{
+				ComputeCommand cmd = new ComputeCommand(myShaderProgram, output.width / 32, output.height / 32);
 
-         cmd.renderState.setUniform(new UniformData(1, Uniform.UniformType.Bool, scaleImg != null));
-         if (scaleImg != null)
-         {
-            cmd.addImage(scaleImg, TextureAccess.ReadOnly, 0);
-         }
+				cmd.addImage(input.output, TextureAccess.ReadOnly, 0);
+				cmd.addImage(scale.output, TextureAccess.ReadOnly, 1);
+				cmd.addImage(output, TextureAccess.WriteOnly, 2);
 
-         cmd.addImage( output, TextureAccess.ReadWrite, 1);
+				cmd.execute();
+				GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
+				return true;
+			}
 
-         cmd.execute();
-         GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
-      }
+			return false;
+		}
+
+		bool didChange()
+		{
+			if (input.update() || scale.update()) return true;
+
+			return false;
+		}
    }
 }
