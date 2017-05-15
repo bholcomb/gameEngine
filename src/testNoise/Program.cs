@@ -98,12 +98,13 @@ namespace testNoise
 			ImGui.displaySize = new Vector2(theWidth, theHeight);
 
 			//create tree
-			int size = 128;
+			int size = 1024;
 			myNoiseTree = new ModuleTree(size, size);
 
 			//build tree
 			Fractal f = myNoiseTree.addModule(Module.Type.Fractal, "fractal") as Fractal;
 			AutoCorrect ac = myNoiseTree.addModule(Module.Type.AutoCorect, "autocorrect") as AutoCorrect;
+			AutoCorrect ac2 = myNoiseTree.addModule(Module.Type.AutoCorect, "autocorrect2") as AutoCorrect;
 			Combiner comb = myNoiseTree.addModule(Module.Type.Combiner, "combiner") as Combiner;
 			Constant c = myNoiseTree.addModule(Module.Type.Constant, "constant") as Constant;
 			Gradient g = myNoiseTree.addModule(Module.Type.Gradient, "gradient") as Gradient;
@@ -117,23 +118,14 @@ namespace testNoise
 
 			//link modules
 			ac.source = f;
-			comb.inputs[0] = ac;
-			comb.inputs[1] = c;
-			comb.action = Combiner.CombinerType.Multiply;
-
-			s.scale = sc;
-			s.input = g;
-
-			sel.low = f;
-			sel.high = f2;
+			ac2.source = f2;
+			
+			sel.low = ac;
+			sel.high = ac2;
 			sel.control = g;
 
-			t.x = tx;
-			t.y = ty;
-			t.input = f;
-
 			//set the output
-			myNoiseTree.output.source = t;
+			myNoiseTree.output.source = sel;
 		}
 
 		protected override void OnUpdateFrame(FrameEventArgs e)
@@ -243,37 +235,30 @@ namespace testNoise
 			ImGui.separator();
 
 
-			// 			Fractal f2 = myNoiseTree.findModule("f2") as Fractal;
-			// 			ImGui.label("Fractal Two---");
-			// 			ImGui.slider("Function ", ref f2.function);
-			// 			ImGui.slider("Octaves ", ref f2.octaves, 1, 10);
-			// 			ImGui.slider("Frequency ", ref f2.frequency, 0.1f, 10.0f);
-			// 			ImGui.slider("lacunarity ", ref f2.lacunarity, 1.0f, 3.0f);
-			// 			ImGui.slider("Gain ", ref f2.gain, 0.01f, 2.0f);
-			// 			ImGui.slider("Offset ", ref f2.offset, 0.0f, 10.0f);
-			// 			ImGui.slider("H", ref f2.H, 0.1f, 2.0f);
-			// 			ImGui.separator();
+			Fractal f2 = myNoiseTree.findModule("f2") as Fractal;
+			ImGui.label("Fractal Two---");
+			ImGui.slider("Function ", ref f2.function);
+			ImGui.slider("Octaves ", ref f2.octaves, 1, 10);
+			ImGui.slider("Frequency ", ref f2.frequency, 0.1f, 10.0f);
+			ImGui.slider("lacunarity ", ref f2.lacunarity, 1.0f, 3.0f);
+			ImGui.slider("Gain ", ref f2.gain, 0.01f, 2.0f);
+			ImGui.slider("Offset ", ref f2.offset, 0.0f, 10.0f);
+			ImGui.slider("H ", ref f2.H, 0.1f, 2.0f);
+			ImGui.separator();
 
-			// 			Gradient g = myNoiseTree.findModule("gradient") as Gradient;
-			// 			ImGui.label("Gradient---");
-			// 			ImGui.slider("X0", ref g.x0, 0.0f, 1.0f);
-			// 			ImGui.slider("X1", ref g.x1, 0.0f, 1.0f);
-			// 			ImGui.slider("Y0", ref g.y0, 0.0f, 1.0f);
-			// 			ImGui.slider("Y1", ref g.y1, 0.0f, 1.0f);
-			// 			ImGui.separator();
+			Gradient g = myNoiseTree.findModule("gradient") as Gradient;
+			ImGui.label("Gradient---");
+			ImGui.slider("X0", ref g.x0, 0.0f, 1.0f);
+			ImGui.slider("X1", ref g.x1, 0.0f, 1.0f);
+			ImGui.slider("Y0", ref g.y0, 0.0f, 1.0f);
+			ImGui.slider("Y1", ref g.y1, 0.0f, 1.0f);
+			ImGui.separator();
 
-			// 			Select s = myNoiseTree.findModule("select") as Select;
-			// 			ImGui.label("Select---");
-			// 			ImGui.slider("Threshold", ref s.threshold, 0.0f, 1.0f);
-			// 			ImGui.slider("Falloff", ref s.falloff, 0.0f, 1.0f);
-			// 			ImGui.separator();
-
-			Constant tx = myNoiseTree.findModule("tx") as Constant;
-			Constant ty = myNoiseTree.findModule("ty") as Constant;
-			ImGui.label("Translate---");
-			ImGui.slider("X", ref tx.val, -100.0f, 100.0f);
-			ImGui.slider("Y", ref ty.val, -100.0f, 100.0f);
-
+			Select s = myNoiseTree.findModule("select") as Select;
+			ImGui.label("Select---");
+			ImGui.slider("Threshold", ref s.threshold, 0.0f, 1.0f);
+			ImGui.slider("Falloff", ref s.falloff, 0.0f, 1.0f);
+			ImGui.separator();
 
 			ImGui.endWindow();
 
