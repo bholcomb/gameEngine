@@ -1,0 +1,54 @@
+The Util library is a general catch-all library of useful objects an functions.  
+
+Box-is an Axis Aligned Bounding Box data structure
+
+Clock-Clock is an object that can be used tto advance time at relative rates to wall-clock time (absolute real-time).  The clock class allows for pausing, and can even be run in reverse.  
+
+Color-Color extends the OpenTK color class to add functions to convert betwen a Color4 (4 floats) and a UInt32.  It also provides the ability to mix(lerp) between colors
+
+Curve-The curve class allows a user to provide multiple inputs points (2D) with the X axis being the placement in the curve space, and the Y axis being the value/height of the curve.  The class allows for getting back intermediate values from the curve.  Only linear interpolation at this point.  TODO:  Expand this out to other types of interpolation.
+
+DllLoader-Class to bring a DLL into the address space without needing to hard code the name of the file in code.  Allows for runtime selection of the right DLL depending on architeture (x32 vs x64)
+
+Formatter-Class to provide human readable strings to numbers of bytes using B, KB, MB and GB.  Also provides the ability to take a list of strings, concatinate them together and ge a hash code for the entire list.
+
+Hash-C# implementation of the Lookup3 Hashing function.  TODO:  Update to either Murmur3 or xxHash
+
+Initializer-Initializer class uses the lua bindings to load a lua file (the initialiation data) and provides an API to access the fields.  Users tend to instantiate and then use findData<> to get the initialization field data they need.  Understands tables and can walk table structure if necessary (based on the string name).  Also allows for default values for optional fields in case they are not present in the config file using the findDataOr<> function.  Since its built on the Lua VM, you can do anything with your config scripts that is valid lua.  
+
+Input-The KeyModifiers class gets the state of the keyboard modifier keys (control, alt, shift,  command, numlock, capslock, win).  The class allows for combining the left and right key states (if they exist) or quering each individually.  It also allows for checking if "capitaliation" is enabled.  This class also will convert a key press into a character, taking capitaliation into account, as well as converting  a character to a key.
+
+JSON-The Json class is a simple json parser, serializer and access object.  Similar to the initialization object.
+
+LineSegment-This is a line segment data structure.
+
+MathExt-This is several extensions to the OpenTK math library.  It provides extension methods to the matrix4 class to get a specific value from a (row, column).  Create an orientation matrix from heading, pitch, roll.  Convert a list of Matrix4 to a list of floats for openGL to consume.  Extract frustum planes from a projection matrix.  Create a rotation matrix from a quaternion.   Convert from heading, pitch, roll to a quaternion.  Create a quaternion from an orienation matrix.  Provides clamp, lerp, equality operators for floating point numbers.  Provides a conversion function to converte from Color4 to Vector4.
+
+Multimap-A Map of a list of items and functions for adding/removing items from a list with a key.  Also provides interators.
+
+Noise-C# implementation of Simplex noise for 2, 3, and 4 dimensional noise.   Also provides simple fractal brownian motion generation for 2,3 and 4 dimensions.
+
+Octree-Generic Octree data structure class.  Provides thread safe insertion and removal (pseudo) and ray intersection, sphere intersection, and spacial query functions.  Iteration of octree nodes is not thread safe.  Thread safety is in the context of a "frame,"  resoution of the changes needs to occur after all insert/remove operations are done.  Resolution is not thread safe.  Spatial query functions find nearest neighbor and neighbors within distance of a point.
+
+Plane-Plane data structure and functions to operate on the plane.
+
+Printer-Classes to print log data to a console, file, or other output (websocket when I get around to it) with different levels of notification.  
+
+Ray-Ray data structure.  Rays have an origin and a direction.  Used in intersection testing.
+
+Rect-2D rectangle data structure.  Provides functions for moving, resizing of rectangles.  Provides interrsection with point and other rectangles.
+
+Resource-Abstract resource class (i.e texture, model, sound, script, etc).
+
+Resource Manager-Loads resources on request.  Maintains internal cache of loaded resources.  Resources are requested by creating and using a resource descriptor to get a resource.  
+
+Sphere-Sphere data structure used in intersection testing
+
+Timer-Timer class calls a delegate after a given amount of time has expired.  Timers can loop if they need to fire frequently.
+
+TimeSource-Provides wall clock time to Clock classes.  Also provides frame time, frames per second (current, min, max, average), frame milliseconds (current, min, max, avg)and current frame number.  The timeSource needs to be told when the frame begins using the framestep() function.  Also provides high resolution current time for measuring and profiling.  Time soure is used to create clocks and provides a default clock.
+
+Vector2i/Vector3i-Integer vector classes and operations on them.
+
+
+
