@@ -8,22 +8,52 @@ using Util;
 
 namespace Audio
 {
+   public class SoundDescriptor
+   {
+      public string filename;
+      public Source source;
+      public bool is3d;
+      public bool isLooping;
+      public AbstractAudio.Priority priority;
+   };
+
+
    public class Sound : AbstractAudio, IDisposable
    {
+      public bool is3d { get; set; }
+      public bool isLooping { get; set; }
+      public Vector3 position { get; set; }
+      public Vector3 velocity { get; set; }
+      public Vector3 coneOrientation { get; set; }
+      public float insideConeAngle { get; set; }
+      public float outsideConeAngle { get; set; }
+      public float coneOutsideVoluem { get; set; }
+      public float referenceDistance { get; set; }
+      public float maxFalloffDistance { get; set; }
+      public bool relativePosition { get; set; }
+
       Source mySource;
       int myNextBufferIndex;
-      int myNumQueuedBuffers;
 
-      public Sound(Source src)
+      Voice myVoice;
+
+      public Sound(SoundDescriptor desc)
          : base()
       {
-         mySource = src;
+         myNextBufferIndex = 0;
+         is3d = desc.is3d;
+         isLooping = desc.isLooping;
+         myVoice = null;
+         relativePosition = false;
+         referenceDistance = 1.0f;
+
+         if (desc.source != null)
+            mySource = desc.source;
+       
          position = new Vector3();
          velocity = new Vector3();
          coneOrientation = new Vector3();
          myNextBufferIndex = 0;
-         myNumQueuedBuffers = 0;
-         is3d = false;
       }
 
       public void Dispose()
@@ -32,196 +62,208 @@ namespace Audio
          {
             stop();
          }
-      }
 
-      public bool is3d { get; set; }
-      public Vector3 position { get; set; }
-      public Vector3 velocity { get; set; }
-      public Vector3 coneOrientation { get; set; }
-      public float insideConeAngle { get; set; }
-      public float outsideConeAngle { get; set; }
-      public float coneOutsideVoluem { get; set; }
-      public float minDistance { get; set; }
-      public float maxDistance { get; set; }
+         if(myVoice != null)
+         {
+            myAudioManager.returnVoice(myVoice);
+         }
+      }
 
       public override bool play()
       {
-         if (playing == true)
+         if (mySource == null)
          {
-            Warn.print("Already playing sound");
+            Warn.print("Cannot play a sound without a valid source");
+            stop();
             return false;
          }
 
          if (mySource.state() == Source.SourceState.FAILED)
          {
             Warn.print("cannot play a sound with a failed source");
+            stop();
             return false;
          }
 
-         if (mySource.state() == Source.SourceState.UNLOADED || mySource.state() == Source.SourceState.LOADING)
+         if(myAudioManager.enabled == false)
          {
-            Warn.print("cannot play a sound with a loading source");
+            //can't play a sound if the sound manager isn't enabled
             return false;
          }
 
-         voice = AudioSystem.play(this);
-         if (voice <= 0)
+         bool tooFar = false;
+         if(is3d == true)
          {
-            //Warn.print("Cannot play sound without a voice");
+            float dist = 0;
+            if (relativePosition == true)
+               dist = position.Length;
+            else
+               dist = (position - myAudioManager.listener.position).Length;
+
+            if(dist  > maxFalloffDistance)
+            {
+               //wer're too far away to play
+               tooFar = true;
+            }
+         }
+
+         if(state == State.PLAYING)
+         {
+            if (tooFar)
+               stop();
+            else
+               //its ok to call play on the playing sound
+               return true;
+         }
+
+         //sound is too far away to hear, don't bother
+         if (tooFar)
+            return false;
+
+         myVoice = myAudioManager.getVoice(this);
+         if (myVoice == null)
+         {
+            Warn.print("Cannot play sound without a voice");
             return false;
          }
 
-         playing = true;
-         paused = false;
+         //set reference and max falloff distances based on sound decibels
+         myVoice.setReferenceDistance(referenceDistance);
+         myVoice.setMaxFalloffDistance(maxFalloffDistance);
 
-         update();
+         myAudioManager.startUpdating(this);
 
-         AL.SourcePlay(voice);
-         AudioSystem.checkError("Sound.play-AL.SourcePlay");
+         state = State.PLAYING;
+         update(0.0);
+
          return true;
       }
 
       public override bool pause()
       {
-         //may want to make these messages and do it asynchronously
-         if (mySource.state() == Source.SourceState.FAILED)
+         if (state == State.PAUSED)
          {
-            Warn.print("cannot pause a sound with a failed source");
+            return true;
+         }
+
+         //can't pause a sound that doesn't have a voice
+         if (myVoice == null)
+         {
             return false;
          }
 
-         playing = false;
-         paused = true;
+         myAudioManager.stopUpdating(this);
 
-         AL.SourcePause(voice);
-         AudioSystem.checkError("Sound.pause-AL.SourcePause");
+         state = State.PAUSED;
+         myVoice.pause();
 
          return true;
       }
 
       public override bool stop()
       {
-         AL.SourceStop(voice);
-         AudioSystem.checkError("Sound.stop-AL.SourceStop");
+         //can't stop a sound that isn't playing or paused
+         if (state == State.STOPPED)
+         {
+            return false;
+         }
 
-         popBuffers();
+         state = State.STOPPED;
 
-         myNumQueuedBuffers = 0;
+         if (myVoice != null)
+         {
+            myAudioManager.returnVoice(myVoice);
+            myVoice = null;
+         }
+
+         myAudioManager.stopUpdating(this);
+
          myNextBufferIndex = 0;
-         playing = false;
-         paused = false;
 
          return true;
       }
 
-      public override void update()
+      public override void update(double dt)
       {
-         if (voice <= 0)
+         //can't update a sound that doesn't have a voice
+         if (myVoice == null)
          {
-            Error.print("Updating sound without a voice");
-            stop();
             return;
          }
 
-         if (!playing)
+         //can't update a sound that is paused or stopped
+         if (state != State.PLAYING)
          {
-            stop();
             return;
          }
 
-         if (paused)
+         if (mySource.state() == Source.SourceState.UNLOADED || mySource.state() == Source.SourceState.LOADING)
          {
+            //gotta wait for the sound to finish loading
             return;
          }
 
          //update variables;
-         AL.Source(voice, ALSourcef.Pitch, pitch);
-         AL.Source(voice, ALSourcef.Gain, volume);
+         myVoice.setPitch(pitch);
+         myVoice.setVolume(volume);
 
-         //set position if necessary
-         if (is3d==true)
+         if (!is3d)
          {
-            if (mySource.channels() != 1)
-            {
-               Warn.print("Cannot localize a stereo sound in OpenAL");
-            }
-            AL.Source(voice, ALSource3f.Position, position.X, position.Y, position.Z);
-            AL.Source(voice, ALSource3f.Velocity, velocity.X, velocity.Y, velocity.Z);
+            myVoice.setRelativeLocation(true);
+            myVoice.setPosition(Vector3.Zero);
+            myVoice.setVelocity(Vector3.Zero);
          }
          else
          {
-            Vector3 pos = AudioSystem.listener.position;
-            Vector3 vel = AudioSystem.listener.velocity;
-            AL.Source(voice, ALSource3f.Position, pos.X, pos.Y, pos.Z);
-            AL.Source(voice, ALSource3f.Velocity, vel.X, vel.Y, vel.Z);
+            myVoice.setRelativeLocation(relativePosition);
+            myVoice.setPosition(position);
+            myVoice.setVelocity(velocity);
          }
-         AL.Source(voice, ALSourceb.Looping, false);
 
-         AudioSystem.checkError("Sound.update-updated variables");
+         //we control looping in case the source has multiple buffers
+         myVoice.setLooping(false);
 
-         //pop off any buffers that are done
-         popBuffers();
+         Audio.checkError("Sound.update-updated variables");
 
-         //add any new buffers if there are any
-         pushBuffers();
-      }
-
-      void popBuffers()
-      {
-         int processed;
-         AL.GetSource(voice, ALGetSourcei.BuffersProcessed, out processed);
-         AudioSystem.checkError("Sound.stop-buffers processed");
-
-         //pop off the played buffers and queue next buffers
-         while (processed-- != 0)
+         //remove any finished buffers.  Tell the source in case it's streaming
+         int finishedBuffer = myVoice.finishedBuffer();
+         while (finishedBuffer != -1)
          {
-            int buffer;
-            buffer = AL.SourceUnqueueBuffer(voice);
-            AudioSystem.checkError("Sound.stop-buffers unqueue");
-            mySource.finishedBuffer(buffer);
-            myNumQueuedBuffers--;
+            mySource.finishedBuffer(finishedBuffer);
+            finishedBuffer = myVoice.finishedBuffer();
          }
-      }
 
-      void pushBuffers()
-      {
-         bool addedBuffers = false;
-         while (myNumQueuedBuffers < MaxQueuedBuffers)
+         for (int i = myVoice.queuedBuffers(); i < MaxQueuedBuffers; i++)
          {
-            int buffer;
+            AudioBuffer buffer;
             buffer = mySource.nextBuffer(ref myNextBufferIndex);
-            if (buffer == NoMoreBuffers && looping)
-            {
-               mySource.reset();
-               myNextBufferIndex = 0;
-               buffer = mySource.nextBuffer(ref myNextBufferIndex);
-            }
 
-            //actually buffer the data in OpenAL Context
-            if (buffer != NoMoreBuffers)
+            if (buffer != null)
             {
-               //Debug.print("Queued buffer: {0}", buffer);
-               AL.SourceQueueBuffer(voice, buffer);
-               AudioSystem.checkError("Sound::update-buffers queued");
-               myNumQueuedBuffers++;
-               addedBuffers = true;
+               //debug << "Queued buffer: " << buffer << std::endl;
+               myVoice.addBuffer(buffer);
             }
             else
             {
-               //no more buffers to play, we must be done
-               if (myNumQueuedBuffers == 0)
-                  playing = false;
-               break;
+               //check for looping sounds
+               if (isLooping)
+               {
+                  mySource.reset();
+                  myNextBufferIndex = 0;
+                  buffer = mySource.nextBuffer(ref myNextBufferIndex);
+                  if (buffer != null)
+                  {
+                     myVoice.addBuffer(buffer);
+                  }
+               }
             }
          }
 
-         if (addedBuffers == true)
+         //no more buffers to play so we must be done, 
+         //unless we are streaming, in which case we'll wait for more data and an explicit stop
+         if (myVoice.queuedBuffers() == 0 && myVoice.isPlaying() == false && mySource.state() != Source.SourceState.STREAMING)
          {
-            ALSourceState state = AL.GetSourceState(voice);
-            if (state == ALSourceState.Stopped)
-            {
-               AL.SourcePlay(voice);
-            }
+            stop();
          }
       }
    }

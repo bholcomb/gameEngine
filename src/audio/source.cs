@@ -34,6 +34,11 @@ namespace Audio
 
       protected List<AudioBuffer> myBuffers=new List<AudioBuffer>();
 
+      protected Source()
+      {
+
+      }
+
       public Source(SourceDescriptor desc)
       {
          myFilename = desc.name;
@@ -41,18 +46,12 @@ namespace Audio
          myIs3d = desc.is3d;
       }
 
-      public void Dispose()
+      public virtual void Dispose()
       {
       }
       
       public abstract bool load();
-
-      public virtual bool unLoad()
-      {
-         myBuffers.Clear();
-         myState = SourceState.UNLOADED;
-         return true;
-      }
+      public abstract bool unLoad();
 
       public bool isLoaded()
       {
@@ -86,26 +85,8 @@ namespace Audio
       }
 
       //streaming functions
-      public virtual void reset()
-      {
-      }
-
-      public virtual void finishedBuffer(int bufferId)
-      {
-      }
-
-      public virtual int nextBuffer(ref int nextBufferIndex)
-      {
-         int bufferId = -1;
-
-         //are we done
-         if ((nextBufferIndex == myBuffers.Count))
-         {
-            return -1;
-         }
-
-         bufferId = myBuffers[nextBufferIndex++].id;
-         return bufferId;
-      }
+      public abstract void reset();
+      public abstract void finishedBuffer(int bufferId);
+      public abstract AudioBuffer nextBuffer(ref int nextBufferIndex);
    }
 }

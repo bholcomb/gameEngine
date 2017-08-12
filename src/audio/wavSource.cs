@@ -40,7 +40,7 @@ namespace Audio
             return false;
          }
 
-         using (Stream waveFileStream = File.Open(myFilename, System.IO.FileMode.Open))
+         using (FileStream waveFileStream = File.Open(myFilename, System.IO.FileMode.Open))
          {
             BinaryReader reader = new BinaryReader(waveFileStream);
 
@@ -128,29 +128,47 @@ namespace Audio
                audioData[i] = BitConverter.ToInt16(data, i * 2);
             }
 
-            //fill audio buffers
-            int numSamples = dataSize / 2;
-            int numBuffers = (int)Math.Ceiling((double)numSamples / (double)AudioBuffer.MAX_BUFFER_SIZE);
-            int sampleOffset=0;
-            int samplesRemaining = numSamples;
-            for (int i = 0; i < numBuffers; i++)
-            {
-               AudioBuffer buffer = new AudioBuffer(myNumChannels == 1 ? AudioBuffer.AudioFormat.MONO16 : AudioBuffer.AudioFormat.STEREO16, mySampleRate);
-               int samplesToCopy = Math.Min(AudioBuffer.MAX_BUFFER_SIZE, samplesRemaining);
-               buffer.size = samplesToCopy;
-               Array.Copy(audioData, sampleOffset, buffer.data, 0, samplesToCopy);
-               sampleOffset += samplesToCopy;
-               samplesRemaining -= samplesToCopy;
+            AudioBuffer buffer = new AudioBuffer(myNumChannels == 1 ? AudioBuffer.AudioFormat.MONO16 : AudioBuffer.AudioFormat.STEREO16, mySampleRate);
+            buffer.setData(audioData);
 
-               //put it in the audio system
-               buffer.buffer();
-               myBuffers.Add(buffer);
-            }
+            //put it in the audio system
+            buffer.buffer();
+            myBuffers.Add(buffer);
          }
 
          myState = Source.SourceState.LOADED;
-         Debug.print("Loaded audio file: {0}", myFilename);
+         Info.print("Loaded audio file: {0}", myFilename);
+
          return true;
+      }
+
+      public override bool unLoad()
+      {
+         myBuffers.Clear();
+
+         return true;
+      }
+
+      public override void reset()
+      {
+         //noop
+      }
+
+      public override AudioBuffer nextBuffer(ref int nextBufferIndex)
+      {
+         //are we done?
+         if(nextBufferIndex == myBuffers.Count)
+         {
+            return null;
+         }
+
+         AudioBuffer buffer = myBuffers[nextBufferIndex++];
+         return buffer;
+      }
+
+      public override void finishedBuffer(int bufferId)
+      {
+         //noop
       }
    }
 }

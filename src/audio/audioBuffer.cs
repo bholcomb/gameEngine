@@ -25,8 +25,8 @@ namespace Audio
       {
          myFormat = format;
          myRate = rate;
-         mySize = MAX_BUFFER_SIZE;
-         myData = new short[mySize];
+         mySize = 0;
+         myData = null;
 
          AL.GenBuffers(1, out myId);
       }
@@ -48,13 +48,9 @@ namespace Audio
          {
             if (value == mySize) return;
 
-            short[] temp = new short[value];
-            int cpySize = value > mySize ? mySize : value;
-            Array.Copy(myData, temp, cpySize);
-
-            mySize = size;
-            myData = temp;
             mySize = value;
+            myData = new short[mySize];
+            
          }
       }
 
@@ -82,7 +78,7 @@ namespace Audio
          }
 
          ALFormat format = myFormat == AudioFormat.MONO16 ? ALFormat.Mono16 : ALFormat.Stereo16;
-         AL.BufferData(myId, format, myData, mySize*sizeof(short), myRate);
+         AL.BufferData(myId, format, myData, mySize * sizeof(short), myRate);
          ALError err = AL.GetError();
          if (err != ALError.NoError)
          {
@@ -93,6 +89,42 @@ namespace Audio
       public void clear()
       {
          Array.Clear(myData, 0, myData.Length);
+      }
+
+      public void setData(short[] buffer)
+      {
+         mySize = buffer.Length;
+         myData = buffer;
+      }
+
+      public int numberOfSamples()
+      {
+         int numSamples = mySize;
+         int multiplier = 1;
+         
+         switch(myFormat)
+         {
+            case AudioFormat.MONO8: multiplier = 1; break;
+            case AudioFormat.MONO16: multiplier = 2; break;
+            case AudioFormat.STEREO8: multiplier = 2; break;
+            case AudioFormat.STEREO16: multiplier = 4; break;
+         }
+
+         return numSamples / multiplier;
+      }
+
+      public int calculateBufferSize(AudioFormat format, int numSamples)
+      {
+         int multiplier = 1;
+         switch (format)
+         {
+            case AudioFormat.MONO8: multiplier = 1; break;
+            case AudioFormat.MONO16: multiplier = 2; break;
+            case AudioFormat.STEREO8: multiplier = 2; break;
+            case AudioFormat.STEREO16: multiplier = 4; break;
+         }
+
+         return numSamples * multiplier;
       }
    }
 }

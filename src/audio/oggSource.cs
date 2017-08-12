@@ -74,6 +74,35 @@ namespace Audio
          return true;
       }
 
+      public override bool unLoad()
+      {
+         myBuffers.Clear();
+
+         return true;
+      }
+
+      public override AudioBuffer nextBuffer(ref int nextBufferIndex)
+      {
+         //are we done?
+         if (nextBufferIndex == myBuffers.Count)
+         {
+            return null;
+         }
+
+         AudioBuffer buffer = myBuffers[nextBufferIndex++];
+         return buffer;
+      }
+
+      public override void finishedBuffer(int bufferId)
+      {
+         //noop
+      }
+
+      public override void reset()
+      {
+         //noop
+      }
+
       void castBuffer(float[] inBuffer, short[] outBuffer, int length)
       {
          for (int i = 0; i < length; i++)
