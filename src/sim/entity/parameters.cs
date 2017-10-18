@@ -19,7 +19,7 @@ namespace Sim
       public bool init(Initializer init)
       {
          //read in templates
-         String path = (String)init.findDataOrDefault("SimManager.entityDataDir", "../data/entity");
+         String path = (String)init.findDataOr("SimManager.entityDataDir", "../data/entity");
          
          //read in the scripts to support the entity system
          //may need to move this to a resource

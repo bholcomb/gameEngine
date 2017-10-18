@@ -49,7 +49,7 @@ namespace Graphics
 
       public void init(InitTable init)
       {
-         String path = (String)init.findDataOrDefault("shaderComponents", "../data/shaders");
+         String path = (String)init.findDataOr("shaderComponents", "../data/shaders");
 
          //read in the scripts to support the entity system
          //may need to move this to a resource

@@ -64,13 +64,13 @@ namespace Engine
             return false;
          }
 
-         Printer.VerboseLevel vl = (Printer.VerboseLevel)init.findDataOrDefault<int>("core.verboseLevel", 4);
+         Printer.VerboseLevel vl = (Printer.VerboseLevel)init.findDataOr<int>("core.verboseLevel", 4);
          Printer.verboseLevel = vl;
 
-         myAppId = init.findDataOrDefault<uint>("network.appId", myProcId);
+         myAppId = init.findDataOr<uint>("network.appId", myProcId);
 
-         myMinTime = init.findDataOrDefault<float>("core.minTick", -1.0f);
-         myMaxTime = init.findDataOrDefault<float>("core.maxTick", -1.0f);
+         myMinTime = init.findDataOr<float>("core.minTick", -1.0f);
+         myMaxTime = init.findDataOr<float>("core.maxTick", -1.0f);
             
          return true;
       }

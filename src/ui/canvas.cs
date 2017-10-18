@@ -12,17 +12,17 @@ using OpenTK.Graphics.OpenGL;
 
 namespace UI
 {
-	public class Glyph
-	{
-		public Vector2 minTexCoord;
-		public Vector2 maxTexCoord;
-		public Vector2 size;             // size inside the Texture, in pixels
-		public Vector2 offset;           // offset from the top-left corner of the pen to the glyph image
-		public Vector2 advance;          // tells us how much we should advance the pen after drawing this glyph
-	};
+   public class Glyph
+   {
+      public Vector2 minTexCoord;
+      public Vector2 maxTexCoord;
+      public Vector2 size;             // size inside the Texture, in pixels
+      public Vector2 offset;           // offset from the top-left corner of the pen to the glyph image
+      public Vector2 advance;          // tells us how much we should advance the pen after drawing this glyph
+   };
 
-	//used for UI rendering
-	[StructLayout(LayoutKind.Sequential)]
+   //used for UI rendering
+   [StructLayout(LayoutKind.Sequential)]
    public struct V2T2B4
    {
       static int theStride = Marshal.SizeOf(default(V2T2B4));
@@ -54,23 +54,23 @@ namespace UI
 
    public class UiRenderCommand : StatelessRenderCommand
    {
-		static PipelineState thePipelineState;
+      static PipelineState thePipelineState;
 
       int myElementOffset;
       int myElementCount;
 
-		static UiRenderCommand()
-		{
-			thePipelineState = new PipelineState();
-			thePipelineState.blending.enabled = true;
-			thePipelineState.shaderProgram = UI.Canvas.theShader;
-			thePipelineState.blending.enabled = true;
-			thePipelineState.culling.enabled = false;
-			thePipelineState.depthTest.enabled = false;
-			thePipelineState.vao = new VertexArrayObject();
-			thePipelineState.vao.bindVertexFormat<V2T2B4>(UI.Canvas.theShader);
-			thePipelineState.generateId();
-		}
+      static UiRenderCommand()
+      {
+         thePipelineState = new PipelineState();
+         thePipelineState.blending.enabled = true;
+         thePipelineState.shaderProgram = UI.Canvas.theShader;
+         thePipelineState.blending.enabled = true;
+         thePipelineState.culling.enabled = false;
+         thePipelineState.depthTest.enabled = false;
+         thePipelineState.vao = new VertexArrayObject();
+         thePipelineState.vao.bindVertexFormat<V2T2B4>(UI.Canvas.theShader);
+         thePipelineState.generateId();
+      }
 
       public UiRenderCommand(DrawCmd drawCmd, Vector2 position, VertexBufferObject<V2T2B4> vbo, IndexBufferObject ibo)
          : base()
@@ -78,12 +78,12 @@ namespace UI
          myElementCount = (int)drawCmd.elementCount;
          myElementOffset = (int)drawCmd.elementOffset;
 
-			pipelineState = thePipelineState;
+         pipelineState = thePipelineState;
 
-			renderState.scissorTest.enabled = true;
+         renderState.scissorTest.enabled = true;
          renderState.scissorTest.rect = drawCmd.clipRect;
-			renderState.setVertexBuffer(vbo.id, 0, 0, V2T2B4.stride);
-			renderState.setIndexBuffer(ibo.id);
+         renderState.setVertexBuffer(vbo.id, 0, 0, V2T2B4.stride);
+         renderState.setIndexBuffer(ibo.id);
 
          renderState.setUniform(new UniformData(0, Uniform.UniformType.Int, 0));
          renderState.setUniform(new UniformData(0, Uniform.UniformType.Mat4, Matrix4.CreateTranslation(new Vector3(position.X, position.Y, 0))));
@@ -92,7 +92,7 @@ namespace UI
 
       public override void execute()
       {
-			base.execute();
+         base.execute();
 
          GL.DrawElements(BeginMode.Triangles, myElementCount, DrawElementsType.UnsignedShort, myElementOffset * 2);  //unsigned short in bytes
       }
@@ -100,8 +100,8 @@ namespace UI
 
    public class DrawCmd
    {
-		public int layer;
-		public UInt32 elementOffset;
+      public int layer;
+      public UInt32 elementOffset;
       public UInt32 elementCount;
       public Vector4 clipRect;
       public Texture texture;
@@ -109,8 +109,8 @@ namespace UI
 
       public DrawCmd()
       {
-			layer = 0;
-			elementOffset = 0;
+         layer = 0;
+         elementOffset = 0;
          elementCount = 0;
          clipRect = new Vector4(0.0f, 0.0f, 8192.0f, 8192.0f);
          texture = null;
@@ -122,16 +122,18 @@ namespace UI
    {
       [Flags]
       public enum Corners { NONE = 0, LL = 1, LR = 2, UR = 4, UL = 8, TOP = UL | UR, BOTTOM = LL | LR, LEFT = LL | UL, RIGHT = LR | UR, ALL = LL | LR | UL | UR }
-      public enum Icons {
+      public enum Icons
+      {
          CHECKBOX_UNCHECKED = 256, //start of the icons in the built in texture
-         CHECKBOX_CHECKED};
+         CHECKBOX_CHECKED
+      };
 
       public static readonly Vector4 theNullClipRect = new Vector4(0.0f, 0.0f, +8192.0f, +8192.0f);
       public static readonly Vector2 uv_zero = new Vector2(0, 0);
       public static readonly Vector2 uv_one = new Vector2(1, 1);
       public static readonly Color4 col_white = new Color4(255, 255, 255, 255);
 
-		public static ShaderProgram theShader;
+      public static ShaderProgram theShader;
       public VertexBufferObject<V2T2B4> myVbo = new VertexBufferObject<V2T2B4>(BufferUsageHint.DynamicDraw);
       public IndexBufferObject myIbo = new IndexBufferObject(BufferUsageHint.DynamicDraw);
       Vector2 myPosition;
@@ -148,25 +150,25 @@ namespace UI
 
       List<Vector4> clipRectStack = new List<Vector4>();
       List<Texture> textureStack = new List<Texture>();
-		List<int> layerStack = new List<int>();
-		List<Vector2> path = new List<Vector2>(); //internal stateful path data
+      List<int> layerStack = new List<int>();
+      List<Vector2> path = new List<Vector2>(); //internal stateful path data
 
       DrawCmd currentCommand { get { return myCmdBuffer.Last(); } }
       Vector4 currentClipRect { get { return clipRectStack.Count > 0 ? clipRectStack.Last() : theNullClipRect; } }
       Texture currentTexture { get { return textureStack.Count > 0 ? textureStack.Last() : null; } }
-		int currentLayer { get { return layerStack.Count > 0 ? layerStack.Last() : 0; } }
+      int currentLayer { get { return layerStack.Count > 0 ? layerStack.Last() : 0; } }
 
-		#region Top level
-		static Canvas()
+      #region Top level
+      static Canvas()
       {
-			ShaderProgramDescriptor desc = new ShaderProgramDescriptor("UI.shaders.ui-vs.glsl", "UI.shaders.ui-ps.glsl");
-			theShader = Renderer.resourceManager.getResource(desc) as ShaderProgram;
+         ShaderProgramDescriptor desc = new ShaderProgramDescriptor("UI.shaders.ui-vs.glsl", "UI.shaders.ui-ps.glsl");
+         theShader = Renderer.resourceManager.getResource(desc) as ShaderProgram;
 
-			//we're expecting a sheet that is 32x32 glyphs each 32pix x 32pix in size. (1024 x 1024 texture)
-			theDefaultTexture = Graphics.Util.getEmbeddedTexture("UI.data.fontIconSheet.png");
-			theDefaultTexture.setMinMagFilters(TextureMinFilter.NearestMipmapNearest, TextureMagFilter.Nearest);
-			
-			theGlyphs = new List<Glyph>(1024);
+         //we're expecting a sheet that is 32x32 glyphs each 32pix x 32pix in size. (1024 x 1024 texture)
+         theDefaultTexture = Graphics.Util.getEmbeddedTexture("UI.data.fontIconSheet.png");
+         theDefaultTexture.setMinMagFilters(TextureMinFilter.NearestMipmapNearest, TextureMagFilter.Nearest);
+
+         theGlyphs = new List<Glyph>(1024);
          float width = theDefaultTexture.width;
          float height = theDefaultTexture.height;
          float step = 1.0f / 32.0f;
@@ -198,8 +200,8 @@ namespace UI
          clipRectStack.Clear();
          textureStack.Clear();
          textureStack.Add(theDefaultTexture);
-			layerStack.Clear();
-			myCmdBuffer.Clear();
+         layerStack.Clear();
+         myCmdBuffer.Clear();
 
          addDrawCommand();
       }
@@ -214,10 +216,10 @@ namespace UI
          myVbo.setData(myVerts, (int)myVertCount);
          myIbo.setData(myIndexes, (int)myIndexCount);
 
-			//sort based on layer depth 
-			myCmdBuffer.Sort((a, b) => a.layer.CompareTo(b.layer));
+         //sort based on layer depth 
+         myCmdBuffer.Sort((a, b) => a.layer.CompareTo(b.layer));
 
-			foreach (DrawCmd dc in myCmdBuffer)
+         foreach (DrawCmd dc in myCmdBuffer)
          {
 
             if (dc.userRenderCommand != null)
@@ -338,13 +340,13 @@ namespace UI
          primativeText(size, pos, col, text);
       }
 
-//       public void addText(Font font, float size, Vector2 pos, Color4 col, String text, float wrap_width = 0.0f)
-//       {
-//          if (col.A == 0.0)
-//             return;
-// 
-//          addCustomRenderCommand(new RenderFontCommand(font, text, col, pos.X + myPosition.X, pos.Y + myPosition.Y));
-//       }
+      //       public void addText(Font font, float size, Vector2 pos, Color4 col, String text, float wrap_width = 0.0f)
+      //       {
+      //          if (col.A == 0.0)
+      //             return;
+      // 
+      //          addCustomRenderCommand(new RenderFontCommand(font, text, col, pos.X + myPosition.X, pos.Y + myPosition.Y));
+      //       }
 
       public void addIcon(Icons icon, Rect r)
       {
@@ -361,7 +363,7 @@ namespace UI
       {
          addImage(tex, r.SW, r.NE, uv0, uv1, col);
       }
-      public void addImage(Texture tex, Vector2 a, Vector2 b, Vector2 uv0 , Vector2 uv1, Color4 col)
+      public void addImage(Texture tex, Vector2 a, Vector2 b, Vector2 uv0, Vector2 uv1, Color4 col)
       {
          if (col.A == 0.0)
             return;
@@ -375,6 +377,7 @@ namespace UI
          if (pushTex)
             popTexture();
       }
+
       public void addPolyline(List<Vector2> points, Color4 col, bool closed, float thickness)
       {
          if (points.Count < 2)
@@ -707,7 +710,7 @@ namespace UI
       DrawCmd addDrawCommand()
       {
          DrawCmd cmd = new DrawCmd();
-			cmd.layer = currentLayer;
+         cmd.layer = currentLayer;
          cmd.clipRect = currentClipRect;
          cmd.texture = currentTexture;
          cmd.elementOffset = myIndexCount;
@@ -717,22 +720,22 @@ namespace UI
          return cmd;
       }
 
-		public void pushDrawLayer(int newLayer)
-		{
-			layerStack.Add(newLayer);
-			updateLayer();
-		}
+      public void pushDrawLayer(int newLayer)
+      {
+         layerStack.Add(newLayer);
+         updateLayer();
+      }
 
-		public void popDrawLayer()
-		{
-			if (layerStack.Count > 0)
-			{
-				layerStack.RemoveAt(layerStack.Count - 1);
-				updateLayer();
-			}
-		}
+      public void popDrawLayer()
+      {
+         if (layerStack.Count > 0)
+         {
+            layerStack.RemoveAt(layerStack.Count - 1);
+            updateLayer();
+         }
+      }
 
-		public void pushClipRect(Vector4 r)
+      public void pushClipRect(Vector4 r)
       {
          clipRectStack.Add(r);
          updateClipRect();
@@ -803,20 +806,20 @@ namespace UI
          }
       }
 
-		void updateLayer()
-		{
-			DrawCmd cmd = currentCommand;
-			int layer = currentLayer;
-			if (cmd != null || (cmd.elementCount != 0 && cmd.layer != layer) || cmd.userRenderCommand != null)
-			{
-				addDrawCommand();
-			}
-			else
-			{
-				cmd.layer = layer;
-			}
-		}
+      void updateLayer()
+      {
+         DrawCmd cmd = currentCommand;
+         int layer = currentLayer;
+         if (cmd != null || (cmd.elementCount != 0 && cmd.layer != layer) || cmd.userRenderCommand != null)
+         {
+            addDrawCommand();
+         }
+         else
+         {
+            cmd.layer = layer;
+         }
+      }
 
-		#endregion
-	}
+      #endregion
+   }
 }

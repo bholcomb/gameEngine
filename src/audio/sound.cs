@@ -18,7 +18,7 @@ namespace Audio
    };
 
 
-   public class Sound : AbstractAudio, IDisposable
+   public class Sound : AbstractAudio
    {
       public bool is3d { get; set; }
       public bool isLooping { get; set; }
@@ -56,7 +56,7 @@ namespace Audio
          myNextBufferIndex = 0;
       }
 
-      public void Dispose()
+      public override void Dispose()
       {
          if (playing == true || paused == true)
          {

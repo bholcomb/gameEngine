@@ -83,7 +83,7 @@ namespace Graphics
 		{
 			if (initializer != null)
 			{
-				InitTable sceneConfigs = initializer.findDataOrDefault<InitTable>("scenes", null);
+				InitTable sceneConfigs = initializer.findDataOr<InitTable>("scenes", null);
 				if (sceneConfigs != null)
 				{
 					List<string> keys = sceneConfigs.keys;

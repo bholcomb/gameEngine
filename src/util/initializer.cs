@@ -161,7 +161,7 @@ namespace Util
          }
       }
 
-      public T findDataOrDefault<T>(String name, T def)
+      public T findDataOr<T>(String name, T def)
       {
          if (contains(name) == false)
          {
@@ -172,7 +172,7 @@ namespace Util
          return get<T>(name);
       }
 
-      public T findDataOrDefault<T>(int index, T def)
+      public T findDataOr<T>(int index, T def)
       {
          if (contains(index) == false)
          {
@@ -268,14 +268,14 @@ namespace Util
          return myGlobalTable.findData<T> (index);
       }
 
-      public T findDataOrDefault<T>(String name, T def)
+      public T findDataOr<T>(String name, T def)
       {
-         return myGlobalTable.findDataOrDefault<T>(name, def);
+         return myGlobalTable.findDataOr<T>(name, def);
       }
 
-      public T findDataOrDefault<T>(int index, T def)
+      public T findDataOr<T>(int index, T def)
       {
-         return myGlobalTable.findDataOrDefault<T>(index, def);
+         return myGlobalTable.findDataOr<T>(index, def);
       }
 
       void createGlobalTable()

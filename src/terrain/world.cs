@@ -72,7 +72,7 @@ namespace Terrain
 
       public World(Initializer init)
       {
-         String source = init.findDataOrDefault("terrain.source", "file");
+         String source = init.findDataOr("terrain.source", "file");
          switch (source)
          {
             case "file":

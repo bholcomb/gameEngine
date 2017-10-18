@@ -21,7 +21,7 @@ namespace Terrain
 
       public TerrainSource(Initializer init, World world)
       {
-         String path = init.findDataOrDefault("terrain.cachePath", "../data/chunks/world.chunk");
+         String path = init.findDataOr("terrain.cachePath", "../data/chunks/world.chunk");
          myChunkCache = new TerrainCache(path);
          myWorld = world;
       }
@@ -207,8 +207,8 @@ namespace Terrain
 
       public RemoteTerrainSource(Initializer init, World world): base(init, world)
       {
-         String addr=init.findDataOrDefault("terrain.address", "127.0.0.1");
-         int port=init.findDataOrDefault("terrain.port", 2377);
+         String addr=init.findDataOr("terrain.address", "127.0.0.1");
+         int port=init.findDataOr("terrain.port", 2377);
          myClient = new TerrainClient(addr, port);
          startWorkerThread();
       }

@@ -51,8 +51,8 @@ namespace Terrain
       public void init(Initializer initData)
       {
          //myRegionGenerators.Clear();
-         string terrainFilename = initData.findDataOrDefault("terrain.terrainDefinition", "../data/terrain.json");
-         string biomeFilename = initData.findDataOrDefault("terrain.biomeDefinition", "../data/biome.json");
+         string terrainFilename = initData.findDataOr("terrain.terrainDefinition", "../data/terrain.json");
+         string biomeFilename = initData.findDataOr("terrain.biomeDefinition", "../data/biome.json");
          //myTerrainModules = ModuleFactory.loadDefinition(terrainFilename);
          JsonObject biomeData=JsonObject.loadFile(biomeFilename);
          foreach(String bdname in biomeData.keys)

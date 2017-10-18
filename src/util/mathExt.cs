@@ -5,6 +5,15 @@ using OpenTK.Graphics;
 
 namespace Util
 {
+   public static class RandomExt
+   {
+      public static float randomInRange(this Random r, float min, float max)
+      {
+         double v = r.NextDouble();
+         float scale = max - min;
+         return min + ((float)v * scale);
+      }
+   }
    public static class Matrix4Ext
    {
       static public float getValue(this Matrix4 m, int i, int j)

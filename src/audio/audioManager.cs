@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 using OpenTK;
 using OpenTK.Audio;
@@ -24,6 +25,22 @@ namespace Audio
          //everything was ok
          return true;
       }
+
+      public static string enumToString(int att)
+      {
+         switch (att)
+         {
+            case (int)AlcContextAttributes.Frequency: return "ALC_FREQUENCY"; break;
+            case (int)AlcContextAttributes.Refresh: return "ALC_REFRESH"; break;
+            case (int)AlcContextAttributes.Sync: return "ALC_SYNC"; break;
+            case (int)AlcContextAttributes.MonoSources: return "ALC_MONO_SOURCES"; break;
+            case (int)AlcContextAttributes.StereoSources: return "ALC_STEREO_SOURCES"; break;
+            case 0x1992: return "ALC_HRTF_SOFT"; break;
+            case 0x1993: return "ALC_HRTF_STATUS_SOFT"; break;
+            case (int)AlcContextAttributes.EfxMaxAuxiliarySends: return "ALC_MAX_AUXILIARY_SENDS"; break;
+            default: { return att.ToString(); } break;
+         }
+      }
    };
 
 
@@ -40,24 +57,94 @@ namespace Audio
          return theAudioManager;
       }
 
-      public static void shutdown()
+      protected bool init()
       {
-         AudioManager me = AudioManager.instance();
-         
-         //stop any playing sounds
-         foreach(AbstractAudio snd in me.myPlayingSounds)
+         if (myIsInitialized == true)
          {
-            snd.stop();
+            return true;
          }
 
-         me.clearVoices();
-         me.myCaptureDevice.Dispose();
-         me.myContext.Dispose();
+
+         Info.print("------------------AUDIO MANAGER----------------");
+
+         try
+         {
+            //try to get the DirectSound default (openAL-soft's target)
+            string defaultDevice = AudioContext.DefaultDevice;
+            myContext = new AudioContext(defaultDevice);
+            
+         }
+         catch (AudioException ex)
+         {
+            Error.print("Exception trying to initialize OpenAL Context.  Verify OpenAL drivers are installed");
+            Error.print("Exception: {0}", ex.Message);
+            if (ex.InnerException != null)
+            {
+               Error.print("Inner Exception: {0}", ex.InnerException.Message);
+            }
+
+            return false;
+         }
+
+         //make the context current
+         myContext.MakeCurrent();
+         myContext.CheckErrors();
+         myDevice = Alc.GetContextsDevice(Alc.GetCurrentContext());
+
+         //print out the attributs
+         int attributeSize = 0;
+         Alc.GetInteger(myDevice, AlcGetInteger.AttributesSize, 1, out attributeSize);
+         int[] attBuffer = new int[attributeSize * 2 + 1];
+         Alc.GetInteger(myDevice, AlcGetInteger.AllAttributes, attributeSize * 2 + 1, attBuffer);
+         int idx = 0;
+         while(attBuffer[idx] != 0)
+         {
+            Info.print(String.Format("Context attribute: {0}:{1}", Audio.enumToString(attBuffer[idx]), attBuffer[idx + 1]));
+            idx += 2;
+         }
+
+         //print some debug information about the system
+         string alExtensions = AL.Get(ALGetString.Extensions);
+         string alcExtensions = Alc.GetString(myDevice, AlcGetString.Extensions);
+         
+         Info.print("Opened Audio device {0}", myContext.ToString());
+         Info.print("OpenAL Vendor: {0}", AL.Get(ALGetString.Vendor));
+         Info.print("OpenAL Version: {0}", AL.Get(ALGetString.Version));
+         Info.print("OpenAL Renderer: {0}", AL.Get(ALGetString.Renderer));
+         Info.print("OpenAL Extensions: {0}", AL.Get(ALGetString.Extensions));
+         Info.print("OpenAL Context Extensions: {0} ", Alc.GetString(myDevice, AlcGetString.Extensions));
+
+
+
+         string[] extensions = alcExtensions.Split(' ');
+         for (int i = 0; i < extensions.Length; i++)
+         {
+            if (extensions[i] == "ALC_EXT_EFX")
+            {
+               myEnvironmentalProcessingAvailable = true;
+            }
+         }
+
+         Info.print("Environmental Processing: " + (myEnvironmentalProcessingAvailable ? "available" : "unavailable"));
+
+         createVoices(myMaxVoices);
+
+         Info.print("------------------AUDIO MANAGER----------------");
+
+         return true;
       }
 
       public void tick(double dt)
       {
          myCurrentTime += dt;
+
+         if(myIsInitialized == false)
+         {
+            Warn.print("Audio manager not initialized, cannot tick");
+            return;
+         }
+
+         myContext.MakeCurrent();
 
          //update the listener
          Vector3 pos = myListener.position;
@@ -77,31 +164,55 @@ namespace Audio
          listenerOri[5] = myListener.up.Z;
          AL.Listener(ALListenerfv.Orientation, ref listenerOri);
 
-         //internal pseudo lock to prevent clobbering of std::vectors while iterating them
-         myIsTicking = true;
-
          //remove the playing sound from the playing list if it asked to be stopped the previous tick
-         foreach(AbstractAudio snd in myToRemovePlayingSounds)
+         foreach (AbstractAudio snd in myToRemovePlayingSounds)
          {
             myPlayingSounds.Remove(snd);
          }
          myToRemovePlayingSounds.Clear();
 
-         foreach(AbstractAudio snd in myToAddPlayingSounds)
+         foreach (AbstractAudio snd in myToAddPlayingSounds)
          {
             myPlayingSounds.Add(snd);
          }
          myToAddPlayingSounds.Clear();
 
-         if(myIsEnabled)
+         if (myIsEnabled)
          {
-            foreach(AbstractAudio snd in myPlayingSounds)
+            foreach (AbstractAudio snd in myPlayingSounds)
             {
                snd.update(dt);
             }
          }
+      }
 
-         myIsTicking = false;
+      public void shutdown()
+      {
+         if (myIsInitialized)
+         {
+            myContext.MakeCurrent();
+
+            foreach(AbstractAudio snd in myToRemovePlayingSounds)
+            {
+               myPlayingSounds.Remove(snd);
+            }
+            myToRemovePlayingSounds.Clear();
+
+            //stop any playing sounds
+            foreach (AbstractAudio snd in myPlayingSounds)
+            {
+               snd.stop();
+            }
+            myPlayingSounds.Clear();
+
+            clearVoices();
+            myCaptureDevice.Dispose();
+            myContext.Dispose();
+
+            myDevice = IntPtr.Zero;
+            myIsInitialized = false;
+            myIsEnabled = false;
+         }
       }
 
       public bool enabled 
@@ -118,12 +229,20 @@ namespace Audio
 
       public void startUpdating(AbstractAudio snd)
       {
-         myToAddPlayingSounds.Add(snd);
+         if (myIsEnabled)
+         {
+            myToAddPlayingSounds.Add(snd);
+         }
       }
 
       public void stopUpdating(AbstractAudio snd)
       {
          myToRemovePlayingSounds.Add(snd);
+
+         if(snd.transient == true)
+         {
+            snd.Dispose();
+         }
       }
 
       public Listener listener { get { return myListener; } }
@@ -221,6 +340,8 @@ namespace Audio
          snd.velocity = vel;
          snd.relativePosition = relative;
          snd.transient = true;
+
+         snd.play();
       }
 
       Capture getCaptureDevice(CaptureInitializer init)
@@ -251,45 +372,6 @@ namespace Audio
       protected AudioManager()
       {
 
-      }
-
-      protected bool init()
-      {
-         try
-         {
-            //try to get the DirectSound default (openAL-soft's target)
-            string defaultDevice = AudioContext.DefaultDevice;
-            myContext = new AudioContext(defaultDevice);
-         }
-         catch (AudioException ex)
-         {
-            Error.print("Exception trying to initialize OpenAL Context.  Verify OpenAL drivers are installed");
-            Error.print("Exception: {0}", ex.Message);
-            if (ex.InnerException != null)
-            {
-               Error.print("Inner Exception: {0}", ex.InnerException.Message);
-            }
-
-            return false;
-         }
-
-         //make the context current
-         myContext.MakeCurrent();
-         myContext.CheckErrors();
-
-         //print some debug information about the system
-         Debug.print("------------------AUDIO MANAGER----------------");
-         Debug.print("Opened Audio device {0}", myContext.ToString());
-         Debug.print("OpenAL Vendor: {0}", AL.Get(ALGetString.Vendor));
-         Debug.print("OpenAL Version: {0}", AL.Get(ALGetString.Version));
-         Debug.print("OpenAL Renderer: {0}", AL.Get(ALGetString.Renderer));
-         Debug.print("OpenAL Extensions: {0}", AL.Get(ALGetString.Extensions));
-         Debug.print("OpenAL Context Extensions: {0} ", Alc.GetString(Alc.GetContextsDevice(Alc.GetCurrentContext()), AlcGetString.Extensions));
-         Debug.print("------------------AUDIO MANAGER----------------");
-
-         createVoices(myMaxVoices);
-
-         return true;
       }
 
       protected void clearVoices()
@@ -344,12 +426,16 @@ namespace Audio
 
       static AudioManager theAudioManager;
       AudioContext myContext;
+      IntPtr myDevice;
       Capture myCaptureDevice;
 
+      bool myIsInitialized = false;
       int myMaxVoices = 32;
       bool myIsEnabled = false;
-      bool myIsTicking = false;
       double myCurrentTime = 0.0;
+
+      bool myEnvironmentalProcessingAvailable = false;
+      bool myEnvironmentalProcessingEnabled = false;
 
       float myMasterGain = 1.0f;
       float myMusicVolume = 1.0f;
@@ -359,7 +445,6 @@ namespace Audio
       List<AbstractAudio> myPlayingSounds = new List<AbstractAudio>();
       List<AbstractAudio> myToAddPlayingSounds = new List<AbstractAudio>();
       List<AbstractAudio> myToRemovePlayingSounds = new List<AbstractAudio>();
-
 
       List<Voice> myActiveVoiceList = new List<Voice>();
       Queue<Voice> myInactiveVoiceList = new Queue<Voice>();

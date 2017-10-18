@@ -29,7 +29,7 @@ namespace TerrainServer
          Kernel.eventManager.addListener(handleTerrainResponse, "terrain.chunk.response");
 
          //setup socket
-         int port=init.findDataOrDefault("terrainServer.port", 2377);
+         int port=init.findDataOr("terrainServer.port", 2377);
          myServer=new TcpMessageServer(port);
 
 
