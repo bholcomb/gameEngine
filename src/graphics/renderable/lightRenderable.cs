@@ -15,7 +15,8 @@ namespace Graphics
 		public float size;
 		public int index;
 		public Color4 color;
-		public Vector4 direction;
+      //used by spot lights
+      public Vector4 direction;
 		public float constantAttenuation;
 		public float linearAttenuation;
 		public float quadraticAttenuation;
@@ -32,8 +33,12 @@ namespace Graphics
 
 		public override bool isVisible(Camera c)
 		{
-			if (myLightType == Type.DIRECTIONAL)
-				return true;
+         if (myLightType == Type.DIRECTIONAL)
+         {
+            DebugRenderer.addLine(position, Vector3.Zero, color, Fill.WIREFRAME, false, 0);
+            DebugRenderer.addSphere(position, 0.1f, color, Fill.TRANSPARENT, false, 0);
+            return true;
+         }
 
 			DebugRenderer.addSphere(position, 0.1f, color, Fill.TRANSPARENT, false, 0);
 

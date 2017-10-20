@@ -30,6 +30,9 @@ namespace testRenderer
 		UI.GuiEventHandler myUiEventHandler;
 		RenderTarget myRenderTarget;
 		SkinnedModelRenderable mySkinnedModel;
+      LightRenderable mySun;
+      LightRenderable myPoint1;
+      LightRenderable myPoint2;
 
 		bool myShowRenderStats = true;
 
@@ -147,16 +150,27 @@ namespace testRenderer
 			//update the camera
 			myCameraEventHandler.tick((float)e.Time);
 
+         //update the animated object
 			mySkinnedModel.update((float)TimeSource.timeThisFrame());
 
-			avgFps = (0.99f * avgFps) + (0.01f * (float)TimeSource.fps());
+         //update the sun and point lights
+         double now = TimeSource.currentTime();
+         mySun.position = new Vector3((float)Math.Sin(now) * 5.0f, 5.0f, (float)Math.Cos(now) * 5.0f);
+         myPoint1.position = new Vector3(2.5f, 1, 0) + new Vector3(0.0f, (float)Math.Sin(now), (float)Math.Cos(now));
+         myPoint2.position = new Vector3(5.5f, 1, 0) + new Vector3(0.0f, (float)Math.Cos(now), (float)Math.Sin(now));
+
+
+         //high frequency filter on avg fps
+         avgFps = (0.99f * avgFps) + (0.01f * (float)TimeSource.fps());
 
 			ImGui.beginFrame();
 			if(ImGui.beginWindow("Render Stats", ref myShowRenderStats, Window.Flags.ShowBorders))
 			{
 				ImGui.setWindowPosition(new Vector2(20, 100), SetCondition.FirstUseEver);
-				ImGui.setWindowSize(new Vector2(300, 600), SetCondition.FirstUseEver);
+				ImGui.setWindowSize(new Vector2(500, 600), SetCondition.FirstUseEver);
 				ImGui.label("FPS: {0:0.00}", avgFps);
+            ImGui.label("Camera position: {0}", myCamera.position);
+            ImGui.label("Camera view vector: {0}", myCamera.viewVector);
 				ImGui.label("Cull Time: {0:0.00}ms", Renderer.stats.cullTime * 1000.0);
 				ImGui.label("Extract Time: {0:0.00}ms", Renderer.stats.extractTime * 1000.0);
 				ImGui.label("Prepare Time: {0:0.00}ms", Renderer.stats.prepareTime * 1000.0);
@@ -193,7 +207,7 @@ namespace testRenderer
 		{
 			base.OnRenderFrame(e);
 
-			DebugRenderer.addOffsetCube(new Vector3(0, 1, 0), 1.2f, Color4.Blue, Fill.WIREFRAME, false, 0.0f);
+			//DebugRenderer.addOffsetCube(new Vector3(0, 1, 0), 1.2f, Color4.Blue, Fill.WIREFRAME, false, 0.0f);
 
 			Renderer.render();
 
@@ -244,29 +258,29 @@ namespace testRenderer
 
 		void present()
 		{
-			RenderWireframeCubeCommand wc = new RenderWireframeCubeCommand(Vector3.Zero, Vector3.One, Color4.Yellow);
-			wc.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-			wc.execute();
-
-			RenderLineCommand l = new RenderLineCommand(Vector3.Zero, Vector3.One, Color4.Green);
-			l.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-			l.execute();
-
-			RenderSphereCommand s = new RenderSphereCommand(Vector3.Zero, 1.0f, Color4.Red);
-			s.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-			s.renderState.wireframe.enabled = true;
-			s.execute();
-
-			Vector3[] verts = new Vector3[4] {new Vector3(0,0,0), new Vector3(1,0,0), new Vector3(1,0,1), new Vector3(0,0,1) };
-			TextureDescriptor td = new TextureDescriptor("../data/textures/circle.png");
-			Texture tex = Renderer.resourceManager.getResource(td) as Texture;
-			RenderTexturedQuadCommand t = new RenderTexturedQuadCommand(verts, tex);
-			t.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-			t.execute();
-
-			RenderTextureCubeCommand tc = new RenderTextureCubeCommand(Vector3.Zero, Vector3.One, tex);
-			tc.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-			tc.execute();
+// 			RenderWireframeCubeCommand wc = new RenderWireframeCubeCommand(Vector3.Zero, Vector3.One, Color4.Yellow);
+// 			wc.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
+// 			wc.execute();
+// 
+// 			RenderLineCommand l = new RenderLineCommand(Vector3.Zero, Vector3.One, Color4.Green);
+// 			l.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
+// 			l.execute();
+// 
+// 			RenderSphereCommand s = new RenderSphereCommand(Vector3.Zero, 1.0f, Color4.Red);
+// 			s.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
+// 			s.renderState.wireframe.enabled = true;
+// 			s.execute();
+// 
+// 			Vector3[] verts = new Vector3[4] {new Vector3(0,0,0), new Vector3(1,0,0), new Vector3(1,0,1), new Vector3(0,0,1) };
+// 			TextureDescriptor td = new TextureDescriptor("../data/textures/circle.png");
+// 			Texture tex = Renderer.resourceManager.getResource(td) as Texture;
+// 			RenderTexturedQuadCommand t = new RenderTexturedQuadCommand(verts, tex);
+// 			t.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
+// 			t.execute();
+// 
+// 			RenderTextureCubeCommand tc = new RenderTextureCubeCommand(Vector3.Zero, Vector3.One, tex);
+// 			tc.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
+// 			tc.execute();
 
 			RenderCommand cmd = new BlitFrameBufferCommand(myRenderTarget);
 			cmd.execute();
@@ -359,8 +373,17 @@ namespace testRenderer
 				//smr.model.myMeshes[0].material.myFeatures = Material.Feature.DiffuseMap; //turn off lighting
 			}
 
-			//create a skinned model instance
-			mySkinnedModel = new SkinnedModelRenderable();
+
+         //create a test cube
+         StaticModelRenderable testRenderable = new StaticModelRenderable();
+         ObjModelDescriptor testDesc;
+         testDesc = new ObjModelDescriptor("../data/models/props/testCube/testCube.obj");
+         testRenderable.model = Renderer.resourceManager.getResource(testDesc) as StaticModel;
+         Renderer.renderables.Add(testRenderable);
+         testRenderable.setPosition(new Vector3(0, 1, 0));
+
+         //create a skinned model instance
+         mySkinnedModel = new SkinnedModelRenderable();
 			//MS3DModelDescriptor skmd = new MS3DModelDescriptor("../data/models/characters/zombie/zombie.json");
 			IQModelDescriptor skmd = new IQModelDescriptor("../data/models/characters/mrFixIt/mrFixIt.json");
 			mySkinnedModel.model = Renderer.resourceManager.getResource(skmd) as SkinnedModel;
@@ -370,31 +393,31 @@ namespace testRenderer
 			(mySkinnedModel.findController("animation") as AnimationController).startAnimation("idle");
 
 			//add a sun for light
-			LightRenderable lr = new LightRenderable();
-			lr.myLightType = LightRenderable.Type.DIRECTIONAL;
-			lr.color = Color4.White;
-			lr.direction = new Vector4(-1, 1, 0, 0);
-			Renderer.renderables.Add(lr);
+			mySun = new LightRenderable();
+         mySun.myLightType = LightRenderable.Type.DIRECTIONAL;
+         mySun.color = Color4.White;
+         mySun.position = new Vector3(5, 5, 5);
+			Renderer.renderables.Add(mySun);
 
 			//add a point light
-			LightRenderable lrp1 = new LightRenderable();
-			lrp1.myLightType = LightRenderable.Type.POINT;
-			lrp1.color = Color4.Red;
-			lrp1.position = new Vector3(2.5f, 1, 0);
-			lrp1.size = 10;
-			lrp1.linearAttenuation = 1.0f;
-			lrp1.quadraticAttenuation = 0.5f;
-			Renderer.renderables.Add(lrp1);
+			myPoint1 = new LightRenderable();
+			myPoint1.myLightType = LightRenderable.Type.POINT;
+			myPoint1.color = Color4.Red;
+			myPoint1.position = new Vector3(2.5f, 1, 0);
+			myPoint1.size = 10;
+			myPoint1.linearAttenuation = 1.0f;
+         myPoint1.quadraticAttenuation = 0.5f;
+			Renderer.renderables.Add(myPoint1);
 
 			//add another point light
-			LightRenderable lrp2 = new LightRenderable();
-			lrp2.myLightType = LightRenderable.Type.POINT;
-			lrp2.color = Color4.Blue;
-			lrp2.position = new Vector3(5.5f, 1, 0);
-			lrp2.size = 10;
-			lrp2.linearAttenuation = 1.0f;
-			lrp2.quadraticAttenuation = 0.25f;
-			Renderer.renderables.Add(lrp2);
+			myPoint2 = new LightRenderable();
+			myPoint2.myLightType = LightRenderable.Type.POINT;
+			myPoint2.color = Color4.Blue;
+			myPoint2.position = new Vector3(5.5f, 1, 0);
+			myPoint2.size = 10;
+			myPoint2.linearAttenuation = 1.0f;
+         myPoint2.quadraticAttenuation = 0.25f;
+			Renderer.renderables.Add(myPoint2);
 
 			myViewport.notifier += new Viewport.ViewportNotifier(handleViewportChanged);
 		}

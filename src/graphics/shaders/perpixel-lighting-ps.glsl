@@ -83,13 +83,14 @@ mat3 cotangent_frame(vec3 N, vec3 p, vec2 uv)
 	return mat3(T * invmax, B * invmax, N);
 }
 
-#define WITH_NORMALMAP_GREEN_UP 1
+//#define WITH_NORMALMAP_GREEN_UP 1
 
 vec3 perturb_normal(vec3 N, vec3 V, vec2 texcoord)
 {
 	// assume N, the interpolated vertex normal and 
 	// V, the view vector (vertex to eye)
 	vec3 map = texture(normalMap, texcoord).xyz;
+   map = map * 2.0 - 1.0;
 
 #ifdef WITH_NORMALMAP_UNSIGNED
 	map = map * 255. / 127. - 128. / 127.;
@@ -120,21 +121,19 @@ vec3 lightIntensity(LightData light, vec3 pos)
 
 vec3 directionalLight(LightData light, vec3 pos, vec3 norm)
 {
-	vec3 n = normalize(norm);
-	vec3 lightDir = normalize(light.direction.xyz);
+	vec3 lightDir = normalize(light.position.xyz);
 	vec3 viewDir = normalize(eyeLocation.xyz - pos);
 	vec3 halfVec = normalize(viewDir + lightDir);
 
 	vec3 amb = light.color.rgb *  matAmbientReflectivity.rgb;
-	vec3 diff = light.color.rgb * matDiffuseReflectivity.rgb * max(dot(lightDir, n), 0.0);
-	vec3 spec = light.color.rgb * specularReflectivity.rgb * pow(max(dot(n, halfVec), 0.0001), shininess);
+	vec3 diff = light.color.rgb * matDiffuseReflectivity.rgb * max(dot(lightDir, norm ), 0.0);
+	vec3 spec = light.color.rgb * specularReflectivity.rgb * pow(max(dot(norm, halfVec), 0.0001), shininess);
 
 	return amb + diff + spec;
 }
 
 vec3 pointLight(LightData light, vec3 pos, vec3 norm)
 {
-	vec3 n = normalize(norm);
 	vec3 lightDir = normalize(light.position.xyz - pos);
 	vec3 viewDir = normalize(eyeLocation.xyz - pos);
 	vec3 halfVec = normalize(viewDir + lightDir);
@@ -143,15 +142,14 @@ vec3 pointLight(LightData light, vec3 pos, vec3 norm)
 	vec3 intensity = lightIntensity(light, pos);
 
 	vec3 amb = intensity *  matAmbientReflectivity.rgb;
-	vec3 diff = intensity * matDiffuseReflectivity.rgb * max(dot(lightDir, n), 0.0);
-	vec3 spec = intensity * specularReflectivity.rgb * pow(max(dot(n, halfVec), 0.0001), shininess);
+	vec3 diff = intensity * matDiffuseReflectivity.rgb * max(dot(lightDir, norm), 0.0);
+	vec3 spec = intensity * specularReflectivity.rgb * pow(max(dot(norm, halfVec), 0.0001), shininess);
 
 	return amb + diff + spec;
 }
 
 vec3 spotLight(LightData light, vec3 pos, vec3 norm)
 {
-	vec3 n = normalize(norm);
 	vec3 lightDir = normalize(light.position.xyz - pos);
 	float dotSDir = dot(-lightDir, light.direction.xyz);
 	float angle = acos(dotSDir);
@@ -166,8 +164,8 @@ vec3 spotLight(LightData light, vec3 pos, vec3 norm)
 		vec3 halfVec = normalize(viewDir + lightDir);
 
 		return ambient + spotFactor * intensity * (
-			matDiffuseReflectivity.rgb * max(dot(lightDir, n), 0.0) +
-			specularReflectivity.rgb * pow(max(dot(n, halfVec), 0.0001), shininess)
+			matDiffuseReflectivity.rgb * max(dot(lightDir, norm), 0.0) +
+			specularReflectivity.rgb * pow(max(dot(norm, halfVec), 0.0001), shininess)
 			);
 	}
 	else
@@ -199,14 +197,15 @@ void main()
 	//if(hasSpecularMap)
 	//	specularReflectivity = texture(specularMap, texCoord);
 
-	vec3 n = normalize(worldNormal).xyz;
-	vec3 viewVector =  worldVert - vec3(eyeLocation) ;
+   vec3 n = normalize(worldNormal);
    
-   
-	if(hasNormalMap)
-		n = perturb_normal(n, normalize(viewVector), texCoord);
+   if (hasNormalMap)
+   {
+      n = perturb_normal(n, normalize(eyeLocation.xyz - worldVert), texCoord);
+   }
 
-	//FragColor = vec4(n, 1);
+	//FragColor = vec4(n * 0.5 + 0.5, 1);
+   //FragColor = vec4(n, 1);
 	//return;
 
 	for (int i = 0; i < 4; i++)

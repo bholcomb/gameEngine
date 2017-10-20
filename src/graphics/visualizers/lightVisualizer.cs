@@ -11,7 +11,7 @@ using Util;
 
 namespace Graphics
 {
-	/* glsl struct
+   /* glsl struct
    struct lightData{
       vec4 color;	
       vec4 position;
@@ -26,13 +26,13 @@ namespace Graphics
       float pad2;
    };
    */
-	[StructLayout(LayoutKind.Sequential)]
+   [StructLayout(LayoutKind.Sequential)]
 	public struct LightUniformData
 	{
 		public Vector4 color;
 		public Vector4 position;
-		public Vector4 direction;
-		public int lightType;
+      public Vector4 direction;
+      public int lightType;
 		public float constantAttenuation;
 		public float linearAttenuation;
 		public float quadraticAttenuation;
@@ -46,7 +46,7 @@ namespace Graphics
 	{
 		public Color4 color;
 		public Vector4 position;
-		public Vector4 direction;
+      public Vector4 direction;
 		public int lightType;
 		public float constantAttenuation;
 		public float linearAttenuation;
@@ -96,7 +96,7 @@ namespace Graphics
 				case LightRenderable.Type.DIRECTIONAL:
 					myLightData[myCurrentLightIndex].lightType = 0;
 					myLightData[myCurrentLightIndex].color = new Vector4(lr.color.R, lr.color.G, lr.color.B, 1.0f);
-					myLightData[myCurrentLightIndex].direction = new Vector4(lr.direction.X, lr.direction.Y, lr.direction.Z, 0.0f);
+					myLightData[myCurrentLightIndex].position = new Vector4(lr.position.X, lr.position.Y, lr.position.Z, 0.0f);
 					break;
 				case LightRenderable.Type.POINT:
 					myLightData[myCurrentLightIndex].lightType = 1;

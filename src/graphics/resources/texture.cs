@@ -335,7 +335,7 @@ namespace Graphics
 
          OGL.PixelFormat pf;
          OGL.PixelType pt;
-         Bitmap bm=loadBitmap(filename, out myPixelFormat, out pf, out pt);
+         Bitmap bm = loadBitmap(filename, out myPixelFormat, out pf, out pt);
          if(bm!=null)
          {
             BitmapData Data = bm.LockBits(new System.Drawing.Rectangle(0, 0, bm.Width, bm.Height), ImageLockMode.ReadOnly, bm.PixelFormat);

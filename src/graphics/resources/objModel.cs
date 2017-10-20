@@ -205,12 +205,12 @@ namespace Graphics
                   {
                      Material m = new Material(tokens[1]);
 							m.myFeatures |= Material.Feature.Lighting;
-                     while (line != "")
+                     while (line != "" && line != null)
                      {
-                        line = file.ReadLine();
                         line = line.Trim();
-                        line = line.ToLowerInvariant();
                         String[] matTokens = line.Split(' ');
+                        matTokens[0] = matTokens[0].ToLowerInvariant(); 
+
                         switch (matTokens[0])
                         {
                            case "ka":
@@ -323,6 +323,8 @@ namespace Graphics
                                  break;
                               }
                         }
+
+                        line = file.ReadLine();
                      }
 
                      myMaterials.Add(tokens[1], m);

@@ -33,10 +33,10 @@ layout(location = 0) uniform int modelDataIndex;
 
 out VertexStage
 {
-	smooth vec2 texCoord;
-	smooth vec3 worldNormal;
-	smooth vec3 worldVert;
-	mat3 normalMatrix;
+   smooth vec2 texCoord;
+   smooth vec3 worldNormal;
+   smooth vec3 worldVert;
+   mat3 normalMatrix;
 };
 	
 flat out vec4 activeLights;
