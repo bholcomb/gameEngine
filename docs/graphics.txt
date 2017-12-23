@@ -1,24 +1,26 @@
 The graphics library provides a high level way to render scenes using OpenGL 4.5 (using OpenTK).  
 
 Concepts/Classes:
-Device-Interface to the graphics card, responsible for mirroring render state and pipeline state to prevent state changes
+Device-Interface to the graphics card, responsible for mirroring render state and pipeline state to prevent unneccesary state changes
 RenderState-Per draw call state that can be changed within the context of a pipeline, typically texture mappings and uniform values
 PipelineState-Encapsulates a specific shader program , blend mode, depth test, stencil test, and variables that cannot be changed easilty (immutable in vulkan).
-Effect-class that encapsulates the different shaders coand the logic to update the render info from a specific type of renderable for a specific type of render pass
+Effect-class that encapsulates the different shaders and the logic to update the render info from a specific type of renderable for a specific type of render pass
 Material-parameters for lighting models and rendering surfaces
 Mesh-set of verticies that are all rendered at once with the same material
 Renderqueue-A render queue is a list of commands that are to be exeuted with a specific pipeline.  Since pipelines are shader specific, this also implies renderqueues are visualizer specific.
+Visualizer-Class responsible for visualizing a specific type of renderable
+Scene Graph-A list of render passes and targets required to generate an image
 
 Top-Down Description
-The renderer maintains a list of scene graphs and a list of renderables (note: scene graph in this context is more of an inside joke about real scene graphs, and I didn't have a better name at the time).  Each scene graph renders all the renderable objects registered with the renderer.  A scene graph consists of a list of render stages that are executed in order.  Render stages implement a render pass type and contain a list of one or more views.  A view is a camera, viewport, render target.  Views subsribe for types of renderables that they want to render using any registered visualizers.  Visualizer use the current render stages pass type and renderable to select the correct shader technique and build up any buffer data and draw commands.
+The renderer maintains a list of scene graphs and a list of renderables.    Each scene graph renders all the renderable objects registered with the renderer.  A scene graph consists of a list of render stages that are executed in order.  Render stages implement a render pass type and contain a list of one or more views.  A view is a camera, viewport, render target.  Views subsribe for types of renderables that they want to render using any registered visualizers.  Visualizer use the current render stages pass type and renderable to select the correct shader technique (an effect) and build up any buffer data and draw commands.
 
-Renderable objects reference a model.  Models are loaded using the resource manager and added to the renderer.
+Renderable objects reference a model.  Models are loaded using the resource manager and added to the renderer.  A renderable will contain instance specific data about the model such as position, rotation, material, or animation data.
 
 The renderer render function executes several passes over the renderable list for each view to build up the buffers and commands to submit to the GPU.   
 
 The first phase is the culling phase.   The first thing that is done is each active camera culls the renderable list generating a per-camera potentially visable list.  Then each each active view, using its camera's potentially visible list and the registered view filter, creates the views visible renderable list.  There are several common filters that allow renderables to filtered out of the cull list based on type, distance from camera, or a specific instance of a renderable.  This builds the visuable renderderable list for each view every frame.
 
-The next phase is the extract phase.  This where the view using a visualizer will generate any buffer data such as transforms, material data and will also create the render queues that will be used to submit draw calls to the graphics device.
+The next phase is the extract phase.  This where the view using a visualizer will generate any buffer data such as transforms, material data and will also create/lookup the render queues that will be used to submit draw calls to the graphics device.
 
 The next phase is the prepare phase.  This is where all the buffers that were built in the previous phase are uploaded to the GPU. 
 
@@ -26,9 +28,9 @@ The next phase is the submit phase.  During the submit phase each mesh that is r
 
 The next phase is the execute phase.  During the exectute phase each view's render queues are execute on the device in order (opaque before transparent, etc)
 
-The last phase is the present phase which uses a user provided function to present the renered image to the user.  This could be a simple swap buffer, t could be a copy FBO to back buffer and then swap, or it could be copying the image to an HMD.
+The last phase is the present phase which uses a user provided function to present the renered image to the user.  This could be a simple swap buffer, or it could be a copy FBO to back buffer and then swap, or it could be copying the image to an HMD.
 
-Render commands come in two flavors, the first is a renderstate command that allows the user to adjust only renderstate within the context of a pipeline.  Most visualizers generate these types of commands since the pipeline object is set on the renderqueue that holds the commands.  The other type of command is the StatelessRenderstate, which include a pipeline state object that gets applied.  These commands are intended to be used outside of the typical visualizer use case.  Compute shaders, UI, and Debug rendering use stateless commands since they're easy to create and execute.
+Render commands come in two flavors, the first is a renderstate command that allows the user to adjust only renderstate within the context of a pipeline.  Most visualizers generate these types of commands since the pipeline object is set on the renderqueue that holds the commands.  The other type of command is the StatelessRenderstate, which include a pipeline state object that gets applied when it's called.  Stateless commands are intended to be used outside of the typical visualizer use case.  Compute shaders, UI, and Debug rendering use stateless commands since they tend to be .
 
 The Effect class encapsulates a shader program to implement a specific visual effect.  It is used to generate a pipeline given a mesh material and can update the renderstate.  Visualizers select an effect for a renderable mesh based on the technique being used and the material features such as diffuse and normal mapping.  Exact matching of material features aren't required, a less capable effect may be used as a fallback if there isn't an exact matcch for all the features a material has.
 

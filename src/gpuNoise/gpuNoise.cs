@@ -18,11 +18,11 @@ namespace GpuNoise
       static IndexBufferObject theIBO;
       static VertexArrayObject theVAO;
       static Matrix4 theOrientation;
-		static PipelineState thePipeline;
+      static PipelineState thePipeline;
 
       bool myIsSpinning;
       Vector3 myPos;
-      float mySize; 
+      float mySize;
 
       static RenderCubemapSphere()
       {
@@ -87,20 +87,20 @@ namespace GpuNoise
          theVAO = new VertexArrayObject();
          theVAO.bindVertexFormat<V3>(theShader);
 
-			thePipeline = new PipelineState();
-			thePipeline.shaderProgram = theShader;
-			thePipeline.vao = theVAO;
-			thePipeline.generateId();
+         thePipeline = new PipelineState();
+         thePipeline.shaderProgram = theShader;
+         thePipeline.vao = theVAO;
+         thePipeline.generateId();
       }
 
       public RenderCubemapSphere(Vector3 pos, float size, CubemapTexture tex, bool spining = false)
-         :base()
+         : base()
       {
          myIsSpinning = spining;
          myPos = pos;
          mySize = size;
 
-			if (myIsSpinning == true)
+         if (myIsSpinning == true)
          {
             float rot = (float)(TimeSource.currentTime() / 2.0);
             theOrientation = Matrix4.CreateFromQuaternion(new Quaternion(0, rot, 0));
@@ -110,131 +110,85 @@ namespace GpuNoise
          {
             renderState.setUniform(new UniformData(0, Uniform.UniformType.Mat4, Matrix4.CreateTranslation(myPos)));
          }
-			renderState.setUniform(new UniformData(1, Uniform.UniformType.Float, size));
+         renderState.setUniform(new UniformData(1, Uniform.UniformType.Float, size));
 
-			renderState.setTexture(tex.id(), 0, tex.target);
-			renderState.setUniform(new UniformData(20, Uniform.UniformType.Int, 0));
+         renderState.setTexture(tex.id(), 0, tex.target);
+         renderState.setUniform(new UniformData(20, Uniform.UniformType.Int, 0));
 
-			renderState.setVertexBuffer(theVBO.id, 0, 0, V3.stride);
-			renderState.setIndexBuffer(theIBO.id);
+         renderState.setVertexBuffer(theVBO.id, 0, 0, V3.stride);
+         renderState.setIndexBuffer(theIBO.id);
 
-			pipelineState = thePipeline;
-		}
+         pipelineState = thePipeline;
+      }
 
-		public override void execute()
+      public override void execute()
       {
-			base.execute();
+         base.execute();
 
          GL.DrawElements(PrimitiveType.Triangles, theIBO.count, DrawElementsType.UnsignedShort, 0);
       }
    }
 
-	public class GpuNoise2dMap
+   public class GpuNoise2dMap
    {
       int myWidth;
       int myHeight;
       float mySeed;
-      int myLastOctaves = 5;
-      float myLastFrequency = 1.0f;
-      float myLastOffset = 0.0f;
-      float myLastLacunarity = 2.0f;
-      float myLastGain = 1.0f;
-      float myLastH = 1.0f;
-		Fractal.Function myLastFunction = Fractal.Function.fBm;
 
-		public Texture texture;
+      public Texture texture;
       public int octaves = 5;
       public float frequency = 1.0f;
       public float offset = 0.0f;
       public float lacunarity = 2.0f;
       public float gain = 1.0f;
       public float H = 1.0f;
-		public Fractal.Function function = Fractal.Function.multiFractal;
+      public Fractal.Function function = Fractal.Function.multiFractal;
 
-		Fractal myFractal = new Fractal();
-		AutoCorrect myAutoCorrect = new AutoCorrect();
+      Fractal myFractal;
+      AutoCorrect myAutoCorrect;
 
-		public GpuNoise2dMap(int width, int height, float seed = 0.0f)
+      public GpuNoise2dMap(int width, int height, float seed = 0.0f)
       {
          myWidth = width;
          myHeight = height;
          mySeed = seed;
 
-         myLastOctaves = octaves;
-         myLastFrequency = frequency;
-         myLastOffset = offset;
-         myLastLacunarity = lacunarity;
-         myLastGain = gain;
-         myLastH = H;
-
          texture = new Texture(myWidth, myHeight, PixelInternalFormat.R32f);
+         myFractal = new Fractal(myWidth, myHeight);
+         myAutoCorrect = new AutoCorrect(myWidth, myHeight);
+         myAutoCorrect.source = myFractal;
+
          generateTexture();
-      }
-
-      bool didChange()
-      {
-         bool diff = octaves != myLastOctaves ||
-                frequency != myLastFrequency ||
-                offset != myLastOffset ||
-                lacunarity != myLastLacunarity ||
-                gain != myLastGain ||
-                H != myLastH;
-
-         if (diff)
-         {
-            myLastOctaves = octaves;
-            myLastFrequency = frequency;
-            myLastOffset = offset;
-            myLastLacunarity = lacunarity;
-            myLastGain = gain;
-            myLastH = H;
-         }
-
-         return diff;
       }
 
       void generateTexture()
       {
-			myAutoCorrect.reset();
+         myFractal.seed = mySeed;
+         myFractal.function = function;
+         myFractal.octaves = octaves;
+         myFractal.frequency = frequency;
+         myFractal.lacunarity = lacunarity;
+         myFractal.H = H;
+         myFractal.gain = gain;
+         myFractal.offset = offset;
+         myFractal.face = 0;
 
-			myFractal.seed = mySeed;
-			myFractal.function = function;
-			myFractal.octaves = octaves;
-			myFractal.frequency = frequency;
-			myFractal.lacunarity = lacunarity;
-			myFractal.H = H;
-			myFractal.gain = gain;
-			myFractal.offset = offset;
-			myFractal.face = 0;
-
-			myFractal.generate(texture);
-			myAutoCorrect.findMinMax(texture);
-         myAutoCorrect.correct(texture);
+         myAutoCorrect.update();
       }
 
       public void update()
       {
-         if (didChange() == false)
-            return;
-
          generateTexture();
       }
    }
 
-	
 
-	public class GpuNoiseCubeMap
+
+   public class GpuNoiseCubeMap
    {
       int myWidth;
       int myHeight;
       float mySeed;
-      int myLastOctaves = 5;
-      float myLastFrequency = 1.0f;
-      float myLastOffset = 0.0f;
-      float myLastLacunarity = 2.0f;
-      float myLastGain = 1.0f;
-      float myLastH = 1.0f;
-      Fractal.Function myLastFunction = Fractal.Function.fBm;
 
       public Texture[] myTextures = new Texture[6];
       public CubemapTexture myCubemap;
@@ -246,8 +200,8 @@ namespace GpuNoise
       public float H = 1.0f;
       public Fractal.Function function = Fractal.Function.multiFractal;
 
-      Fractal myFractal = new Fractal();
-      AutoCorrect myAutoCorrect = new AutoCorrect();
+      Fractal[] myFractal = new Fractal[6];
+      AutoCorrect myAutoCorrect;
 
       public GpuNoiseCubeMap(int width, int height, float seed = 0.0f)
       {
@@ -257,77 +211,55 @@ namespace GpuNoise
 
          for (int i = 0; i < 6; i++)
          {
-            myTextures[i] = new Texture(myWidth, myHeight, PixelInternalFormat.Rgba32f);
-            myTextures[i].setName(String.Format("Face {0}", i));
+            myTextures[i] = new Texture(myWidth, myHeight, PixelInternalFormat.R32f);
+            myFractal[i] = new Fractal(myWidth, myHeight);
+            myFractal[i].face = i;
          }
 
-         myCubemap = new CubemapTexture(width, height, PixelInternalFormat.Rgba32f);
+         myCubemap = new CubemapTexture(width, height, PixelInternalFormat.R32f);
          myCubemap.setName("Terrain Cubemap");
+
+         myAutoCorrect = new AutoCorrect(myWidth, myHeight);
+
          generateTextures();
-      }
-
-      bool didChange()
-      {
-         bool diff = octaves != myLastOctaves ||
-                frequency != myLastFrequency ||
-                offset != myLastOffset ||
-                lacunarity != myLastLacunarity ||
-                gain != myLastGain ||
-                H != myLastH ||
-                function != myLastFunction;
-
-         if (diff)
-         {
-            myLastOctaves = octaves;
-            myLastFrequency = frequency;
-            myLastOffset = offset;
-            myLastLacunarity = lacunarity;
-            myLastGain = gain;
-            myLastH = H;
-            myLastFunction = function;
-         }
-
-         return diff;
       }
 
       void generateTextures()
       {
          myAutoCorrect.reset();
 
-         myFractal.seed = mySeed;
-         myFractal.function = function;
-         myFractal.octaves = octaves;
-         myFractal.frequency = frequency;
-         myFractal.lacunarity = lacunarity;
-         myFractal.H = H;
-         myFractal.gain = gain;
-         myFractal.offset = offset;
-
-         //generate each face
+         //generate each face and update the min/max
          for (int i = 0; i < 6; i++)
          {
-            myFractal.face = i;
-            myFractal.generate(myTextures[i]);
-            myAutoCorrect.findMinMax(myTextures[i]);
-         }
+            myFractal[i].seed = mySeed;
+            myFractal[i].function = function;
+            myFractal[i].octaves = octaves;
+            myFractal[i].frequency = frequency;
+            myFractal[i].lacunarity = lacunarity;
+            myFractal[i].H = H;
+            myFractal[i].gain = gain;
+            myFractal[i].offset = offset;
+            myFractal[i].face = i;
+            myFractal[i].update();
 
-          //correct all the images with the global min/max
-          for(int i = 0; i < 6; i++)
-          {
-            myAutoCorrect.correct(myTextures[i]);
+            myAutoCorrect.findMinMax(myFractal[i].output);
          }
-
+         
+         //correct all the images with the same min/max
+         for (int i = 0; i < 6; i++)
+         {
+            myAutoCorrect.output = myTextures[i];
+            myAutoCorrect.correct(myFractal[i].output);
+         }
+         
          myCubemap.updateFaces(myTextures);
       }
 
       public void update()
       {
-         if (didChange() == false)
-            return;
-
          generateTextures();
       }
    }
 
-	
+
 }

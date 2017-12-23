@@ -66,7 +66,7 @@ namespace GpuNoise
 			return false;
 		}
 
-		void findMinMax(Texture t)
+		internal void findMinMax(Texture t)
 		{
 			if (mySSbo.sizeInBytes < 4 * 2 * t.width)
 			{
@@ -86,7 +86,31 @@ namespace GpuNoise
 			GL.MemoryBarrier(MemoryBarrierFlags.ShaderStorageBarrierBit);
 		}
 
-		void correct(Texture t)
+      internal void findMinMax(Texture[] t)
+      {
+         //assumes all images are same size
+         if (mySSbo.sizeInBytes < 4 * 2 * t[0].width)
+         {
+            mySSbo.resize(4 * 2 * t[0].width);
+         }
+
+         for(int i=0; i<t.Length; i++)
+         {
+            ComputeCommand cmd = new ComputeCommand(myMinMaxShader, t[i].width / 32, t[i].height / 32);
+            cmd.addImage(t[i], TextureAccess.ReadOnly, 0);
+            cmd.renderState.setStorageBuffer(mySSbo.id, 1);
+            cmd.execute();
+            GL.MemoryBarrier(MemoryBarrierFlags.ShaderStorageBarrierBit);
+
+            cmd = new ComputeCommand(myMinMaxPass2Shader, 1);
+            cmd.renderState.setStorageBuffer(mySSbo.id, 1);
+            cmd.renderState.setUniform(new UniformData(0, Uniform.UniformType.Int, (t[i].width / 32) * (t[i].height / 32)));
+            cmd.execute();
+            GL.MemoryBarrier(MemoryBarrierFlags.ShaderStorageBarrierBit);
+         }
+      }
+
+      internal void correct(Texture t)
 		{
 			ComputeCommand cmd = new ComputeCommand(myAutoCorrectShader, t.width / 32, t.height / 32);
 			cmd.addImage(t, TextureAccess.ReadOnly, 0);
@@ -95,5 +119,5 @@ namespace GpuNoise
 			cmd.execute();
 			GL.MemoryBarrier(MemoryBarrierFlags.ShaderImageAccessBarrierBit);
 		}
-	}
+   }
 }
