@@ -31,8 +31,11 @@ namespace testRenderer
 		UI.GuiEventHandler myUiEventHandler;
 		RenderTarget myRenderTarget;
 		SkinnedModelRenderable mySkinnedModel;
+      LightRenderable mySun;
+      LightRenderable myPoint1;
+      LightRenderable myPoint2;
 
-		bool myShowRenderStats = true;
+      bool myShowRenderStats = true;
 
 		World myWorld;
 		TerrainRenderManager myTerrainRenderManager;
@@ -149,15 +152,23 @@ namespace testRenderer
 			//update the camera
 			myCameraEventHandler.tick((float)e.Time);
 
-			mySkinnedModel.update((float)TimeSource.timeThisFrame());
+         //update the animated object
+         mySkinnedModel.update((float)TimeSource.timeThisFrame());
 
-			avgFps = (0.99f * avgFps) + (0.01f * (float)TimeSource.fps());
+         //update the sun and point lights
+         double now = TimeSource.currentTime();
+         mySun.position = new Vector3((float)Math.Sin(now) * 5.0f, 5.0f, (float)Math.Cos(now) * 5.0f);
+         myPoint1.position = new Vector3(2.5f, 1, 0) + new Vector3(0.0f, (float)Math.Sin(now), (float)Math.Cos(now));
+         myPoint2.position = new Vector3(5.5f, 1, 0) + new Vector3(0.0f, (float)Math.Cos(now), (float)Math.Sin(now));
+
+         //high frequency filter on avg fps
+         avgFps = (0.99f * avgFps) + (0.01f * (float)TimeSource.fps());
 
 			ImGui.beginFrame();
-			if (ImGui.beginWindow("Render Stats", ref myShowRenderStats, Window.Flags.ShowBorders))
+			if (ImGui.beginWindow("Render Stats", ref myShowRenderStats, Window.Flags.Borders))
 			{
 				ImGui.setWindowPosition(new Vector2(20, 100), SetCondition.FirstUseEver);
-				ImGui.setWindowSize(new Vector2(300, 600), SetCondition.FirstUseEver);
+				ImGui.setWindowSize(new Vector2(300, 700), SetCondition.FirstUseEver);
 				ImGui.label("FPS: {0:0.00}", avgFps);
 				ImGui.label("Cull Time: {0:0.00}ms", Renderer.stats.cullTime * 1000.0);
 				ImGui.label("Extract Time: {0:0.00}ms", Renderer.stats.extractTime * 1000.0);
@@ -214,7 +225,7 @@ namespace testRenderer
 			List<RenderTargetDescriptor> rtdesc = new List<RenderTargetDescriptor>();
 			rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.ColorAttachment0, format = SizedInternalFormat.Rgba32f }); //creates a texture internally
 			rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.DepthAttachment, tex = new Texture(x, y, PixelInternalFormat.DepthComponent32f) }); //uses an existing texture
-																																																							 //rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.DepthAttachment, bpp = 32 });
+			//rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.DepthAttachment, bpp = 32 });
 
 			if (myRenderTarget == null)
 			{
@@ -307,7 +318,7 @@ namespace testRenderer
 
 			//create a tree instance
 			Random rand = new Random(230877);
-			for (int i = 0; i < 5000; i++)
+			for (int i = 0; i < 10000; i++)
 			{
 				int size = 500;
 				int halfSize = size / 2;
@@ -334,34 +345,34 @@ namespace testRenderer
 			mySkinnedModel.setPosition(new Vector3(5, 0, 0));
 			(mySkinnedModel.findController("animation") as AnimationController).startAnimation("idle");
 
-			//add a sun for light
-			LightRenderable lr = new LightRenderable();
-			lr.myLightType = LightRenderable.Type.DIRECTIONAL;
-			lr.color = Color4.White;
-			lr.direction = new Vector4(-1, 1, 0, 0);
-			Renderer.renderables.Add(lr);
+         //add a sun for light
+         mySun = new LightRenderable();
+         mySun.myLightType = LightRenderable.Type.DIRECTIONAL;
+         mySun.color = Color4.White;
+         mySun.position = new Vector3(5, 5, 5);
+         Renderer.renderables.Add(mySun);
 
-			//add a point light
-			LightRenderable lrp1 = new LightRenderable();
-			lrp1.myLightType = LightRenderable.Type.POINT;
-			lrp1.color = Color4.Red;
-			lrp1.position = new Vector3(2.5f, 1, 0);
-			lrp1.size = 10;
-			lrp1.linearAttenuation = 1.0f;
-			lrp1.quadraticAttenuation = 0.5f;
-			Renderer.renderables.Add(lrp1);
+         //add a point light
+         myPoint1 = new LightRenderable();
+         myPoint1.myLightType = LightRenderable.Type.POINT;
+         myPoint1.color = Color4.Red;
+         myPoint1.position = new Vector3(2.5f, 1, 0);
+         myPoint1.size = 10;
+         myPoint1.linearAttenuation = 1.0f;
+         myPoint1.quadraticAttenuation = 0.5f;
+         Renderer.renderables.Add(myPoint1);
 
-			//add another point light
-			LightRenderable lrp2 = new LightRenderable();
-			lrp2.myLightType = LightRenderable.Type.POINT;
-			lrp2.color = Color4.Blue;
-			lrp2.position = new Vector3(5.5f, 1, 0);
-			lrp2.size = 10;
-			lrp2.linearAttenuation = 1.0f;
-			lrp2.quadraticAttenuation = 0.25f;
-			Renderer.renderables.Add(lrp2);
+         //add another point light
+         myPoint2 = new LightRenderable();
+         myPoint2.myLightType = LightRenderable.Type.POINT;
+         myPoint2.color = Color4.Blue;
+         myPoint2.position = new Vector3(5.5f, 1, 0);
+         myPoint2.size = 10;
+         myPoint2.linearAttenuation = 1.0f;
+         myPoint2.quadraticAttenuation = 0.25f;
+         Renderer.renderables.Add(myPoint2);
 
-			myViewport.notifier += new Viewport.ViewportNotifier(handleViewportChanged);
+         myViewport.notifier += new Viewport.ViewportNotifier(handleViewportChanged);
 		}
 	}
 
@@ -371,7 +382,7 @@ namespace testRenderer
 		{
 			using (TestRenderer example = new TestRenderer())
 			{
-				example.Title = "Test Renderer";
+				example.Title = "Test Terrain Editor";
 				example.Run(/*60.0*/);
 			}
 

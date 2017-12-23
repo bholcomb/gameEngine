@@ -19,15 +19,18 @@ namespace UI
          Vertical = 1 << 0
       };
 
-      static bool sliderBehavior(Rect r, UInt32 id, ref float val, float min, float max, SliderFlags flags = 0)
+      static bool sliderBehavior(Rect r, UInt32 id, ref float val, float min, float max, ref bool hovered, SliderFlags flags = 0)
       {
          Window win = currentWindow;
+         if(win != ImGui.focusedWindow)
+         {
+            return false;
+         }
 
-         bool hovered = r.containsPoint(mouse.pos.X - win.position.X, mouse.pos.Y - win.position.Y);
+         hovered = r.containsPoint(mouse.pos);
          if (hovered)
          {
             hoveredId = id;
-            win.canvas.addRect(r, Color4.Red);
          }
 
          if (hovered && mouse.buttonClicked[(int)MouseButton.Left])
@@ -48,7 +51,7 @@ namespace UI
          {
             if (mouse.buttonDown[(int)MouseButton.Left] == true)
             {
-               float mouseAbsPos = isHorizontal ? (mouse.pos.X - win.position.X) : (mouse.pos.Y - win.position.Y);
+               float mouseAbsPos = isHorizontal ? (mouse.pos.X) : (mouse.pos.Y);
                float normalizedPos = MathExt.clamp<float>((mouseAbsPos - sliderMinPos) / siderUsableSize, 0.0f, 1.0f);
                if (!isHorizontal)
                   normalizedPos = 1.0f - normalizedPos; //reverse it
@@ -59,36 +62,12 @@ namespace UI
                   val = newValue;
                   valueChanged = true;
                }
-
             }
             else
             {
                setActiveId(0);
             }
          }
-
-         float grab_t = (MathExt.clamp<float>(val, min, max) - min) / (max - min);
-
-         //drawing
-         win.canvas.addRect(r, style.colors[(int)ElementColor.FrameBg], style.frameRounding);
-
-         if (!isHorizontal)
-            grab_t = 1.0f - grab_t;
-
-         float grabPosition = MathExt.lerp(sliderMinPos, sliderMaxPos, grab_t);
-         Rect grabRect;
-         if (isHorizontal)
-         {
-            grabRect = new Rect(new Vector2(grabPosition - grabSize * 0.5f, r.SW.Y + grabPadding),
-                                new Vector2(grabPosition + grabSize * 0.5f, r.NE.Y - grabPadding));
-         }
-         else
-         {
-            grabRect = new Rect(new Vector2(r.SW.X + grabPadding, grabPosition + grabSize * 0.5f),
-                                new Vector2(r.NE.X - grabPadding, grabPosition + grabSize * 0.5f));
-         }
-
-         win.canvas.addRectFilled(grabRect, activeId == id ? style.colors[(int)ElementColor.SliderGrabActive] : style.colors[(int)ElementColor.SliderGrabActive], style.grabRounding);
 
          return valueChanged;
       }
@@ -105,13 +84,22 @@ namespace UI
          Vector2 labelSize = style.textSize(s);
 
          //move cursor down for the size of the text accounting for the padding
-         Vector2 pos = win.cursorPosition + new Vector2(0, -(labelSize.Y + style.framePadding2x.Y));
-         Rect sliderRect = new Rect(pos, pos + new Vector2(width, labelSize.Y + style.framePadding2x.Y));
-         Rect totalRect = new Rect(sliderRect.SW, sliderRect.NE + new Vector2(style.itemInnerSpacing.X + labelSize.X, 0));
+         Vector2 pos = win.cursorScreenPosition + style.framePadding;
+         Rect sliderRect = Rect.fromPosSize(pos, new Vector2(width, labelSize.Y) + style.framePadding2x);
+         Rect totalRect = Rect.fromPosSize(pos, sliderRect.size + new Vector2(labelSize.X, 0));
 
          win.addItem(totalRect.size);
 
-         bool valChanged = sliderBehavior(sliderRect, id, ref val, min, max, 0);
+         bool hovered = false;
+         bool isHorizontal = true;
+         float grabPadding = 2.0f;
+         float sliderSize = isHorizontal ? sliderRect.width - grabPadding * 2.0f : sliderRect.height - grabPadding * 2.0f;
+         float grabSize = Math.Min(style.grabMinSize, sliderSize);
+         float siderUsableSize = sliderSize - grabSize;
+         float sliderMinPos = (isHorizontal ? sliderRect.SW.X : sliderRect.SW.Y) + grabPadding + grabSize * 0.5f;
+         float sliderMaxPos = (isHorizontal ? sliderRect.NE.X : sliderRect.NE.Y) - grabPadding - grabSize * 0.5f;
+
+         bool valChanged = sliderBehavior(sliderRect, id, ref val, min, max, ref hovered);
 
          string valString = "";
          if (displayFormat != "")
@@ -123,11 +111,42 @@ namespace UI
             valString = String.Format("{0:0.00}", val);
          }
 
+
+         //drawing
+         if (hovered)
+         {
+            win.canvas.addRect(sliderRect, Color4.Red);
+         }
+
+         win.canvas.addRect(sliderRect, style.colors[(int)ElementColor.FrameBg], style.frameRounding);
+
+         float grab_t = (MathExt.clamp<float>(val, min, max) - min) / (max - min);
+         if (!isHorizontal)
+         {
+            grab_t = 1.0f - grab_t;
+         }
+
+         float grabPosition = MathExt.lerp(sliderMinPos, sliderMaxPos, grab_t);
+         Rect grabRect;
+         if (isHorizontal)
+         {
+            grabRect = new Rect(new Vector2(grabPosition - grabSize * 0.5f, sliderRect.SW.Y + grabPadding),
+                                new Vector2(grabPosition + grabSize * 0.5f, sliderRect.NE.Y - grabPadding));
+         }
+         else
+         {
+            grabRect = new Rect(new Vector2(sliderRect.SW.X + grabPadding, grabPosition + grabSize * 0.5f),
+                                new Vector2(sliderRect.NE.X - grabPadding, grabPosition + grabSize * 0.5f));
+         }
+
+         win.canvas.addRectFilled(grabRect, activeId == id ? style.colors[(int)ElementColor.SliderGrabActive] : style.colors[(int)ElementColor.SliderGrabActive], style.grabRounding);
+
+
          win.canvas.addText(sliderRect, style.colors[(int)ElementColor.Text], valString, Alignment.Middle);
 
          if (s != "")
          {
-            Rect textRect = new Rect(sliderRect.SE + style.framePadding, totalRect.NW - style.framePadding);
+            Rect textRect = new Rect(sliderRect.SE + style.framePadding, totalRect.NW + style.framePadding);
             win.canvas.addText(textRect, style.colors[(int)ElementColor.Text], s, Alignment.VCenter);
          }
 
@@ -157,9 +176,9 @@ namespace UI
          Vector2 labelSize = style.textSize(s);
 
          //move cursor down for the size of the text accounting for the padding
-         Vector2 pos = win.cursorPosition + new Vector2(0, -(labelSize.Y + style.framePadding2x.Y));
-         Rect sliderRect = new Rect(pos, pos + new Vector2(width, labelSize.Y + style.framePadding2x.Y));
-         Rect totalRect = new Rect(sliderRect.SW, sliderRect.NE + new Vector2(style.itemInnerSpacing.X + labelSize.X, 0));
+         Vector2 pos = win.cursorScreenPosition + style.framePadding;
+         Rect sliderRect = Rect.fromPosSize(pos, new Vector2(width, labelSize.Y) + style.framePadding2x);
+         Rect totalRect = Rect.fromPosSize(pos, sliderRect.size + new Vector2(labelSize.X, 0));
 
          win.addItem(totalRect.size);
 
@@ -167,7 +186,8 @@ namespace UI
          int max = Enum.GetValues(typeof(T)).GetUpperBound(0);
          float val = (float)Convert.ToInt32(enumVal);
 
-         bool valChanged = sliderBehavior(sliderRect, id, ref val, min, max, 0);
+         bool hovered = false;
+         bool valChanged = sliderBehavior(sliderRect, id, ref val, min, max, ref hovered);
 
          enumVal = (T)(Object)((int)val);
 
@@ -176,7 +196,7 @@ namespace UI
 
          if (s != "")
          {
-            Rect textRect = new Rect(sliderRect.SE + style.framePadding, totalRect.NW - style.framePadding);
+            Rect textRect = new Rect(sliderRect.SE + style.framePadding, totalRect.NW + style.framePadding);
             win.canvas.addText(textRect, style.colors[(int)ElementColor.Text], s, Alignment.VCenter);
          }
 

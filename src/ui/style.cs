@@ -134,6 +134,7 @@ namespace UI
       {
          fontSizeStack.Push(15.0f);
 
+         //default IMGUI Style
          alpha = 1.0f;             // Global alpha applies to everything in ImGui
          windowPadding = new Vector2(8, 8);      // Padding within a window
          windowMinSize = new Vector2(32, 32);    // Minimum window size
@@ -202,6 +203,80 @@ namespace UI
          colors[(int)ElementColor.TextSelectedBg] = new Color4(0.00f, 0.00f, 1.00f, 0.35f);
          colors[(int)ElementColor.TooltipBg] = new Color4(0.05f, 0.05f, 0.10f, 0.90f);
          colors[(int)ElementColor.ModalWindowDarkening] = new Color4(0.20f, 0.20f, 0.20f, 0.35f);
+
+         darkStyle();
+      }
+
+      public void darkStyle()
+      {
+         alpha = 1.0f;             // Global alpha applies to everything in ImGui
+         windowPadding = new Vector2(15, 15);      // Padding within a window
+         windowMinSize = new Vector2(32, 32);    // Minimum window size
+         windowRounding = 5.0f;             // Radius of window corners rounding. Set to 0.0f to have rectangular windows
+         windowTitleAlign = Alignment.Left;  // Alignment for title bar text
+         childWindowRounding = 0.0f;             // Radius of child window corners rounding. Set to 0.0f to have rectangular windows
+         framePadding = new Vector2(2, 2);      // Padding within a framed rectangle (used by most widgets)
+         framePadding2x = framePadding * 2.0f;      // Padding within a framed rectangle (used by most widgets)
+         frameRounding = 4.0f;             // Radius of frame corners rounding. Set to 0.0f to have rectangular frames (used by most widgets).
+         itemSpacing = new Vector2(6, 4);      // Horizontal and vertical spacing between widgets/lines
+         itemInnerSpacing = new Vector2(8, 6);      // Horizontal and vertical spacing between within elements of a composed widget (e.g. a slider and its label)
+         touchExtraPadding = new Vector2(0, 0);      // Expand reactive bounding box for touch-based system where touch position is not accurate enough. Unfortunately we don't sort widgets so priority on overlap will always be given to the first widget. So don't grow this too much!
+         windowFillAlphaDefault = 0.70f;            // Default alpha of window background, if not specified in ImGui::Begin()
+         indentSpacing = 25.0f;            // Horizontal spacing when e.g. entering a tree node
+         columnsMinSpacing = 6.0f;             // Minimum horizontal spacing between two columns
+         scrollbarSize = 15.0f;            // Width of the vertical scrollbar, Height of the horizontal scrollbar
+         scrollbarRounding = 9.0f;             // Radius of grab corners rounding for scrollbar
+         grabMinSize = 6.0f;            // Minimum width/height of a grab box for slider/scrollbar
+         grabRounding = 3.0f;             // Radius of grabs corners rounding. Set to 0.0f to have rectangular slider grabs.
+         displayWindowPadding = new Vector2(22, 22);    // Window positions are clamped to be visible within the display area by at least this amount. Only covers regular windows.
+         displaySafeAreaPadding = new Vector2(4, 4);      // If you cannot see the edge of your screen (e.g. on a TV) increase the safe area padding. Covers popups/tooltips as well regular windows.
+         antiAliasedLines = true;             // Enable anti-aliasing on lines/borders. Disable if you are really short on CPU/GPU.
+         antiAliasedShapes = true;             // Enable anti-aliasing on filled shapes (rounded rectangles, circles, etc.)
+         curveTesselationTolerance = 1.25f;            // Tessellation tolerance. Decrease for highly tessellated curves (higher quality, more polygons), increase to reduce quality.
+
+         colors[(int)ElementColor.Text] = new Color4(0.80f, 0.80f, 0.83f, 1.00f);
+         colors[(int)ElementColor.TextDisabled] = new Color4(0.25f, 0.25f, 0.25f, 1.00f);
+         colors[(int)ElementColor.WindowBg] = new Color4(0.06f, 0.06f, 0.06f, 1.00f);
+         colors[(int)ElementColor.ChildWindowBg] = new Color4(0.1f, 0.1f, 0.1f, 1.00f);
+         //colors[(int)ElementColor.PopupBg] = new Color4(0.07f, 0.07f, 0.09f, 1.00f);
+         colors[(int)ElementColor.Border] = new Color4(0.8f, 0.8f, 0.8f, 0.9f);
+         colors[(int)ElementColor.BorderShadow] = new Color4(0.9f, 0.9f, 0.9f, 0.9f);
+         colors[(int)ElementColor.FrameBg] = new Color4(0.1f, 0.1f, 0.1f, 1.00f);
+         colors[(int)ElementColor.FrameBgHovered] = new Color4(0.24f, 0.23f, 0.29f, 1.00f);
+         colors[(int)ElementColor.FrameBgActive] = new Color4(0.56f, 0.56f, 0.58f, 1.00f);
+         colors[(int)ElementColor.TitleBg] = new Color4(0.1f, 0.1f, 0.1f, 1.00f);
+         colors[(int)ElementColor.TitleBgCollapsed] = new Color4(1.00f, 0.98f, 0.95f, 0.75f);
+         colors[(int)ElementColor.TitleBgActive] = new Color4(0.07f, 0.07f, 0.09f, 1.00f);
+         colors[(int)ElementColor.MenuBarBg] = new Color4(0.2f, 0.2f, 0.2f, 1.00f);
+         colors[(int)ElementColor.ScrollbarBg] = new Color4(0.10f, 0.09f, 0.12f, 1.00f);
+         colors[(int)ElementColor.ScrollbarGrab] = new Color4(0.80f, 0.80f, 0.83f, 0.31f);
+         colors[(int)ElementColor.ScrollbarGrabHovered] = new Color4(0.56f, 0.56f, 0.58f, 1.00f);
+         colors[(int)ElementColor.ScrollbarGrabActive] = new Color4(0.06f, 0.05f, 0.07f, 1.00f);
+         colors[(int)ElementColor.ComboBg] = new Color4(0.19f, 0.18f, 0.21f, 1.00f);
+         colors[(int)ElementColor.CheckMark] = new Color4(0.80f, 0.80f, 0.83f, 0.31f);
+         colors[(int)ElementColor.SliderGrab] = new Color4(0.80f, 0.80f, 0.83f, 0.31f);
+         colors[(int)ElementColor.SliderGrabActive] = new Color4(0.06f, 0.05f, 0.07f, 1.00f);
+         colors[(int)ElementColor.Button] = new Color4(0.10f, 0.09f, 0.12f, 1.00f);
+         colors[(int)ElementColor.ButtonHovered] = new Color4(0.24f, 0.23f, 0.29f, 1.00f);
+         colors[(int)ElementColor.ButtonActive] = new Color4(0.56f, 0.56f, 0.58f, 1.00f);
+         colors[(int)ElementColor.Header] = new Color4(0.10f, 0.09f, 0.12f, 1.00f);
+         colors[(int)ElementColor.HeaderHovered] = new Color4(0.56f, 0.56f, 0.58f, 1.00f);
+         colors[(int)ElementColor.HeaderActive] = new Color4(0.06f, 0.05f, 0.07f, 1.00f);
+         colors[(int)ElementColor.Column] = new Color4(0.56f, 0.56f, 0.58f, 1.00f);
+         colors[(int)ElementColor.ColumnHovered] = new Color4(0.24f, 0.23f, 0.29f, 1.00f);
+         colors[(int)ElementColor.ColumnActive] = new Color4(0.56f, 0.56f, 0.58f, 1.00f);
+         colors[(int)ElementColor.ResizeGrip] = new Color4(0.00f, 0.00f, 0.00f, 0.00f);
+         colors[(int)ElementColor.ResizeGripHovered] = new Color4(0.56f, 0.56f, 0.58f, 1.00f);
+         colors[(int)ElementColor.ResizeGripActive] = new Color4(0.06f, 0.05f, 0.07f, 1.00f);
+         colors[(int)ElementColor.CloseButton] = new Color4(0.40f, 0.39f, 0.38f, 0.16f);
+         colors[(int)ElementColor.CloseButtonHovered] = new Color4(0.40f, 0.39f, 0.38f, 0.39f);
+         colors[(int)ElementColor.CloseButtonActive] = new Color4(0.40f, 0.39f, 0.38f, 1.00f);
+         colors[(int)ElementColor.PlotLines] = new Color4(0.40f, 0.39f, 0.38f, 0.63f);
+         colors[(int)ElementColor.PlotLinesHovered] = new Color4(0.25f, 1.00f, 0.00f, 1.00f);
+         colors[(int)ElementColor.PlotHistogram] = new Color4(0.40f, 0.39f, 0.38f, 0.63f);
+         colors[(int)ElementColor.PlotHistogramHovered] = new Color4(0.25f, 1.00f, 0.00f, 1.00f);
+         colors[(int)ElementColor.TextSelectedBg] = new Color4(0.25f, 1.00f, 0.00f, 0.43f);
+         colors[(int)ElementColor.ModalWindowDarkening] = new Color4(1.00f, 0.98f, 0.95f, 0.73f);
       }
 
       public Color4 getColor(ElementColor elementType)

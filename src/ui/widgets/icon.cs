@@ -22,7 +22,7 @@ namespace UI
 
          Vector2 iconSize = new Vector2(style.currentFontSize, style.currentFontSize);
 
-         win.canvas.addIcon(iconId, win.cursorPosition + new Vector2(0, -iconSize.Y), win.cursorPosition + iconSize);
+         win.canvas.addIcon(iconId, win.cursorScreenPosition, win.cursorScreenPosition + iconSize);
          win.addItem(iconSize);
       }
    }

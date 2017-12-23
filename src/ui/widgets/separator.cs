@@ -22,8 +22,8 @@ namespace UI
 
          Vector2 size = new Vector2(win.size.X, 6);
          
-         Vector2 a = win.cursorPosition + new Vector2(2, -2);
-         Vector2 b = win.cursorPosition + new Vector2(win.size.X -2, -2);
+         Vector2 a = win.cursorScreenPosition + new Vector2(1, 2);
+         Vector2 b = win.cursorScreenPosition + new Vector2(win.size.X - 1, 2);
 
          win.canvas.addLine(a, b, style.colors[(int)ElementColor.Border], 1);
 

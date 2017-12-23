@@ -71,8 +71,7 @@ namespace Graphics
 			pipelineState.generateId();
 		}
 
-		/*
-		public RenderTexture2DCommand(Vector2 min, Vector2 max, TextureBufferObject t, float alpha = 1.0f, bool isDepthBuffer = false)
+		public RenderTexture2dCommand(Vector2 min, Vector2 max, TextureBufferObject t, float alpha = 1.0f, bool isDepthBuffer = false)
 			: base()
 		{
 			myMin = min;
@@ -85,53 +84,51 @@ namespace Graphics
 			myVerts[2].Position = new Vector3(max.X, max.Y, 0); myVerts[2].TexCoord = new Vector2(1, 1); myVerts[2].Color = new Color4(1.0f, 1.0f, 1.0f, alpha).toUInt();
 			myVerts[3].Position = new Vector3(min.X, max.Y, 0); myVerts[3].TexCoord = new Vector2(0, 1); myVerts[3].Color = new Color4(1.0f, 1.0f, 1.0f, alpha).toUInt();
 
-			TextureBufferSampler ts = new TextureBufferSampler(t, 0);
-			ts.minFilter = TextureMinFilter.Nearest;
-			ts.magFilter = TextureMagFilter.Nearest;
-			renderState.textures.Add(ts);
-			renderState.blending.enabled = true;
-			renderState.culling.enabled = false;
+         renderState.setTexture(t.id, 0, TextureTarget.Texture2D);
+         renderState.setIndexBuffer(theIBO.id);
+         renderState.setVertexBuffer(theVBO.id, 0, 0, V3T2B4.stride);
+         renderState.setUniform(new UniformData(0, Uniform.UniformType.Bool, false));
+         renderState.setUniform(new UniformData(20, Uniform.UniformType.Int, 0));
+         renderState.setUniform(new UniformData(23, Uniform.UniformType.Int, 0));         
+         renderState.setUniform(new UniformData(25, Uniform.UniformType.Bool, isDepthBuffer));
 
-			renderState.shaderProgram = theShader;
-			renderState.vao = theVAO;
+         pipelineState = new PipelineState();
+         pipelineState.shaderProgram = theShader;
+         pipelineState.vao = theVAO;
+         pipelineState.depthTest.enabled = false;
+         pipelineState.blending.enabled = alpha < 1.0f;
+         pipelineState.generateId();
+      }
 
-			renderState.updateUniform(new UniformData("diffuseTexture", Uniform.UniformType.Int, 0));
-			renderState.updateUniform(new UniformData("arrayTexture", Uniform.UniformType.Int, 1));
-			renderState.updateUniform(new UniformData("hasTextureArray", Uniform.UniformType.Bool, false));
-			renderState.updateUniform(new UniformData("arrayIndex", Uniform.UniformType.Int, 0));
-			renderState.updateUniform(new UniformData("alpha", Uniform.UniformType.Float, myAlpha));
-			renderState.updateUniform(new UniformData("isDepthBuffer", Uniform.UniformType.Bool, isDepthBuffer));
-		}
-
-		public RenderTexture2DCommand(Vector2 min, Vector2 max, ArrayTexture t, int idx = 0, float alpha = 1.0f, bool isDepthBuffer = false)
+		public RenderTexture2dCommand(Vector2 min, Vector2 max, ArrayTexture t, int idx = 0, float alpha = 1.0f, bool isDepthBuffer = false)
 			: base()
 		{
 			myMin = min;
 			myMax = max;
 			myAlpha = alpha;
 
-			myVerts = new V3T2[4];
-			myVerts[0].Position = new Vector3(min.X, max.Y, 0); myVerts[0].TexCoord = new Vector2(0, 0); myVerts[0].Color = new Color4(1.0f, 1.0f, 1.0f, alpha).toUInt();
-			myVerts[1].Position = new Vector3(max.X, max.Y, 0); myVerts[1].TexCoord = new Vector2(1, 0); myVerts[1].Color = new Color4(1.0f, 1.0f, 1.0f, alpha).toUInt();
-			myVerts[2].Position = new Vector3(max.X, min.Y, 0); myVerts[2].TexCoord = new Vector2(1, 1); myVerts[2].Color = new Color4(1.0f, 1.0f, 1.0f, alpha).toUInt();
-			myVerts[3].Position = new Vector3(min.X, min.Y, 0); myVerts[3].TexCoord = new Vector2(0, 1); myVerts[3].Color = new Color4(1.0f, 1.0f, 1.0f, alpha).toUInt();
+			myVerts = new V3T2B4[4];
+         myVerts[0].Position = new Vector3(min.X, min.Y, 0); myVerts[0].TexCoord = new Vector2(0, 0); myVerts[0].Color = new Color4(1.0f, 1.0f, 1.0f, alpha).toUInt();
+         myVerts[1].Position = new Vector3(max.X, min.Y, 0); myVerts[1].TexCoord = new Vector2(1, 0); myVerts[1].Color = new Color4(1.0f, 1.0f, 1.0f, alpha).toUInt();
+         myVerts[2].Position = new Vector3(max.X, max.Y, 0); myVerts[2].TexCoord = new Vector2(1, 1); myVerts[2].Color = new Color4(1.0f, 1.0f, 1.0f, alpha).toUInt();
+         myVerts[3].Position = new Vector3(min.X, max.Y, 0); myVerts[3].TexCoord = new Vector2(0, 1); myVerts[3].Color = new Color4(1.0f, 1.0f, 1.0f, alpha).toUInt();
 
-			TextureSampler ts = new TextureSampler(t, 1);
-			renderState.textures.Add(ts);
-			renderState.blending.enabled = true;
-			renderState.culling.enabled = false;
+         renderState.setTexture(t.id(), 0, t.target);
+         renderState.setIndexBuffer(theIBO.id);
+         renderState.setVertexBuffer(theVBO.id, 0, 0, V3T2B4.stride);
+         renderState.setUniform(new UniformData(0, Uniform.UniformType.Bool, false));
+         renderState.setUniform(new UniformData(22, Uniform.UniformType.Int, 0));
+         renderState.setUniform(new UniformData(23, Uniform.UniformType.Int, 2));
+         renderState.setUniform(new UniformData(24, Uniform.UniformType.Int, idx));
+         renderState.setUniform(new UniformData(25, Uniform.UniformType.Bool, isDepthBuffer));
 
-			renderState.shaderProgram = theShader;
-			renderState.vao = theVAO;
-
-			renderState.updateUniform(new UniformData("diffuseTexture", Uniform.UniformType.Int, 0));
-			renderState.updateUniform(new UniformData("arrayTexture", Uniform.UniformType.Int, 1));
-			renderState.updateUniform(new UniformData("alpha", Uniform.UniformType.Float, myAlpha));
-			renderState.updateUniform(new UniformData("hasTextureArray", Uniform.UniformType.Bool, true));
-			renderState.updateUniform(new UniformData("arrayIndex", Uniform.UniformType.Int, idx));
-			renderState.updateUniform(new UniformData("isDepthBuffer", Uniform.UniformType.Bool, isDepthBuffer));
-		}
-		*/
+         pipelineState = new PipelineState();
+         pipelineState.shaderProgram = theShader;
+         pipelineState.vao = theVAO;
+         pipelineState.depthTest.enabled = false;
+         pipelineState.blending.enabled = alpha < 1.0f;
+         pipelineState.generateId();
+      }
 
 		public override void execute()
 		{

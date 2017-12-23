@@ -18,7 +18,7 @@ namespace UI
       public static bool beginWindow(String name)
       {
          bool closed = false;
-         return beginWindow(name, ref closed, 0);
+         return beginWindow(name, ref closed, Window.Flags.DefaultWindow);
       }
 
       public static bool beginWindow(String name, ref bool closed, Window.Flags flags)

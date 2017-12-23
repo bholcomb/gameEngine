@@ -39,12 +39,13 @@ namespace UI
          UInt32 id = win.getChildId(label);
          Vector2 labelSize = style.textSize(label);
          Vector2 size = new Vector2(sizeArg.X != 0 ? sizeArg.X : labelSize.X, sizeArg.Y != 0 ? sizeArg.Y : labelSize.Y);
-         float dropDist = -(size.Y + style.framePadding.Y);
-         Vector2 textPos = win.cursorPosition + new Vector2(style.framePadding.X, dropDist);
-         Vector2 rectPos = win.cursorPosition + new Vector2(0, dropDist);
+         Vector2 rectPos = win.cursorScreenPosition + style.framePadding;
          Rect r = Rect.fromPosSize(rectPos, size);
 
-         win.addItem(size);
+         if (flags.HasFlag(SelectableFlags.HasToggle) == false) //only move the draw cursor after the toggle is drawn
+         {
+            win.addItem(size);
+         }
 
          bool hovered;
          bool held;
@@ -61,7 +62,7 @@ namespace UI
             win.canvas.addRectFilled(r, col);
          }
 
-         win.canvas.addText(textPos, style.getColor(ElementColor.Text), label);
+         win.canvas.addText(r, style.getColor(ElementColor.Text), label, Alignment.Default);
 
          //close popups
          if (pressed && flags.HasFlag(SelectableFlags.DontClosePopups) == false && win.flags.HasFlag(Window.Flags.Popup))

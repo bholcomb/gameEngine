@@ -20,7 +20,7 @@ namespace UI
 		public static void debug()
 		{
 			bool closed = false;
-			if (ImGui.beginWindow("Debug", ref closed, Window.Flags.MenuBar | Window.Flags.ShowBorders))
+			if (ImGui.beginWindow("Debug", ref closed, Window.Flags.DefaultWindow))
 			{
 				ImGui.setWindowPosition(new Vector2(400, 100), SetCondition.FirstUseEver);
 				ImGui.setWindowSize(new Vector2(300, 400), SetCondition.FirstUseEver);
@@ -32,7 +32,13 @@ namespace UI
 						ImGui.menuItem("Active State", ref debug_viewActiveItemState);
 						ImGui.endMenu();
 					}
-					ImGui.endMenuBar();
+               if (ImGui.beginMenu("Eggy"))
+               {
+                  ImGui.menuItem("Empty 1");
+                  ImGui.menuItem("Empty 2");
+                  ImGui.endMenu();
+               }
+               ImGui.endMenuBar();
 				}
 
 				if (debug_viewMouseState)

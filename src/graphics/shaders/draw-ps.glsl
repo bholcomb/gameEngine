@@ -43,7 +43,7 @@ void main()
 		texColor = texture(tex, texCoord);
 		break;
 	case 1:
-		texColor = vec4(1, 0, 0, 1);// texture(cube, vec3(texCoord, layer));
+		texColor = texture(cube, vec3(texCoord, layer));
 		break;
 	case 2:
 		texColor = texture(array, vec3(texCoord, layer));

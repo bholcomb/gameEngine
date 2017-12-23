@@ -36,7 +36,7 @@ namespace UI
 
          style.pushStyleVar(StyleVar.WindowRounding, 0.0f);
          style.pushStyleVar(StyleVar.WindowFillAlpha, 1.0f);
-         Window.Flags flags = extraFlags | Window.Flags.Popup | Window.Flags.NoTitleBar | Window.Flags.NoMove | Window.Flags.NoResize | Window.Flags.AlwaysAutoResize;
+         Window.Flags flags = extraFlags | Window.Flags.Popup | Window.Flags.AutoResize;
 
          String name;
          if(flags.HasFlag(Window.Flags.ChildMenu)==true)
@@ -52,9 +52,9 @@ namespace UI
          bool opened = beginWindow(name, ref closed, flags);
 
          //turn off show borders if the parent window doesn't have them
-         if(win.flags.HasFlag(Window.Flags.ShowBorders)==false)
+         if(win.flags.HasFlag(Window.Flags.Borders)==false)
          {
-            currentWindow.flags &= ~Window.Flags.ShowBorders;
+            currentWindow.flags &= ~Window.Flags.Borders;
          }
 
          if(!opened)

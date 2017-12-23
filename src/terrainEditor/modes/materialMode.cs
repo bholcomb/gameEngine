@@ -35,16 +35,17 @@ namespace Editor
       {
          int size = ImGui.width / 10;
          int x = ImGui.width / 10;
-         int y = ImGui.height-200;
+         int y = (int)ImGui.displaySize.Y  - 200;
          ImGui.beginWindow("Terrain Material");
          ImGui.setWindowPosition(new Vector2(x, y), SetCondition.FirstUseEver);
-         ImGui.setWindowSize(new Vector2(ImGui.width - x -x, 200), SetCondition.FirstUseEver);
+         ImGui.setWindowSize(new Vector2(ImGui.width - x -x, size + 75), SetCondition.FirstUseEver); //near the bottom of the screen
          ImGui.setWindowLayout(Window.Layout.Horizontal);
          for (int i = myFirstVisible; i < myFirstVisible + maxMaterials; i++)
          {
             ImGui.beginGroup();
             ImGui.setWindowLayout(Window.Layout.Vertical);
             if (ImGui.button(Terrain.MaterialManager.myMaterialTextureArray, myMaterialPallete[i].side, new Vector2(size)))
+            //if (ImGui.button(myMaterialPallete[i].name, new Vector2(size)))
             {
                myActiveIndex = i;
             }
@@ -52,7 +53,8 @@ namespace Editor
 
             if (myActiveIndex == i)
             {
-               Rect r = new Rect();
+               Rect r = Rect.fromPosSize(new Vector2(i * (ImGui.style.framePadding2x.X + size) + size + ImGui.style.framePadding.X, y), new Vector2(size));
+
                ImGui.currentWindow.canvas.addRect(r, Color4.White);
             }
             ImGui.endGroup();

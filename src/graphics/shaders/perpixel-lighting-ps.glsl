@@ -1,7 +1,5 @@
 #version 430
 
-//tangent space calculation from http://www.thetenthplanet.de/archives/1180
-
 layout(std140, binding = 0) uniform camera {
 	mat4 view; //aligned 4N
 	mat4 projection; //aligned 4N
@@ -33,7 +31,7 @@ layout(std140, binding = 1) uniform LightBlock{
 	LightData lights[255];
 };
 
-layout(std140, binding = 3) uniform material{
+layout(std140, binding = 2) uniform material{
 	vec4 matAmbientReflectivity;
 	vec4 matDiffuseReflectivity;
 	vec4 matSpecularReflectivity;
@@ -42,6 +40,8 @@ layout(std140, binding = 3) uniform material{
 	float alpha;
 	bool hasSpecularMap;
 	bool hasNormalMap;
+   bool hasParallaxMap;
+   float parallaxScale;
 };
 
 layout(location = 20) uniform sampler2D diffuseMap;
@@ -64,6 +64,7 @@ in VertexStage
 //outputs
 out vec4 FragColor;
 
+//tangent space calculation from http://www.thetenthplanet.de/archives/1180
 mat3 cotangent_frame(vec3 N, vec3 p, vec2 uv)
 {
 	// get edge vectors of the pixel triangle
@@ -85,7 +86,7 @@ mat3 cotangent_frame(vec3 N, vec3 p, vec2 uv)
 
 //#define WITH_NORMALMAP_GREEN_UP 1
 
-vec3 perturb_normal(vec3 N, vec3 V, vec2 texcoord)
+vec3 perturb_normal(mat3 TBN, vec2 texcoord)
 {
 	// assume N, the interpolated vertex normal and 
 	// V, the view vector (vertex to eye)
@@ -101,7 +102,6 @@ vec3 perturb_normal(vec3 N, vec3 V, vec2 texcoord)
 #ifdef WITH_NORMALMAP_GREEN_UP
 	map.y = -map.y;
 #endif
-	mat3 TBN = cotangent_frame(N, -V, texcoord);
 	return normalize(TBN * map);
 }
 
@@ -174,9 +174,9 @@ vec3 spotLight(LightData light, vec3 pos, vec3 norm)
 	}
 }
 
-vec4 diffuseColor(in vec4 color)
+vec4 diffuseColor(in vec4 color, vec2 T)
 {
-	color = texture(diffuseMap, texCoord);
+	color = texture(diffuseMap, T);
 
 	if (color.a < 0.05)
 		discard;
@@ -184,28 +184,54 @@ vec4 diffuseColor(in vec4 color)
 	return color;
 }
 
+//steep parallax mapping from http://sunandblackcat.com/tipFullView.php?topicid=28
+vec2 parallax(vec3 V, vec2 T, out float parallaxHeight)
+{
+
+   // get depth for this fragment
+   float initialHeight = 1.0 - texture(normalMap, T).a;
+
+   // calculate amount of offset for Parallax Mapping
+   vec2 texCoordOffset = parallaxScale * -V.xy * initialHeight;
+
+   parallaxHeight = initialHeight;
+
+   // retunr modified texture coordinates
+   return T + texCoordOffset;
+}
+
 void main()
 {  
 	vec4 outputFrag = vec4(0, 0, 0, 1);
+   vec2 uv = texCoord;
+   vec3 n = normalize(worldNormal);
+   vec3 dirToEye = normalize(eyeLocation.xyz - worldVert);
+   mat3 TBN = cotangent_frame(n, worldVert, texCoord);
+
+   if(hasParallaxMap)
+   {
+      float height = 0;
+      vec3 tangentViewVector = normalize(transpose(TBN) * dirToEye); //move view vector from world to tangent space
+      uv = parallax(tangentViewVector, uv, height);
+   }
+
+	vec4 albedo = diffuseColor(outputFrag, uv);
 	
-	vec4 albedo = diffuseColor(outputFrag);
-	
-	if (albedo.a < 0.1)
+	if (albedo.a < 0.1) 
 		discard;
 
 	specularReflectivity = matSpecularReflectivity;
-	//if(hasSpecularMap)
-	//	specularReflectivity = texture(specularMap, texCoord);
-
-   vec3 n = normalize(worldNormal);
-   
-   if (hasNormalMap)
+   if (hasSpecularMap)
    {
-      n = perturb_normal(n, normalize(eyeLocation.xyz - worldVert), texCoord);
+      specularReflectivity = texture(specularMap, uv);
    }
 
-	//FragColor = vec4(n * 0.5 + 0.5, 1);
-   //FragColor = vec4(n, 1);
+   if (hasNormalMap)
+   {
+     n = perturb_normal(TBN, uv);
+   }
+
+	//FragColor = vec4(transpose(TBN) * n, 1);
 	//return;
 
 	for (int i = 0; i < 4; i++)
@@ -218,13 +244,13 @@ void main()
 			continue;
 		}
 		else if (light.lightType == 0) {
-			lightContribution += directionalLight(light, worldVert, n);
+			lightContribution += directionalLight(light, dirToEye, n);
 		}
 		else if (light.lightType == 1) {
-			lightContribution += pointLight(light, worldVert, n);
+			lightContribution += pointLight(light, dirToEye, n);
 		}
 		else if (light.lightType == 2) {
-			lightContribution += spotLight(light, worldVert, n);
+			lightContribution += spotLight(light, dirToEye, n);
 		}
 
 		outputFrag += vec4(lightContribution, 1) * albedo;

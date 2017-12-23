@@ -17,33 +17,37 @@ namespace UI
       [Flags]
       public enum Flags
       {
-         NoTitleBar = 1 << 0,
-         NoResize = 1 << 1,
-         NoMove = 1 << 2,
-         NoScrollBar = 1 << 3,
-         NoScrollWithMouse = 1 << 4,
-         NoCollapse = 1 << 5,
-         AlwaysAutoResize = 1 << 6,
-         ShowBorders = 1 << 7,
-         NoBackground = 1 << 8,
+         //decorations
+         Background           = 1 << 0,
+         TitleBar             = 1 << 1,
+         MenuBar              = 1 << 2,
+         Borders              = 1 << 3,
+         HorizontalScrollbar  = 1 << 4,
+         VerticalScrollbar    = 1 << 5,
+         ScrollBars           = HorizontalScrollbar | VerticalScrollbar,
+         
 
-         NoInputs = 1 << 9,
-         MenuBar = 1 << 10,
-         HorizontalScrollbar = 1 << 11,
-         NoFocusOnAppearing = 1 << 12,
-         NoBringToFrontOnFocus = 1 << 13,
+         //behavior
+         Movable              = 1 << 10,
+         Collapsable          = 1 << 11,
+         Resizable            = 1 << 12,
+         Inputs               = 1 << 13,
+         ScrollableWithMouse  = 1 << 14,
+         FocusOnAppearing     = 1 << 15,
+         BringToFrontOnFocus  = 1 << 16,
+         AutoResize            = 1 << 17,
 
-         //internal
-         ChildWindow = 1 << 20,
-         ChildWindowAutoFitX = 1 << 21,
-         ChildWindowAutoFitY = 1 << 22,
-         ComboBox = 1 << 23,
-         Tooltip = 1 << 24,
-         Popup = 1 << 25,
-         Modal = 1 << 26,
-         ChildMenu = 1 << 27,
+         //window types
+         Root                 = 1 << 20,
+         ChildWindow          = 1 << 21,
+         ComboBox             = 1 << 22,
+         Tooltip              = 1 << 23,
+         Popup                = 1 << 24,
+         Modal                = 1 << 25,
+         ChildMenu            = 1 << 26,
 
-         Root = NoTitleBar | NoBackground | NoResize | NoMove | NoMove | NoCollapse | NoInputs | MenuBar,
+         //common use cases
+         DefaultWindow = Background | TitleBar | MenuBar | Borders | Movable | Collapsable | Resizable | Inputs | BringToFrontOnFocus | ChildWindow,
       };
 
       public enum Layout
@@ -51,12 +55,12 @@ namespace UI
          Vertical,
          Horizontal
       }
-
-      struct Group
+      class Group
       {
-         public Vector2 myBackupCursorPosition;
-         public Vector2 myBackupCursorSize;
-         public Layout myBackupLayout;
+         public Vector2 myPos;
+         public Vector2 mySize;
+         public Vector2 myCursorPos;
+         public Layout myLayout;
       }
 
       public string name { get; set; }
@@ -78,11 +82,6 @@ namespace UI
       internal Window siblingWindow = null;
 
       public Canvas canvas = new Canvas();
-
-      //layout stuff
-      Vector2 myCursorPos; //this is a screen space value
-      Vector2 myCursorSize; //this is the largest bounds of all the drawn stuff
-      Layout myLayoutType;
 
       //render stuff
       internal float myBackgroundAlpha = ImGui.style.windowFillAlphaDefault;
@@ -141,7 +140,7 @@ namespace UI
          childWindow = null;
          siblingWindow = null;
 
-         flags |= Flags.ShowBorders;
+         flags = Flags.Background | Flags.TitleBar | Flags.MenuBar | Flags.Borders;
 
          //setup the ID of this window
          name = winName;
@@ -151,6 +150,10 @@ namespace UI
          mySetPositionAllowFlags = mySetSizeAllowFlags = SetCondition.Always | SetCondition.Appearing | SetCondition.FirstUseEver | SetCondition.Once;
 
          menuColums = new MenuColumns(this);
+
+         Group g = new Group();
+         g.myLayout = Layout.Vertical;
+         myGroupStack.Push(g);
       }
 
       public UInt32 getChildId(String name)
@@ -162,44 +165,36 @@ namespace UI
          return childId;
       }
 
+      public Vector2 position
+      {
+         get { return myPosition; }
+         set { myPosition = value; }
+      }
+
       public Vector2 cursorPosition
       {
          //this is in window space coordinates.  The conversion to screen space happens during rendering
-         get { return myCursorPos; }
-         set { myCursorPos = value; }
+         get {
+            Group g = myGroupStack.Peek();
+            return g.myPos + g.myCursorPos;
+         }
+         set {
+            Group g = myGroupStack.Peek();
+            g.myCursorPos = value - g.myPos;
+         }
       }
 
       public Vector2 cursorScreenPosition
       {
-         get { return myCursorPos + position; }
-         set { myCursorPos = value - position; }
+         get { return position + cursorPosition; }
+         set { cursorPosition = value - position; }
       }
 
-      public void addItem(Vector2 itemSize)
-      {
-         myCursorSize.X = Math.Max(myCursorSize.X, myCursorPos.X + itemSize.X);
-         myCursorSize.Y = Math.Max(myCursorSize.Y, (size.Y - myCursorPos.Y) + itemSize.Y);
-
-         switch (myLayoutType)
-         {
-            case Layout.Horizontal:
-               {
-                  myCursorPos.X += itemSize.X;
-                  break;
-               }
-            case Layout.Vertical:
-               {
-                  myCursorPos.Y -= itemSize.Y;
-                  break;
-               }
-         }
-      }
-
-      public void nextLine()
-      {
-         myCursorPos.X = ImGui.style.framePadding.X;
-         myCursorPos.Y = myCursorSize.Y;
-      }
+      public Rect rect { get { return Rect.fromPosSize(position, size); } }
+      public float titleBarHeight { get { return flags.HasFlag(Flags.TitleBar) ? ImGui.style.currentFontSize + ImGui.style.framePadding2x.Y : 0.0f; } }
+      public Rect titleBarRect { get { return Rect.fromPosSize(new Vector2(0, 0) + position, new Vector2(size.X, titleBarHeight)); } }
+      public float menuBarHeight { get { return flags.HasFlag(Flags.MenuBar) ? ImGui.style.currentFontSize + ImGui.style.framePadding2x.Y : 0.0f; } }
+      public Rect menuBarRect { get { Vector2 pos = new Vector2(0, titleBarHeight) + position; return Rect.fromPosSize(pos, new Vector2(size.X, menuBarHeight)); } }
 
       public bool begin(ref bool closed)
       {
@@ -209,17 +204,17 @@ namespace UI
          //is this the first time we've begun this window?
          if (lastFrameActive != ImGui.frame)
          {
-            if (flags.HasFlag(Flags.AlwaysAutoResize))
+            if (flags.HasFlag(Flags.AutoResize))
             {
                //from the previous frame
-               size = myCursorSize + ImGui.style.displayWindowPadding;
+               size = myGroupStack.Peek().mySize + ImGui.style.displayWindowPadding;
             }
 
             lastFrameActive = ImGui.frame;
             active = true;
-            myCursorPos = new Vector2(0, size.Y);
-            myCursorSize = new Vector2(0, 0);
-            myLayoutType = Layout.Vertical;
+            myGroupStack.Peek().myCursorPos = new Vector2(0, titleBarHeight + menuBarHeight);
+            myGroupStack.Peek().mySize = new Vector2(0, 0);
+            myGroupStack.Peek().myLayout = Layout.Vertical;
          }
 
          if (ImGui.currentWindow != this)
@@ -230,7 +225,7 @@ namespace UI
          //process the setNextWindow* functions
          if (ImGui.setNextWindowPositionCondition != 0)
          {
-            bool shouldSet = (mySetPositionAllowFlags & ImGui.setNextWindowPositionCondition) != 0;
+            bool shouldSet = (mySetPositionAllowFlags.HasFlag(ImGui.setNextWindowPositionCondition));
             if (shouldSet && (ImGui.setNextWindowPositionValue != ImGui.theInvalidVec2))
             {
                setPosition(ImGui.setNextWindowPositionValue, ImGui.setNextWindowPositionCondition);
@@ -241,7 +236,7 @@ namespace UI
 
          if (ImGui.setNextWindowSizeCondition != 0)
          {
-            bool shouldSet = (mySetSizeAllowFlags & ImGui.setNextWindowSizeCondition) != 0;
+            bool shouldSet = (mySetSizeAllowFlags.HasFlag(ImGui.setNextWindowSizeCondition));
             if (shouldSet && (ImGui.setNextWindowSizeValue != ImGui.theInvalidVec2))
             {
                setSize(ImGui.setNextWindowSizeValue, ImGui.setNextWindowSizeCondition);
@@ -251,7 +246,7 @@ namespace UI
          }
 
          //check for collapsing window
-         if (!flags.HasFlag(Flags.NoTitleBar) && !flags.HasFlag(Flags.NoCollapse))
+         if (flags.HasFlag(Flags.TitleBar) && flags.HasFlag(Flags.Collapsable))
          {
             Rect r = titleBarRect;
             if (ImGui.myHoveredWindow == this && r.containsPoint(ImGui.mouse.pos) && ImGui.mouse.buttonDoubleClicked[(int)MouseButton.Left])
@@ -270,7 +265,7 @@ namespace UI
          {
             if (ImGui.mouse.buttonDown[(int)MouseButton.Middle] == true)
             {
-               if ((flags & Flags.NoMove) == 0)
+               if (flags.HasFlag(Flags.Movable) == true)
                {
                   myPosition += ImGui.mouse.posDelta;
                }
@@ -289,12 +284,6 @@ namespace UI
          return true;
       }
 
-      public Rect rect { get { return Rect.fromPosSize(position, size); } }
-      public float titleBarHeight { get { return flags.HasFlag(Flags.NoTitleBar) ? 0.0f : ImGui.style.currentFontSize + ImGui.style.framePadding2x.Y; } }
-      public Rect titleBarRect { get { return Rect.fromPosSize(new Vector2(0, size.Y - titleBarHeight), new Vector2(size.X, titleBarHeight)); } }
-      public float menuBarHeight { get { return flags.HasFlag(Flags.MenuBar) ? ImGui.style.currentFontSize + ImGui.style.framePadding2x.Y : 0.0f; } }
-      public Rect menuBarRect { get { float y1 = titleBarHeight; return new Rect(0, size.Y - y1 - menuBarHeight, size.X, size.Y - y1); } }
-
       public bool end()
       {
          canvas.popClipRect();
@@ -303,7 +292,7 @@ namespace UI
 
       public bool mouseOverTitle()
       {
-         return titleBarRect.containsPoint(ImGui.mouse.pos - position);
+         return titleBarRect.containsPoint(ImGui.mouse.pos);
       }
 
       public void getRenderCommands(ref List<RenderCommand> cmds)
@@ -383,16 +372,12 @@ namespace UI
          }
       }
 
-      public Vector2 position
-      {
-         get { return myPosition; }
-         set { myPosition = value; }
-      }
-
       void drawWindow()
       {
          canvas.reset();
-         canvas.setPosition(position);
+         canvas.setScreenResolution(ImGui.displaySize);
+         canvas.setScale(1.0f);
+
          float alpha = ImGui.style.alpha;
 
          if (flags.HasFlag(Flags.Root))
@@ -402,49 +387,47 @@ namespace UI
          }
          else
          {
-            canvas.pushClipRect(new Vector4(position.X, position.Y, size.X, size.Y));
+            canvas.pushClipRect(rect);
          }
 
          if (myIsCollapsed)
          {
-            //title bar
-            Rect tbr = Rect.fromPosSize(new Vector2(0, 0), new Vector2(size.X, titleBarHeight));
-            canvas.addRectFilled(tbr.SW, tbr.NE, ImGui.style.getColor(ElementColor.TitleBgCollapsed, alpha), ImGui.style.windowRounding, Canvas.Corners.ALL);
-            canvas.addText(myCursorPos, ImGui.style.getColor(ElementColor.Text), name);
+            //title bar only
+            canvas.addRectFilled(titleBarRect, ImGui.style.getColor(ElementColor.TitleBgCollapsed, alpha), ImGui.style.windowRounding, Canvas.Corners.ALL);
+            canvas.addText(titleBarRect, ImGui.style.getColor(ElementColor.Text), name, Alignment.Middle);
          }
          else
          {
             //window background
-            if(!flags.HasFlag(Flags.NoBackground))
+            if(flags.HasFlag(Flags.Background) == true)
             {
-               canvas.addRectFilled(new Vector2(0, 0), size, ImGui.style.getColor(ElementColor.WindowBg, myBackgroundAlpha), ImGui.style.windowRounding);
+               canvas.addRectFilled(rect, ImGui.style.getColor(ElementColor.WindowBg, myBackgroundAlpha), ImGui.style.windowRounding);
             }
 
             //title bar
-            if (!flags.HasFlag(Flags.NoTitleBar))
+            if (flags.HasFlag(Flags.TitleBar) == true)
             {
-               Rect tbr = titleBarRect;
-               canvas.addRectFilled(tbr.SW, tbr.NE, ImGui.style.getColor(ElementColor.TitleBg, alpha), ImGui.style.windowRounding, Canvas.Corners.TOP);
-               ImGui.label(name);
+               canvas.addRectFilled(titleBarRect, ImGui.style.getColor(ElementColor.TitleBg, alpha), ImGui.style.windowRounding, Canvas.Corners.TOP);
+               canvas.addText(titleBarRect, ImGui.style.getColor(ElementColor.Text), name, Alignment.Middle);
             }
 
             //menu bar
-            if (flags.HasFlag(Flags.MenuBar))
+            if (flags.HasFlag(Flags.MenuBar) == true)
             {
-               Rect mbr = menuBarRect;
-               canvas.addRectFilled(mbr.SW, mbr.NE, ImGui.style.getColor(ElementColor.MenuBarBg, alpha));
+               canvas.addRectFilled(menuBarRect, ImGui.style.getColor(ElementColor.MenuBarBg, alpha));
             }
             //scroll bars
 
             //resize grip
 
             //borders
-            if (flags.HasFlag(Flags.ShowBorders))
+            if (flags.HasFlag(Flags.Borders) == true)
             {
-               canvas.addRect(Vector2.One, size, ImGui.style.getColor(ElementColor.BorderShadow), ImGui.style.windowRounding, Canvas.Corners.ALL);
-               canvas.addRect(Vector2.Zero, size - Vector2.One, ImGui.style.getColor(ElementColor.Border), ImGui.style.windowRounding, Canvas.Corners.ALL);
 
-               if (flags.HasFlag(Flags.NoTitleBar) == false)
+               canvas.addRect(Rect.fromPosSize(position + Vector2.One, size), ImGui.style.getColor(ElementColor.BorderShadow), ImGui.style.windowRounding, Canvas.Corners.ALL);
+               canvas.addRect(Rect.fromPosSize(position, size - Vector2.One), ImGui.style.getColor(ElementColor.Border), ImGui.style.windowRounding, Canvas.Corners.ALL);
+
+               if (flags.HasFlag(Flags.TitleBar) == false)
                {
                   canvas.addLine(titleBarRect.NW + new Vector2(1, 0), titleBarRect.NE - new Vector2(1, 0), ImGui.style.getColor(ElementColor.Border));
                }
@@ -482,30 +465,66 @@ namespace UI
 
       public void setLayout(Layout layout)
       {
-         myLayoutType = layout;
+         myGroupStack.Peek().myLayout = layout;
+      }
+
+      public void pushMenuDrawSettings(Vector2 newCursor, Layout layout)
+      {
+         Group g = new Group();
+         g.myPos = newCursor;
+         g.myLayout = layout;
+         myGroupStack.Push(g);
+      }
+
+      public void popMenuDrawSettings()
+      {
+         Group g = myGroupStack.Pop();
+      }
+
+      public void addItem(Vector2 itemSize)
+      {
+         Group g = myGroupStack.Peek();
+         g.mySize.X = Math.Max(g.mySize.X, g.myCursorPos.X + itemSize.X);
+         g.mySize.Y = Math.Max(g.mySize.Y, g.myCursorPos.Y + itemSize.Y);
+
+         switch (g.myLayout)
+         {
+            case Layout.Horizontal:
+               {
+                  g.myCursorPos.X += itemSize.X;
+                  break;
+               }
+            case Layout.Vertical:
+               {
+                  g.myCursorPos.Y += itemSize.Y;
+                  break;
+               }
+         }
+      }
+
+      public void nextLine()
+      {
+         Group g = myGroupStack.Peek();
+         g.myCursorPos.X = ImGui.style.framePadding.X;
+         g.myCursorPos.Y = g.mySize.Y;
       }
 
       public void beginGroup()
       {
          Group g = new Group();
-         g.myBackupCursorPosition = myCursorPos;
-         g.myBackupCursorSize = myCursorSize;
-         myCursorSize = Vector2.Zero;
-         g.myBackupLayout = myLayoutType;
+         g.myPos = myGroupStack.Peek().myCursorPos;
+         g.mySize = Vector2.Zero;
+         g.myCursorPos = Vector2.Zero;
+         g.myLayout = myGroupStack.Peek().myLayout;
+
          myGroupStack.Push(g);
       }
 
       public void endGroup()
       {
          Group g = myGroupStack.Pop();
-         Rect rect = Rect.fromPosSize(g.myBackupCursorPosition, myCursorSize);
 
-         myCursorPos = g.myBackupCursorPosition;
-         myCursorSize.X = Math.Max(g.myBackupCursorSize.X, myCursorSize.X);
-         myCursorSize.Y = Math.Max(g.myBackupCursorSize.Y, myCursorSize.Y);
-         myLayoutType = g.myBackupLayout;
-
-         addItem(rect.size);
+         addItem(g.mySize);
       }
    }
 }

@@ -25,6 +25,8 @@ namespace Editor
       NodeHit myCurrentHit;
       NodeLocation myClampedLocation;
 
+      bool myDebug = false;
+
 
       public enum SelectMode { NONE, ADD, REMOVE };
       public SelectMode mySelectMode = SelectMode.NONE;
@@ -208,23 +210,25 @@ namespace Editor
 
       public void onGui()
       {
-         int x, y;
-         x = 10;
-         y = ImGui.height-300;
-         ImGui.beginWindow("Selection Manager");
-         ImGui.setWindowPosition(new Vector2(x, y), SetCondition.FirstUseEver);
-         ImGui.setWindowSize(new Vector2(500, 300), SetCondition.FirstUseEver);
-         ImGui.label("Hit: {0}", myCurrentHit == null ? Vector3.Zero : myCurrentHit.location);
-         ImGui.label("Depth: {0}", myEditor.cursorDepth);
-         ImGui.label("hit node: {0}", myCurrentHit == null ? Vector3.Zero : myCurrentHit.node.location.worldLocation());
-         ImGui.label("Node Key: {0}", myCurrentHit == null ? 0 : myCurrentHit.node.myKey.myValue);
-			ImGui.label("Clamped Node Key: {0}", myCurrentHit == null ? 0 : myClampedLocation.node.myValue);
-			ImGui.label("clamped hit: {0}", myCurrentHit == null ? Vector3.Zero : myClampedLocation.node.location);
-         ImGui.label("Face: {0}", myCurrentHit == null ? Face.NONE : myCurrentHit.face);
-         ImGui.label("Edge: {0}", myCurrentHit == null ? -1 : myCurrentHit.edge);
-         ImGui.label("Vertex: {0}", myCurrentHit == null ? -1 : myCurrentHit.vert);
-         ImGui.label("Visible Faces {0}", myCurrentHit == null ? "None" : Node.visiblityFlagsString(myCurrentHit.node.myFaceVisibilty));
-         ImGui.endWindow();
+         if (myDebug)
+         {
+            ImGui.beginWindow("Selection Manager");
+            ImGui.setWindowPosition(new Vector2(10, 10), SetCondition.FirstUseEver);
+            ImGui.setWindowSize(new Vector2(400, 300), SetCondition.FirstUseEver);
+            ImGui.label("Hit: {0}", myCurrentHit == null ? Vector3.Zero : myCurrentHit.location);
+            ImGui.label("Depth: {0}", myEditor.cursorDepth);
+            ImGui.label("hit node: {0}", myCurrentHit == null ? Vector3.Zero : myCurrentHit.node.location.worldLocation());
+            ImGui.label("Node Key: {0}", myCurrentHit == null ? 0 : myCurrentHit.node.myKey.myValue);
+            ImGui.label("Clamped Node Key: {0}", myCurrentHit == null ? 0 : myClampedLocation.node.myValue);
+            ImGui.label("clamped hit: {0}", myCurrentHit == null ? Vector3.Zero : myClampedLocation.node.location);
+            ImGui.label("Face: {0}", myCurrentHit == null ? Face.NONE : myCurrentHit.face);
+            ImGui.label("Edge: {0}", myCurrentHit == null ? -1 : myCurrentHit.edge);
+            ImGui.label("Vertex: {0}", myCurrentHit == null ? -1 : myCurrentHit.vert);
+            ImGui.label("Visible Faces {0}", myCurrentHit == null ? "None" : Node.visiblityFlagsString(myCurrentHit.node.myFaceVisibilty));
+            ImGui.label("Multiselect: {0}", myMultiSelect);
+            ImGui.label("Selected Cubes: {0}", mySelectedNodes.Count);
+            ImGui.endWindow();
+         }
 
          handleInput();
 
@@ -294,7 +298,9 @@ namespace Editor
          if (ImGui.mouse.buttonClicked[(int)MouseButton.Left] == true)
          {
             if (myMultiSelect == false)
+            {
                mySelectedNodes.Clear();
+            }
 
             mySelectMode = SelectMode.ADD;
          }
@@ -307,7 +313,9 @@ namespace Editor
          if(ImGui.mouse.buttonClicked[(int)MouseButton.Right] == true)
          {
             if (myCurrentHit != null)
+            {
                myCurrentHit.node.updateVisibility();
+            }
          }
       }
 
@@ -316,13 +324,13 @@ namespace Editor
          if (ImGui.mouse.buttonReleased[(int)MouseButton.Left] == true)
          {
             addCurrentNode();
+            mySelectMode = SelectMode.NONE;
          }
          if (ImGui.mouse.buttonReleased[(int)MouseButton.Middle] == true)
          {
             removeCurrentNode();
+            mySelectMode = SelectMode.NONE;
          }
-
-         mySelectMode = SelectMode.NONE;
       }
 
       public void handleKeyDown()
@@ -349,15 +357,24 @@ namespace Editor
          if(ImGui.keyboard.keyReleased(Key.Plus)==true)
          {
             myEditor.cursorDepth++;
-            if (myEditor.cursorDepth > WorldParameters.theMaxDepth) 
+            if (myEditor.cursorDepth > WorldParameters.theMaxDepth)
+            {
                myEditor.cursorDepth = WorldParameters.theMaxDepth;
+            }
          }
 
          if(ImGui.keyboard.keyReleased(Key.Minus)==true)
          {
             myEditor.cursorDepth--;
             if (myEditor.cursorDepth < 0)
+            {
                myEditor.cursorDepth = 0;
+            }
+         }
+
+         if(ImGui.keyboard.keyReleased(Key.F12) == true)
+         {
+            myDebug = !myDebug;
          }
       }
       #endregion
@@ -379,9 +396,9 @@ namespace Editor
          if (myCurrentHit != null)
          {
             //in face mode, clear the selection if the face orientation changes
-            if(myEditor.activeMode=="Face Mode")
+            if(myEditor.activeMode == "Face Mode")
             {
-               if(myEditor.context.currentFace!=myEditor.context.previousFace)
+               if(myEditor.context.currentFace != myEditor.context.previousFace)
                {
                   mySelectedNodes.Clear();
                }
@@ -396,7 +413,7 @@ namespace Editor
 
       public NodeLocation getMouseOverLocation(int x, int y)
       {
-         Ray r = myEditor.camera.getPickRay(x, y);
+         Ray r = myEditor.camera.getPickRay(x, (int)ImGui.displaySize.Y - y);
          myCurrentHit = myEditor.world.getNodeIntersection(r, myEditor.camera.near, myEditor.camera.far);
          myClampedLocation = null;
 

@@ -29,6 +29,12 @@ namespace UI
          mySeeds.Push(id);
       }
 
+      public void push(String name)
+      {
+         UInt32 id = getId(name);
+         push(id);
+      }
+
       public void pop()
       {
          mySeeds.Pop();
@@ -165,6 +171,8 @@ namespace UI
       {
          frame++;
 
+         style.darkStyle();
+
          //update input states
          mouse.newFrame();
          keyboard.newFrame();
@@ -196,7 +204,7 @@ namespace UI
          setNextWindowSize(displaySize, SetCondition.Always);
          setNextWindowPosition(Vector2.Zero, SetCondition.Always);
          bool closed = false;
-         ImGui.beginWindow("root", ref closed, Window.Flags.Root);
+         ImGui.beginWindow("root", ref closed, Window.Flags.Root | Window.Flags.MenuBar);
          myRootWindow = findWindow("root");
          myRootWindow.myBackgroundAlpha = 0.0f;
       }
@@ -206,10 +214,13 @@ namespace UI
          ImGui.endWindow();
 
          //check for focus and move
-         if (myHoveredWindow !=null && activeId == 0 && hoveredId == 0 && mouse.buttonClicked[(int)MouseButton.Middle] == true)
+         if (myHoveredWindow !=null && 
+            activeId == 0 && 
+            hoveredId == 0 &&  
+            myHoveredWindow.mouseOverTitle() &&  
+            mouse.buttonClicked[(int)MouseButton.Middle] == true)
          {
-            if (myHoveredWindow.mouseOverTitle() == true)
-               ImGui.setActiveId(myHoveredWindow.moveId);
+            ImGui.setActiveId(myHoveredWindow.moveId);
          }
       }
 
@@ -221,7 +232,9 @@ namespace UI
       public static void keepAliveId(UInt32 id)
       {
          if (activeId == id)
+         {
             activeIdIsAlive = true;
+         }
       }
 
       //the window currently "open" (from a begin statement) used for building the GUI
@@ -238,7 +251,7 @@ namespace UI
          if (win == null)
             return;
 
-         if (win.flags.HasFlag(Window.Flags.NoBringToFrontOnFocus) )
+         if (win.flags.HasFlag(Window.Flags.BringToFrontOnFocus) )
             return;
 
          win.makeLastSibling();
@@ -278,12 +291,12 @@ namespace UI
             return null;
          }
 
-         if ((w.flags & Window.Flags.NoInputs) != 0)
+         if (w.flags.HasFlag(Window.Flags.Inputs) == false)
          {
             return null;
          }
 
-         if (excludeChildren == true && (w.flags & Window.Flags.ChildWindow) != 0)
+         if (excludeChildren == true && (w.flags.HasFlag(Window.Flags.ChildWindow) == true) )
          {
             return null;
          }
@@ -299,8 +312,10 @@ namespace UI
 
       public static Window findHoveredWindow(Vector2 pos, bool excludeChildren)
       {
-         if(myRootWindow != null)
+         if (myRootWindow != null)
+         {
             return findHoveredWindow(pos, excludeChildren, myRootWindow);
+         }
 
 
          return null;
@@ -364,6 +379,5 @@ namespace UI
 
          return false;
       }
-
    }
 }

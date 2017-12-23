@@ -23,10 +23,11 @@ namespace UI
          String txt = String.Format(s, objs);
          Vector2 labelSize = style.textSize(txt) + style.framePadding2x;
 
-         //move cursor down for the size of the text accounting for the padding
-         Vector2 pos = win.cursorPosition + new Vector2(style.framePadding.X, -(labelSize.Y - style.framePadding.Y));
+         //add in padding
+         Vector2 pos = win.cursorScreenPosition;
 
-         win.canvas.addText(pos, style.colors[(int)ElementColor.Text], txt);
+         Rect r = Rect.fromPosSize(pos, labelSize);
+         win.canvas.addText(r, style.colors[(int)ElementColor.Text], txt, Alignment.Default);
          win.addItem(labelSize);
       }
 
@@ -37,10 +38,9 @@ namespace UI
             return;
 
          size += style.framePadding2x;
-         Vector2 pos = win.cursorPosition - new Vector2(0, size.Y - style.framePadding.Y);
+         Vector2 pos = win.cursorScreenPosition;
 
          Rect r= Rect.fromPosSize(pos, size);
-
          win.canvas.addImage(t, r, Vector2.Zero, Vector2.One, Color4.White);
          win.addItem(size);
       }

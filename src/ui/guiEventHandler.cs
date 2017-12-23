@@ -79,10 +79,11 @@ namespace UI
 
       public void handleMouseMove(object sender, MouseMoveEventArgs e)
       {
-         //OpenTK is reporting mouse coords with origin in top left, we want to work
-         //with the origin being bottom left to keep things consistent with openGL
-         ImGui.mouse.pos = new Vector2(e.X, myWindow.Height - e.Y);
-         //Console.WriteLine(String.Format("mouse: {0}", ImGui.mouse.pos));
+         //OpenTK is reporting mouse coords with origin in top left
+         //this is what we want since the UI window space has the coords in the 
+         //top left, it's only when we go to render, that we adjust for screen space
+         //and use the bottom left like openGL wants
+         ImGui.mouse.pos = new Vector2(e.X, e.Y);
       }
       #endregion
    }

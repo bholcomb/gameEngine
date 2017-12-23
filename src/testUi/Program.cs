@@ -28,6 +28,11 @@ namespace testUi
       UI.GuiEventHandler myUiEventHandler;
       Canvas myCanvas;
 
+      //clear color
+      float r = 0.2f;
+      float g = 0.2f;
+      float b = 0.2f;
+
       public TestHarness()
          : base(theWidth, theHeight, new GraphicsMode(32, 24, 0, 8), "Test UI", GameWindowFlags.Default, DisplayDevice.Default, 4, 4,
 #if DEBUG
@@ -70,7 +75,7 @@ namespace testUi
          }
          System.Console.WriteLine("Found OpenGL Version: {0}.{1}", major, minor);
 
-         GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+         GL.ClearColor(r, g, b, 1.0f);
          GL.Enable(EnableCap.Multisample);
 
          initRenderer();
@@ -91,8 +96,6 @@ namespace testUi
          myViewport.apply();
       }
 
-      bool clearRed = false;
-
       protected override void OnUpdateFrame(FrameEventArgs e)
       {
          base.OnUpdateFrame(e);
@@ -108,24 +111,19 @@ namespace testUi
          RenderState rs = new RenderState();
          rs.force();
 
-         if (clearRed)
-         {
-            GL.ClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-         }
-         else
-         {
-            GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-         }
-         
+         GL.ClearColor(r, g, b, 1.0f);
+
          GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
          
          myCamera.updateCameraUniformBuffer();
          myCamera.bind();
 
+         //canvas draw calls use screen space (bottom left origin)
          myCanvas.reset();
-         myCanvas.setPosition(Vector2.Zero);
-         myCanvas.addCircle(new Vector2(100, 200), 75.0f, Color4.Red);
-         myCanvas.addRectFilled(new Rect(300, 200, 600, 400), Color4.Blue, 10.0f);
+         myCanvas.setScreenResolution(ImGui.displaySize);
+         myCanvas.setScale(1.0f);
+         myCanvas.addCircle(new Vector2(100, 600), 75.0f, Color4.Red);
+         myCanvas.addRectFilled(new Rect(300, 500, 600, 800), Color4.Blue, 10.0f);
 
          List<RenderCommand> cmds = new List<RenderCommand>();
          myCanvas.generateCommands(ref cmds);
@@ -138,8 +136,14 @@ namespace testUi
          ImGui.label("Test");
          if (ImGui.button("click", new Vector2(100, 50)))
          {
-            clearRed = !clearRed;
+            r = 1.0f;
+            g = 0.2f;
+            b = 0.2f;
          }
+
+         ImGui.slider("R", ref r, 0.0f, 1.0f);
+         ImGui.slider("G", ref g, 0.0f, 1.0f);
+         ImGui.slider("B", ref b, 0.0f, 1.0f);
 
          ImGui.debug();
          ImGui.endFrame();

@@ -52,7 +52,7 @@ namespace UI
       }
    }
 
-   public class UiRenderCommand : StatelessRenderCommand
+   internal class UiRenderCommand : StatelessRenderCommand
    {
       static PipelineState thePipelineState;
 
@@ -72,7 +72,7 @@ namespace UI
          thePipelineState.generateId();
       }
 
-      public UiRenderCommand(DrawCmd drawCmd, Vector2 position, VertexBufferObject<V2T2B4> vbo, IndexBufferObject ibo)
+      public UiRenderCommand(DrawCmd drawCmd, Matrix4 modelmatrix, VertexBufferObject<V2T2B4> vbo, IndexBufferObject ibo)
          : base()
       {
          myElementCount = (int)drawCmd.elementCount;
@@ -86,7 +86,7 @@ namespace UI
          renderState.setIndexBuffer(ibo.id);
 
          renderState.setUniform(new UniformData(0, Uniform.UniformType.Int, 0));
-         renderState.setUniform(new UniformData(0, Uniform.UniformType.Mat4, Matrix4.CreateTranslation(new Vector3(position.X, position.Y, 0))));
+         renderState.setUniform(new UniformData(0, Uniform.UniformType.Mat4, modelmatrix));
          renderState.setTexture((int)drawCmd.texture.id(), 0, TextureTarget.Texture2D);
       }
 
@@ -98,8 +98,9 @@ namespace UI
       }
    }
 
-   public class DrawCmd
+   internal class DrawCmd
    {
+      public int index;
       public int layer;
       public UInt32 elementOffset;
       public UInt32 elementCount;
@@ -136,7 +137,9 @@ namespace UI
       public static ShaderProgram theShader;
       public VertexBufferObject<V2T2B4> myVbo = new VertexBufferObject<V2T2B4>(BufferUsageHint.DynamicDraw);
       public IndexBufferObject myIbo = new IndexBufferObject(BufferUsageHint.DynamicDraw);
-      Vector2 myPosition;
+      Vector2 myScreenSize;
+      float myScale = 1.0f;
+      Matrix4 myModelMatrix;
 
       public static Texture theDefaultTexture;
       static List<Glyph> theGlyphs;
@@ -206,9 +209,14 @@ namespace UI
          addDrawCommand();
       }
 
-      public void setPosition(Vector2 position)
+      public void setScreenResolution(Vector2 screenResolution)
       {
-         myPosition = position;
+         myScreenSize = screenResolution;
+      }
+
+      public void setScale(float scale)
+      {
+         myScale = scale;
       }
 
       public void generateCommands(ref List<RenderCommand> cmds)
@@ -216,8 +224,20 @@ namespace UI
          myVbo.setData(myVerts, (int)myVertCount);
          myIbo.setData(myIndexes, (int)myIndexCount);
 
+
+         Matrix4 transform = Matrix4.CreateTranslation(new Vector3(0, myScreenSize.Y, 0));
+         Matrix4 scale = Matrix4.CreateScale(new Vector3(myScale, -myScale, 1));
+         myModelMatrix = scale * transform;
+
          //sort based on layer depth 
-         myCmdBuffer.Sort((a, b) => a.layer.CompareTo(b.layer));
+         myCmdBuffer.Sort((a, b) =>
+         {
+            int c = a.layer.CompareTo(b.layer);
+            if (c != 0)
+               return c;
+
+            return a.index.CompareTo(b.index);
+         });
 
          foreach (DrawCmd dc in myCmdBuffer)
          {
@@ -229,7 +249,7 @@ namespace UI
             else
             {
                if (dc.elementCount > 0)
-                  cmds.Add(new UiRenderCommand(dc, myPosition, myVbo, myIbo));
+                  cmds.Add(new UiRenderCommand(dc, myModelMatrix, myVbo, myIbo));
             }
          }
       }
@@ -372,7 +392,11 @@ namespace UI
          if (pushTex)
             pushTexture(tex);
 
-         primativeRectUv(a, b, uv0, uv1, col);
+         //fix the UV's so they're flipped appropriately for the system we're using
+         Vector2 _uv0 = new Vector2(uv0.X, uv1.Y);
+         Vector2 _uv1 = new Vector2(uv1.X, uv0.Y);
+
+         primativeRectUv(a, b, _uv0, _uv1, col);
 
          if (pushTex)
             popTexture();
@@ -522,7 +546,7 @@ namespace UI
             }
          }
       }
-      public void pathBecierToCasteljau(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float tessTol, int level)
+      public void pathBezierToCasteljau(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, float tessTol, int level)
       {
          float dx = x4 - x1;
          float dy = y4 - y1;
@@ -543,8 +567,8 @@ namespace UI
             float x234 = (x23 + x34) * 0.5f, y234 = (y23 + y34) * 0.5f;
             float x1234 = (x123 + x234) * 0.5f, y1234 = (y123 + y234) * 0.5f;
 
-            pathBecierToCasteljau(x1, y1, x12, y12, x123, y123, x1234, y1234, tessTol, level + 1);
-            pathBecierToCasteljau(x1234, y1234, x234, y234, x34, y34, x4, y4, tessTol, level + 1);
+            pathBezierToCasteljau(x1, y1, x12, y12, x123, y123, x1234, y1234, tessTol, level + 1);
+            pathBezierToCasteljau(x1234, y1234, x234, y234, x34, y34, x4, y4, tessTol, level + 1);
          }
       }
       public void pathBezierCurveTo(Vector2 p2, Vector2 p3, Vector2 p4, int num_segments = 0)
@@ -584,10 +608,10 @@ namespace UI
          }
          else
          {
-            float r0 = ((rounding_corners & Corners.LL) == Corners.LL) ? r : 0.0f;
-            float r1 = ((rounding_corners & Corners.LR) == Corners.LR) ? r : 0.0f;
-            float r2 = ((rounding_corners & Corners.UR) == Corners.UR) ? r : 0.0f;
-            float r3 = ((rounding_corners & Corners.UL) == Corners.UL) ? r : 0.0f;
+            float r0 = rounding_corners.HasFlag(Corners.UL) ? r : 0.0f;
+            float r1 = rounding_corners.HasFlag(Corners.UR) ? r : 0.0f;
+            float r2 = rounding_corners.HasFlag(Corners.LR) ? r : 0.0f;
+            float r3 = rounding_corners.HasFlag(Corners.LL) ? r : 0.0f;
             pathArcToFast(new Vector2(a.X + r0, a.Y + r0), r0, 6, 9);
             pathArcToFast(new Vector2(b.X - r1, a.Y + r1), r1, 9, 12);
             pathArcToFast(new Vector2(b.X - r2, b.Y - r2), r2, 0, 3);
@@ -665,8 +689,9 @@ namespace UI
                   float x2 = x + g.size.Y * scale;
                   float y2 = y + g.size.Y * scale;
 
-                  Vector2 uv1 = g.minTexCoord;
-                  Vector2 uv2 = g.maxTexCoord;
+                  //these seem backwards but only because we're doing some crazy inversion thing with UI screen space to window space
+                  Vector2 uv1 = new Vector2(g.minTexCoord.X, g.maxTexCoord.Y);
+                  Vector2 uv2 = new Vector2(g.maxTexCoord.X, g.minTexCoord.Y);
 
                   primativeRectUv(new Vector2(x1, y1), new Vector2(x2, y2), uv1, uv2, col);
 
@@ -684,6 +709,7 @@ namespace UI
       void primativeVert(Vector2 pos, Vector2 uv, Color4 col)
       {
          writeIndex((UInt16)myVertCount);
+         myVertCount++;
          writeVertex(pos, uv, col);
       }
       void writeVertex(Vector2 a, Vector2 uv, Color4 col)
@@ -715,6 +741,7 @@ namespace UI
          cmd.texture = currentTexture;
          cmd.elementOffset = myIndexCount;
          cmd.elementCount = 0;
+         cmd.index = myCmdBuffer.Count;
          myCmdBuffer.Add(cmd);
 
          return cmd;
@@ -735,6 +762,15 @@ namespace UI
          }
       }
 
+      public void pushClipRect(Rect r)
+      {
+         Vector4 c;
+         c.X = r.left;
+         c.Y = myScreenSize.Y - r.top; //convert to pixel coords from UI Screen coords
+         c.Z = r.width;
+         c.W = r.height;
+         pushClipRect(c);
+      }
       public void pushClipRect(Vector4 r)
       {
          clipRectStack.Add(r);

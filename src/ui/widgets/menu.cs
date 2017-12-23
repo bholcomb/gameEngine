@@ -14,30 +14,6 @@ namespace UI
 {
    public static partial class ImGui
    {
-      public static bool beginMainMenuBar()
-      {
-         setNextWindowPosition(new Vector2(0, displaySize.Y - (style.currentFontSize + style.framePadding2x.Y)));
-         setNextWindowSize(new Vector2(displaySize.X, style.currentFontSize + style.framePadding2x.Y));
-         style.pushStyleVar(StyleVar.WindowRounding, 0.0f);
-         style.pushStyleVar(StyleVar.WindowMinSize, Vector2.Zero);
-         bool closed=false;
-         if (!beginWindow("MainMenuBar", ref closed, Window.Flags.NoTitleBar | Window.Flags.NoResize | Window.Flags.NoMove | Window.Flags.NoScrollBar | Window.Flags.MenuBar) || !beginMenuBar())
-         {
-            endWindow();
-            style.popStyleVar(2);
-            return false;
-         }
-         
-         //currentWindow.menuBarOffset.x += style.padding.x;
-         return true;
-      }
-
-      public static void endMainMenuBar()
-      {
-         endMenuBar();
-         endWindow();
-         style.popStyleVar(2);
-      }
 
       public static bool beginMenuBar()
       {
@@ -52,10 +28,9 @@ namespace UI
             return false;
          }
 
-         beginGroup();
-         UInt32 id = idStack.getId("menuBar");
-         idStack.push(id);
-         win.setLayout(Window.Layout.Horizontal);
+         win.pushMenuDrawSettings(win.menuBarRect.position - win.position, Window.Layout.Horizontal);
+         idStack.push("menuBar");
+         
          return true;
       }
 
@@ -68,8 +43,7 @@ namespace UI
          }
 
          idStack.pop();
-         endGroup();
-         win.setLayout(Window.Layout.Vertical);
+         win.popMenuDrawSettings();
       }
 
       public static bool beginMenu(String label, bool enabled = true)
@@ -96,11 +70,7 @@ namespace UI
          Vector2 popupPos;
          
          //assumes horizontal layout
-         popupPos = new Vector2(pos.X, pos.Y - win.menuBarHeight);
-         if (win.childWindow != null)
-         {
-            popupPos.Y -= win.childWindow.size.Y;
-         }
+         popupPos = new Vector2(pos.X , pos.Y + win.menuBarRect.size.Y);
 
          bool shouldOpen = false;
          pressed = selectable(label, ref shouldOpen, new Vector2(labelSize.X, 0.0f), SelectableFlags.Menu | SelectableFlags.DontClosePopups);
@@ -121,7 +91,7 @@ namespace UI
             else
             {
                setNextWindowPosition(popupPos);
-               opened = beginPopup(label, Window.Flags.ShowBorders | Window.Flags.ChildMenu);
+               opened = beginPopup(label, Window.Flags.Background | Window.Flags.Borders | Window.Flags.ChildMenu);
             }
          }
 
@@ -146,8 +116,10 @@ namespace UI
 
          bool pressed = selectable(label, ref selected, new Vector2(width, 0), SelectableFlags.MenuItem | SelectableFlags.HasToggle);
 
-         Rect iconRect = Rect.fromPosSize(new Vector2(win.menuColums.positions[2], win.cursorPosition.Y - style.framePadding.Y), new Vector2(style.currentFontSize, style.currentFontSize));
+         Rect iconRect = Rect.fromPosSize(new Vector2(win.menuColums.positions[2], win.cursorPosition.Y + style.framePadding.Y) + win.position, new Vector2(style.currentFontSize, style.currentFontSize));
          win.canvas.addIcon( selected ? Canvas.Icons.CHECKBOX_CHECKED : Canvas.Icons.CHECKBOX_UNCHECKED, iconRect);
+
+         win.addItem(new Vector2(width, style.currentFontSize + style.framePadding.Y));
 
          return pressed;
       }

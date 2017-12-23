@@ -6,7 +6,7 @@ layout (triangle_strip, max_vertices=3) out;
 in VertexStage
 {
    smooth vec2 texCoord;
-   smooth vec3 eyevert;
+   smooth vec3 worldVert;
    flat mat3 normalMatrix;
    flat int texLayer;
 } gs_in[];
@@ -14,8 +14,8 @@ in VertexStage
 out GeometryStage
 {
    smooth vec2 texCoord;
-   smooth vec3 normal;
-   smooth vec3 eyevert;
+   smooth vec3 worldNormal;
+   smooth vec3 worldVert;
    flat mat3 normalMatrix;
    flat int texLayer;
 } gs_out;
@@ -30,7 +30,7 @@ vec3 calcNormal()
 
 void main()
 {
-   gs_out.normal = calcNormal();
+   gs_out.worldNormal = calcNormal();
 
    //discard if the normal is not facing the camera
 
@@ -38,7 +38,7 @@ void main()
    {
       gl_Position = gl_in[i].gl_Position;
       gs_out.normalMatrix = gs_in[i].normalMatrix;
-      gs_out.eyevert = gs_in[i].eyevert;
+      gs_out.worldVert = gs_in[i].worldVert;
       gs_out.texCoord = gs_in[i].texCoord;
       gs_out.texLayer = gs_in[i].texLayer;
       EmitVertex();

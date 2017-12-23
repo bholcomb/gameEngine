@@ -21,6 +21,8 @@ namespace Graphics
 		uniform float alpha;
 		uniform bool hasSpecularMap;
 		uniform bool hasNormalMap;		
+      uniform bool hasParallaxMap;
+      uniform float parallaxScale;
   };
 	*/
 	[StructLayout(LayoutKind.Sequential)]
@@ -32,14 +34,12 @@ namespace Graphics
 		public Color4 emmission;
 		public float shininess;
 		public float alpha;
-		public bool hasSpecularMap;
-		byte pad0;
-		byte pad1;
-		byte pad3;
-		public bool hasNormalMap;
-		byte pad4;
-		byte pad5;
-		byte pad6;
+		public int hasSpecularMap;
+      public int hasNormalMap;
+      public int hasParallaxMap;
+      public float parallaxScale;
+      int pad1;
+      int pad2;
 
 		public static int theSize = Marshal.SizeOf(typeof(PerPixelUniformData));
 
@@ -72,6 +72,7 @@ namespace Graphics
 			myFeatures |= Material.Feature.DiffuseMap;
 			myFeatures |= Material.Feature.SpecMap;
 			myFeatures |= Material.Feature.NormalMap;
+         myFeatures |= Material.Feature.ParallaxMap;
 
 			//enable blending
 			myTransparentPipeline.shaderProgram = myShader;
@@ -106,32 +107,41 @@ namespace Graphics
 			state.setTexture((int)tex.id(), 0, TextureTarget.Texture2D);
 			state.setUniform(new UniformData(20, Uniform.UniformType.Int, 0));
 
-			//setup specular map if it exists
-			if (m.myTextures[(int)Material.TextureId.Specular] != null)
-			{
-				tex = m.myTextures[(int)Material.TextureId.Specular].value();
-				state.setTexture((int)tex.id(), 1, TextureTarget.Texture2D);
-				state.setUniform(new UniformData(21, Uniform.UniformType.Int, 1));
-				matData.hasSpecularMap = true;
-			}
-			else
-				matData.hasSpecularMap = false;
+         //setup specular map if it exists
+         if (m.myTextures[(int)Material.TextureId.Specular] != null)
+         {
+            tex = m.myTextures[(int)Material.TextureId.Specular].value();
+            state.setTexture((int)tex.id(), 1, TextureTarget.Texture2D);
+            state.setUniform(new UniformData(21, Uniform.UniformType.Int, 1));
+            matData.hasSpecularMap = 1;
+         }
+         else
+         {
+            matData.hasSpecularMap = 0;
+         }
 
-			//setup normal map if it exists
-			if (m.myTextures[(int)Material.TextureId.Normal] != null)
-			{
-				tex = m.myTextures[(int)Material.TextureId.Normal].value();
-				state.setTexture((int)tex.id(), 2, TextureTarget.Texture2D);
-				state.setUniform(new UniformData(22, Uniform.UniformType.Int, 2));
-				matData.hasNormalMap = true;
-			}
-			else
-				matData.hasNormalMap = false;
+         //setup normal map if it exists
+         if (m.myTextures[(int)Material.TextureId.Normal] != null)
+         {
+            tex = m.myTextures[(int)Material.TextureId.Normal].value();
+            state.setTexture((int)tex.id(), 2, TextureTarget.Texture2D);
+            state.setUniform(new UniformData(22, Uniform.UniformType.Int, 2));
+            matData.hasNormalMap = 1;
+            if(tex.hasAlpha == true)
+            {
+               matData.hasParallaxMap = 1;
+               matData.parallaxScale = 0.04f;
+            }
+         }
+         else
+         {
+            matData.hasNormalMap = 0;
+         }
 
 
 			byte[] data = matData.toBytes();
 			state.setUniformUpload(myMaterialUniform, data);
-			state.setUniformBuffer(myMaterialUniform.id, 3);
+			state.setUniformBuffer(myMaterialUniform.id, 2);
 			state.setUniformBuffer(myLightVisualizer.myLightUniforBuffer.id, 1);
 		}
 

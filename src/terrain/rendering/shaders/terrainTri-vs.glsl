@@ -25,7 +25,7 @@ layout(std140, binding = 2) uniform instanceData{
 out VertexStage
 {
    smooth vec2 texCoord;
-   smooth vec3 eyevert;
+   smooth vec3 worldVert;
    flat mat3 normalMatrix;
    flat int texLayer;
 } vs_out;
@@ -82,8 +82,8 @@ void main()
    //this should be the inverse transpose, but since we're not doing any non-uniform scaling, we can just 
    //skip the inverse/transpose steps since they cancel each other out when we have no scaling (or just uniform scaling).
    //http://www.lighthouse3d.com/tutorials/glsl-tutorial/the-normal-matrix/
-   vs_out.normalMatrix = mat3(view * model);
-   vs_out.eyevert = vs_out.normalMatrix * pos.xyz;
+   vs_out.normalMatrix = mat3(model);
+   vs_out.worldVert = (model * vec4(pos.xyz, 1)).xyz;
    vs_out.texCoord = uv * 102.4;
    vs_out.texLayer =  texIndex;
 

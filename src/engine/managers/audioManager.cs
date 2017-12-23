@@ -18,7 +18,7 @@ namespace Engine
 
       protected override void onUpdate(double dt)
       {
-         Audio.AudioSystem.tick(dt);  
+         Audio.AudioManager.instance().tick(dt);  
       }
    }
 
@@ -33,7 +33,9 @@ namespace Engine
 
       static public bool init(Initializer initializer)
       {
-         return Audio.AudioSystem.init(initializer);
+         //return Audio.AudioManager.init();
+
+         return true;
       }
    }
 }
