@@ -35,11 +35,13 @@ namespace Editor
       {
          int size = ImGui.width / 10;
          int x = ImGui.width / 10;
-         int y = (int)ImGui.displaySize.Y  - 200;
+         int y = (int)ImGui.displaySize.Y  - 250;
          ImGui.beginWindow("Terrain Material");
          ImGui.setWindowPosition(new Vector2(x, y), SetCondition.FirstUseEver);
          ImGui.setWindowSize(new Vector2(ImGui.width - x -x, size + 75), SetCondition.FirstUseEver); //near the bottom of the screen
          ImGui.setWindowLayout(Window.Layout.Horizontal);
+         Window win = ImGui.currentWindow;
+
          for (int i = myFirstVisible; i < myFirstVisible + maxMaterials; i++)
          {
             ImGui.beginGroup();
@@ -49,13 +51,17 @@ namespace Editor
             {
                myActiveIndex = i;
             }
-            ImGui.label(myMaterialPallete[i].name);
 
             if (myActiveIndex == i)
             {
-               Rect r = Rect.fromPosSize(new Vector2(i * (ImGui.style.framePadding2x.X + size) + size + ImGui.style.framePadding.X, y), new Vector2(size));
-
-               ImGui.currentWindow.canvas.addRect(r, Color4.White);
+               Color4 backup = ImGui.style.getColor(ElementColor.Text);
+               ImGui.style.colors[(int)ElementColor.Text] = Color4.Red;
+               ImGui.label(myMaterialPallete[i].name);
+               ImGui.style.colors[(int)ElementColor.Text] = backup;
+            }
+            else
+            {   
+               ImGui.label(myMaterialPallete[i].name);
             }
             ImGui.endGroup();
          }

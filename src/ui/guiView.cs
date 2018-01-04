@@ -52,7 +52,25 @@ namespace UI
 			myRenderQueue.addCommand(new SetRenderTargetCommand(renderTarget));
 			myRenderQueue.addCommand(new SetPipelineCommand(myRenderQueue.myPipeline));
 			myRenderQueue.addCommand(new BindCameraCommand(camera));
-			myRenderQueue.commands.AddRange(ImGui.getRenderCommands());
+
+         bool needsCameraRebind = false;
+         foreach (RenderCommand rc in ImGui.getRenderCommands())
+         {
+            //previous command was custom and reset the camera binding
+            if(needsCameraRebind == true && rc is UiRenderCommand)
+            {
+               myRenderQueue.addCommand(new SetPipelineCommand(myRenderQueue.myPipeline));
+               //myRenderQueue.addCommand(new BindCameraCommand(camera));
+            }
+
+            //add the command
+            myRenderQueue.addCommand(rc);
+
+            if(rc is StatelessRenderCommand)
+            {
+               needsCameraRebind = true;
+            }
+         }
 
          stats.renderCalls = myRenderQueue.commands.Count;
 		}

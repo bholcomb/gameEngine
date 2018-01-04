@@ -15,13 +15,13 @@ namespace UI
 {
    public static partial class ImGui
    {
-      public static bool beginWindow(String name)
+      public static bool beginWindow(String name, Window.Flags flags = Window.Flags.DefaultWindow)
       {
          bool closed = false;
-         return beginWindow(name, ref closed, Window.Flags.DefaultWindow);
+         return beginWindow(name, ref closed, flags);
       }
 
-      public static bool beginWindow(String name, ref bool closed, Window.Flags flags)
+      public static bool beginWindow(String name, ref bool closed, Window.Flags flags = Window.Flags.DefaultWindow)
       {
          Window win = findWindow(name);
 

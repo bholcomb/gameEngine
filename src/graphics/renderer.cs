@@ -134,9 +134,11 @@ namespace Graphics
 			#region extract phase
 			tdiff = TimeSource.currentTime();
 
-			//prep each visualizer for the beginning of the frame
-			foreach (Visualizer vis in visualizers.Values)
-				vis.onFrameBeginExtract();
+         //prep each visualizer for the beginning of the frame
+         foreach (Visualizer vis in visualizers.Values)
+         {
+            vis.onFrameBeginExtract();
+         }
 
 			//run per-frame extract for each visible renderable, visualizer will need to protect against the same 
 			//renderable being submitted more than once for a different camera
@@ -155,9 +157,11 @@ namespace Graphics
 				v.extract();
 			}
 
-			//finalize extract for each visualizer
-			foreach (Visualizer vis in visualizers.Values)
-				vis.onFrameExtractFinalize();
+         //finalize extract for each visualizer
+         foreach (Visualizer vis in visualizers.Values)
+         {
+            vis.onFrameExtractFinalize();
+         }
 
 			tdiff = TimeSource.currentTime() - tdiff;
 			stats.extractTime = (1.0f - stats.alpha) * stats.extractTime + (stats.alpha) * tdiff;
@@ -166,8 +170,10 @@ namespace Graphics
 			#region prepare phase
 			tdiff = TimeSource.currentTime();
 
-			foreach (Visualizer vis in visualizers.Values)
-				vis.onFrameBeginPrepare();
+         foreach (Visualizer vis in visualizers.Values)
+         {
+            vis.onFrameBeginPrepare();
+         }
 
 			//run per-frame prepare for each visible renderable, visualizer will need to protect against the same 
 			//renderable being submitted more than once for a different camera
@@ -185,8 +191,10 @@ namespace Graphics
 				v.prepare();
 			}
 
-			foreach (Visualizer vis in visualizers.Values)
-				vis.onFramePrepareFinalize();
+         foreach (Visualizer vis in visualizers.Values)
+         {
+            vis.onFramePrepareFinalize();
+         }
 
 			tdiff = TimeSource.currentTime() - tdiff;
 			stats.prepareTime = (1.0f - stats.alpha) * stats.prepareTime + (stats.alpha) * tdiff;
@@ -208,13 +216,17 @@ namespace Graphics
 			tdiff = TimeSource.currentTime();
 			foreach (SceneGraph sg in scenes.Values)
 			{
-				if (sg.isActive == false)
-					continue;
+            if (sg.isActive == false)
+            {
+               continue;
+            }
 
 				foreach (RenderStage rs in sg.renderStages)
 				{
-					if (rs.isActive == false)
-						continue;
+               if (rs.isActive == false)
+               {
+                  continue;
+               }
 
 					rs.preExectue();
 
@@ -225,8 +237,10 @@ namespace Graphics
 						if (v.isActive == true)
 						{
 							IEnumerable<BaseRenderQueue> renderQueues = v.getRenderQueues();
-							foreach (BaseRenderQueue rq in renderQueues)
-								device.executeRenderQueue(rq);
+                     foreach (BaseRenderQueue rq in renderQueues)
+                     {
+                        device.executeRenderQueue(rq);
+                     }
 						}
 					}
 
@@ -241,11 +255,13 @@ namespace Graphics
 			}
 			tdiff = TimeSource.currentTime() - tdiff;
 			stats.executeTime = (1.0f - stats.alpha) * stats.executeTime + (stats.alpha) * tdiff;
-			#endregion
+         #endregion
 
-			//present
-			if(present != null)
-				present();
+         //present
+         if (present != null)
+         {
+            present();
+         }
 		}
 
 		public static void registerVisualizer(String name, Visualizer vis)
@@ -260,18 +276,24 @@ namespace Graphics
 
 			foreach (SceneGraph sg in scenes.Values)
 			{
-				if (sg.isActive == false)
-					continue;
+            if (sg.isActive == false)
+            {
+               continue;
+            }
 
 				foreach (RenderStage rs in sg.renderStages)
 				{
-					if (rs.isActive == false)
-						continue;
+               if (rs.isActive == false)
+               {
+                  continue;
+               }
 
 					foreach (View v in rs.views)
 					{
-						if (v.isActive == true)
-							activeViews.Add(v);
+                  if (v.isActive == true)
+                  {
+                     activeViews.Add(v);
+                  }
 					}
 				}
 			}

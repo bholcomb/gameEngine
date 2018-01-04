@@ -127,6 +127,7 @@ namespace Graphics
          pipelineState.vao = theVAO;
          pipelineState.depthTest.enabled = false;
          pipelineState.blending.enabled = alpha < 1.0f;
+         pipelineState.culling.enabled = false;
          pipelineState.generateId();
       }
 

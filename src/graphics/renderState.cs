@@ -276,6 +276,7 @@ namespace Graphics
 			public int id;
 			public int location;
 		}
+
 		BindBufferInfo[] myUniformBuffers = new BindBufferInfo[5];
 		int currentUniformBuffer = -1;
 		BindBufferInfo[] myStorageBuffers = new BindBufferInfo[5];
@@ -286,6 +287,7 @@ namespace Graphics
 			public UniformBufferObject ubo;
 			public byte[] data;
 		}
+
 		UniformUploadData[] myUniformUploadData = new UniformUploadData[5];
 		int currentUniformUpload = -1;
 
@@ -299,6 +301,7 @@ namespace Graphics
 			public int offset;
 			public int stride;
 		}
+
 		public VertexInfo[] myVertexBuffers = new VertexInfo[5];
 		public int currentVertexBuffer = -1;
 
@@ -309,6 +312,7 @@ namespace Graphics
 			public TextureAccess access;
 			public SizedInternalFormat format;
 		}
+
 		ImageInfo[] myImageBuffers = new ImageInfo[5];
 		int currentImageBuffer = -1;
 
@@ -318,6 +322,7 @@ namespace Graphics
 			public int location;
 			public TextureTarget type;
 		}
+
 		public TextureInfo[] myTextures = new TextureInfo[5];
 		public int currentTextureInfo = -1;
 

@@ -165,7 +165,7 @@ namespace testRenderer
          avgFps = (0.99f * avgFps) + (0.01f * (float)TimeSource.fps());
 
 			ImGui.beginFrame();
-			if (ImGui.beginWindow("Render Stats", ref myShowRenderStats, Window.Flags.Borders))
+			if (ImGui.beginWindow("Render Stats", ref myShowRenderStats))
 			{
 				ImGui.setWindowPosition(new Vector2(20, 100), SetCondition.FirstUseEver);
 				ImGui.setWindowSize(new Vector2(300, 700), SetCondition.FirstUseEver);

@@ -134,13 +134,12 @@ namespace UI
 
       public MenuColumns menuColums;
 
-      public Window(String winName)
+      public Window(String winName, Flags createFlags = Flags.DefaultWindow)
       {
          parentWindow = null;
          childWindow = null;
          siblingWindow = null;
-
-         flags = Flags.Background | Flags.TitleBar | Flags.MenuBar | Flags.Borders;
+         flags = createFlags;
 
          //setup the ID of this window
          name = winName;
@@ -277,7 +276,7 @@ namespace UI
             }
          }
 
-         drawWindow();
+         drawWindowBackground();
 
          skipItems = myIsCollapsed;
 
@@ -286,6 +285,7 @@ namespace UI
 
       public bool end()
       {
+         drawWindowForeground();
          canvas.popClipRect();
          return true;
       }
@@ -372,7 +372,7 @@ namespace UI
          }
       }
 
-      void drawWindow()
+      void drawWindowBackground()
       {
          canvas.reset();
          canvas.setScreenResolution(ImGui.displaySize);
@@ -390,6 +390,31 @@ namespace UI
             canvas.pushClipRect(rect);
          }
 
+         if (!myIsCollapsed)
+         {
+            //window background
+            if(flags.HasFlag(Flags.Background) == true)
+            {
+               canvas.addRectFilled(rect, ImGui.style.getColor(ElementColor.WindowBg, myBackgroundAlpha), ImGui.style.windowRounding);
+            }
+         }
+   
+         //pop root special style
+         if (flags.HasFlag(Flags.Root))
+         {
+            ImGui.style.popStyleVar(1);
+         }
+      }
+
+      void drawWindowForeground()
+      {
+         float alpha = ImGui.style.alpha;
+
+         if (flags.HasFlag(Flags.Root))
+         {
+            ImGui.style.pushStyleVar(StyleVar.WindowRounding, 0.0f);
+         }
+
          if (myIsCollapsed)
          {
             //title bar only
@@ -398,12 +423,6 @@ namespace UI
          }
          else
          {
-            //window background
-            if(flags.HasFlag(Flags.Background) == true)
-            {
-               canvas.addRectFilled(rect, ImGui.style.getColor(ElementColor.WindowBg, myBackgroundAlpha), ImGui.style.windowRounding);
-            }
-
             //title bar
             if (flags.HasFlag(Flags.TitleBar) == true)
             {
@@ -433,14 +452,13 @@ namespace UI
                }
             }
          }
-   
+
          //pop root special style
          if (flags.HasFlag(Flags.Root))
          {
             ImGui.style.popStyleVar(1);
          }
       }
-
       public void setPosition(Vector2 pos, SetCondition cond)
       {
          if ((cond & mySetPositionAllowFlags) == 0)

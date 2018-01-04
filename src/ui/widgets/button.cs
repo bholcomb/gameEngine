@@ -116,11 +116,11 @@ namespace UI
          win.canvas.addRect(r, style.colors[(int)ElementColor.Border], style.frameRounding);
 
          //center text in button
-         //win.canvas.pushClipRect(r);
+         win.canvas.pushClipRect(r);
          win.canvas.addText(r, style.colors[(int)ElementColor.Text], s, Alignment.Middle);
 
          //cleanup
-         //win.canvas.popClipRect();
+         win.canvas.popClipRect();
          style.popStyleVar(1);
 
          //update the window cursor
@@ -136,7 +136,7 @@ namespace UI
             return false;
 
          UInt32 id = win.getChildId(t.ToString());
-         Rect r = Rect.fromPosSize(win.cursorScreenPosition, size);
+         Rect r = Rect.fromPosSize(win.cursorScreenPosition + style.framePadding, size);
 
          bool hovered;
          bool held;
@@ -157,17 +157,19 @@ namespace UI
          if (win.skipItems)
             return false;
 
-         UInt32 id = win.getChildId(t.ToString());
-         Rect r = Rect.fromPosSize(win.cursorScreenPosition, size);
+         string name = t.ToString() + "-" + idx.ToString();
+         UInt32 id = win.getChildId(name);
+         Rect r = Rect.fromPosSize(win.cursorScreenPosition + style.framePadding, size);
 
          bool hovered;
          bool held;
          bool pressed = buttonBehavior(r, id, out hovered, out held);
 
-         //draw the thing (need to conver to screen space)
+         //draw the thing (need to convert to screen space)
          Vector2 min = new Vector2(r.left, ImGui.displaySize.Y - r.top);
          Vector2 max = new Vector2(r.right, ImGui.displaySize.Y - r.bottom);
-         win.canvas.addCustomRenderCommand(new RenderTexture2dCommand(min, max, t, idx));
+         RenderTexture2dCommand cmd = new RenderTexture2dCommand(min, max, t, idx, pressed ? .25f : 1.0f);
+         win.canvas.addCustomRenderCommand(cmd);
          win.canvas.addRect(r, style.colors[(int)ElementColor.Border], style.frameRounding);
 
          //update the window cursor

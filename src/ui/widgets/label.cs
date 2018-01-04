@@ -21,10 +21,10 @@ namespace UI
             return;
 
          String txt = String.Format(s, objs);
-         Vector2 labelSize = style.textSize(txt) + style.framePadding2x;
+         Vector2 labelSize = style.textSize(txt) + style.framePadding;
 
          //add in padding
-         Vector2 pos = win.cursorScreenPosition;
+         Vector2 pos = win.cursorScreenPosition + style.framePadding;
 
          Rect r = Rect.fromPosSize(pos, labelSize);
          win.canvas.addText(r, style.colors[(int)ElementColor.Text], txt, Alignment.Default);

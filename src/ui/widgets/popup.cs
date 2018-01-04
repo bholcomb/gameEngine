@@ -20,7 +20,7 @@ namespace UI
          UInt32 popupId = win.getChildId(label);
          if (isPopupOpen(popupId) == false)
          {
-            PopupRef pref = new PopupRef(popupId, win, win.getChildId("popups"), mouse.pos);
+            Popup pref = new Popup(popupId, win, win.getChildId("popups"), mouse.pos);
             myOpenedPopupStack.Push(pref);
          }
       }

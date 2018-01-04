@@ -56,7 +56,7 @@ namespace UI
       Appearing = 1 << 3
    }
 
-   public class PopupRef
+   public class Popup
    {
       public UInt32 myPopUpId;
       public Window myWin;
@@ -64,12 +64,12 @@ namespace UI
       public UInt32 myParentMenuSet;
       public Vector2 myMousePositionOnOpen;
 
-      public PopupRef()
+      public Popup()
       {
 
       }
 
-      public PopupRef(UInt32 id, Window parentwin, UInt32 parentMenuSet, Vector2 mousePos)
+      public Popup(UInt32 id, Window parentwin, UInt32 parentMenuSet, Vector2 mousePos)
       {
          myPopUpId = id;
          myWin = null;
@@ -124,8 +124,8 @@ namespace UI
       public static SetCondition setNextWindowFocusCondition { get; set; }
 
       //popups
-      public static Stack<PopupRef> myOpenedPopupStack = new Stack<PopupRef>();
-      public static List<PopupRef> myCurrentPopupStack = new List<PopupRef>();
+      public static Stack<Popup> myOpenedPopupStack = new Stack<Popup>();
+      public static List<Popup> myCurrentPopupStack = new List<Popup>();
 
       //active elements
       public static UInt32 hoveredId { get; set; }
@@ -323,8 +323,7 @@ namespace UI
 
       public static Window createWindow(String name, Window.Flags flags)
       {
-         Window win = new Window(name);
-         win.flags = flags;
+         Window win = new Window(name, flags);
          windows.Add(win);
 
          Window currWin = currentWindow;
@@ -371,7 +370,7 @@ namespace UI
 
       public static bool isPopupOpen(UInt32 id)
       {
-         foreach(PopupRef pop in myOpenedPopupStack)
+         foreach(Popup pop in myOpenedPopupStack)
          {
             if (pop.myPopUpId == id)
                return true;
