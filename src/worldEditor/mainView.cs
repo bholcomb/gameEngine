@@ -25,7 +25,7 @@ namespace WorldEditor
          ImGui.setNextWindowPosition(new Vector2(400, 0), SetCondition.FirstUseEver);
          ImGui.setNextWindowSize(new Vector2(820, 840), SetCondition.FirstUseEver);
          bool closed = false;
-         ImGui.beginWindow("MainView", ref closed, Window.Flags.NoResize | Window.Flags.AlwaysAutoResize);
+         ImGui.beginWindow("MainView", ref closed);
          
          ImGui.beginGroup();
          ImGui.setWindowLayout(Window.Layout.Horizontal);

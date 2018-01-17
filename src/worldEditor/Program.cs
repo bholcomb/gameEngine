@@ -155,7 +155,7 @@ namespace WorldEditor
          //myMainWindow.onGui();
 
          bool closed= false;
-         ImGui.beginWindow("Views", ref closed, Window.Flags.NoResize | Window.Flags.AlwaysAutoResize);
+         ImGui.beginWindow("Views", ref closed);
          ImGui.setWindowLayout(Window.Layout.Horizontal);
          if (ImGui.button("Elevation", new Vector2(150, 20)) == true)
          {

@@ -23,7 +23,7 @@ namespace WorldEditor
 
       public void onGui()
       {
-         if(ImGui.beginMainMenuBar()==true)
+         if(ImGui.beginMenuBar()==true)
          {
             if (ImGui.beginMenu("File") == true)
             {
@@ -52,7 +52,7 @@ namespace WorldEditor
                ImGui.endMenu();
             }
 
-            ImGui.endMainMenuBar();
+            ImGui.endMenuBar();
          }
 
          myLeftBar.onGui();
