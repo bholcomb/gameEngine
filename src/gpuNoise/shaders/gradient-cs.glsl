@@ -14,10 +14,14 @@ void main()
    ivec2 outPos = ivec2(gl_GlobalInvocationID.xy);
    vec2 normalizedCoord = vec2(outPos) / vec2(imageSize(tex));
 
+   float mx = x1 - x0;
+   float my = y1 - y0;
+   float len = (mx * mx + my * my);
+   
    float dx = normalizedCoord.x - x0;
    float dy = normalizedCoord.y - y0;
-   float dp = dx * x1 + dy * y1;
-   dp /= (x1 * x1 + y1 * y1);
+   float dp = dx * mx + dy * my;
+   dp /= len;
    
    imageStore(tex, outPos, vec4(dp));
 }

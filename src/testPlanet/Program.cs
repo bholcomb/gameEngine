@@ -104,6 +104,7 @@ namespace testNoise
          base.OnUpdateFrame(e);
 			myCamera.updateCameraUniformBuffer();
 		}
+
       protected override void OnRenderFrame(FrameEventArgs e)
       {
          base.OnRenderFrame(e);

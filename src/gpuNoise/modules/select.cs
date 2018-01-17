@@ -28,6 +28,7 @@ namespace GpuNoise
       public Select(int x, int y) : base(Type.Select, x, y)
       {
 			output = new Texture(x, y, PixelInternalFormat.R32f);
+         output.setName("Select output");
 
 			List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
          shadersDesc.Add(new ShaderDescriptor(ShaderType.ComputeShader, "GpuNoise.shaders.select-cs.glsl"));

@@ -91,6 +91,8 @@ namespace GpuNoise
          thePipeline.shaderProgram = theShader;
          thePipeline.vao = theVAO;
          thePipeline.generateId();
+
+
       }
 
       public RenderCubemapSphere(Vector3 pos, float size, CubemapTexture tex, bool spining = false)

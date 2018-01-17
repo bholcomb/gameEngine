@@ -24,7 +24,7 @@ namespace GpuNoise
 
 		public Dictionary<string, Module> modules { get { return myModules; } }
 
-		public Output output
+		public Output final
 		{
 			get
 			{

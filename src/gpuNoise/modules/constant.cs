@@ -22,6 +22,8 @@ namespace GpuNoise
 		public Constant(float val, int x, int y) : base(Type.Constant, x, y)
 		{
 			output = new Texture(1, 1, PixelInternalFormat.R32f);
+         output.setName("Constant output");
+
 			this.val = val;
 		}
 

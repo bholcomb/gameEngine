@@ -125,7 +125,7 @@ namespace testNoise
 			sel.control = g;
 
 			//set the output
-			myNoiseTree.output.source = sel;
+			myNoiseTree.final.source = sel;
 		}
 
 		protected override void OnUpdateFrame(FrameEventArgs e)
@@ -160,7 +160,7 @@ namespace testNoise
 			int posY = 10;
 			RenderTexture2dCommand cmd;
 
-			cmd = new RenderTexture2dCommand(new Vector2(posX, posY), new Vector2(posX + size, posY + size), myNoiseTree.output.output);
+			cmd = new RenderTexture2dCommand(new Vector2(posX, posY), new Vector2(posX + size, posY + size), myNoiseTree.final.output);
 			cmd.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
 			cmd.execute();
 			/*

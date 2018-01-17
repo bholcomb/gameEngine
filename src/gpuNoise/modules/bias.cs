@@ -23,6 +23,7 @@ namespace GpuNoise
 		public Bias(int x, int y) : base(Type.Bias, x, y)
 		{
 			output = new Texture(x, y, PixelInternalFormat.R32f);
+         output.setName("Bias output");
 
 			List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
 			shadersDesc.Add(new ShaderDescriptor(ShaderType.ComputeShader, "GpuNoise.shaders.bias-cs.glsl"));

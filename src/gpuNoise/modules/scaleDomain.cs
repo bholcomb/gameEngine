@@ -12,20 +12,25 @@ using Util;
 
 namespace GpuNoise
 {
-   public class Scale : Module
+   public class ScaleDomain : Module
    {
       ShaderProgram myShaderProgram;
 
-      public Module scale = null;
+      public float x = 1.0f;
+      public float y = 1.0f;
+
+      float myLastX = 1.0f;
+      float myLastY = 1.0f;
+
 		public Module input = null;
 
-      public Scale(int x, int y) : base(Type.Scale, x, y)
+      public ScaleDomain(int x, int y) : base(Type.ScaleDomain, x, y)
       {
 			output = new Texture(x, y, PixelInternalFormat.R32f);
-         output.setName("Scale output");
+         output.setName("Scale Domain");
 
 			List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
-         shadersDesc.Add(new ShaderDescriptor(ShaderType.ComputeShader, "GpuNoise.shaders.scale-cs.glsl"));
+         shadersDesc.Add(new ShaderDescriptor(ShaderType.ComputeShader, "GpuNoise.shaders.scaleDomain-cs.glsl"));
          ShaderProgramDescriptor sd = new ShaderProgramDescriptor(shadersDesc);
          myShaderProgram = Renderer.resourceManager.getResource(sd) as ShaderProgram;
       }
@@ -37,10 +42,12 @@ namespace GpuNoise
 				ComputeCommand cmd = new ComputeCommand(myShaderProgram, output.width / 32, output.height / 32);
 
 				cmd.addImage(input.output, TextureAccess.ReadOnly, 0);
-				cmd.addImage(scale.output, TextureAccess.ReadOnly, 1);
-				cmd.addImage(output, TextureAccess.WriteOnly, 2);
+				cmd.addImage(output, TextureAccess.WriteOnly, 1);
 
-				cmd.execute();
+            cmd.renderState.setUniform(new UniformData(2, Uniform.UniformType.Float, x));
+            cmd.renderState.setUniform(new UniformData(3, Uniform.UniformType.Float, y));
+
+            cmd.execute();
 				GL.MemoryBarrier(MemoryBarrierFlags.AllBarrierBits);
 				return true;
 			}
@@ -50,7 +57,14 @@ namespace GpuNoise
 
 		bool didChange()
 		{
-			if (input.update() || scale.update()) return true;
+         if (input.update() ||
+            myLastX != x ||
+            myLastY != y)
+         {
+            myLastX = x;
+            myLastY = y;
+            return true;
+         }
 
 			return false;
 		}
