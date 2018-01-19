@@ -23,6 +23,7 @@ namespace GpuNoise
       public Translate(int x, int y) : base(Type.Translate, x, y)
       {
 			output = new Texture(x, y, PixelInternalFormat.R32f);
+         output.setName("Translate output");
 
 			List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
          shadersDesc.Add(new ShaderDescriptor(ShaderType.ComputeShader, "GpuNoise.shaders.translate-cs.glsl"));

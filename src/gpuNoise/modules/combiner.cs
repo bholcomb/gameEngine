@@ -31,6 +31,7 @@ namespace GpuNoise
       public Combiner(int x, int y) : base(Type.Combiner, x, y)
       {
 			output = new Texture(x, y, PixelInternalFormat.R32f);
+         output.setName("Combiner output");
 
 			List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
          shadersDesc.Add(new ShaderDescriptor(ShaderType.ComputeShader, "GpuNoise.shaders.combiner-cs.glsl"));

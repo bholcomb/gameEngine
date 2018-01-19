@@ -15,7 +15,7 @@ solution "GameEngine"
  
   configuration { "Debug" }
     defines { "DEBUG", "TRACE" }
-    flags   { "Symbols" }
+    symbols "On"
     optimize "Off"
  
   configuration { "Release" }
@@ -43,6 +43,7 @@ include("lua.lua")
 group "Tools"
 include("particleEditor.lua")
 include("messageCodeGen.lua")
+include("worldEditor.lua")
 
 group "Apps"
 include("terrainServer.lua")

@@ -30,8 +30,9 @@ namespace GpuNoise
 		public Gradient(int x, int y) : base(Type.Gradient, x, y)
       {
 			output = new Texture(x, y, PixelInternalFormat.R32f);
+         output.setName("Gradient output");
 
-			List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
+         List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
          shadersDesc.Add(new ShaderDescriptor(ShaderType.ComputeShader, "GpuNoise.shaders.gradient-cs.glsl"));
          ShaderProgramDescriptor sd = new ShaderProgramDescriptor(shadersDesc);
          myShaderProgram = Renderer.resourceManager.getResource(sd) as ShaderProgram;

@@ -24,7 +24,7 @@ namespace GpuNoise
 
 		public Dictionary<string, Module> modules { get { return myModules; } }
 
-		public Output output
+		public Output final
 		{
 			get
 			{
@@ -50,6 +50,7 @@ namespace GpuNoise
 				case Module.Type.Gradient: m = new Gradient(myX, myY); break;
 				case Module.Type.Output: m = new Output(myX, myY); break;
 				case Module.Type.Scale: m = new Scale(myX, myY); break;
+            case Module.Type.ScaleDomain: m = new ScaleDomain(myX, myY); break;
 				case Module.Type.Select: m = new Select(myX, myY); break;
 				case Module.Type.Translate: m = new Translate(myX, myY); break;
 			}

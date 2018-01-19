@@ -41,6 +41,7 @@ namespace GpuNoise
 		public Fractal(int x, int y) : base(Type.Fractal, x, y)
 		{
 			output = new Texture(x, y, PixelInternalFormat.R32f);
+         output.setName("Fractal output");
 
 			List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
 			shadersDesc.Add(new ShaderDescriptor(ShaderType.ComputeShader, "GpuNoise.shaders.fbm-cs.glsl"));

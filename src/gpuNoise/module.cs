@@ -13,7 +13,7 @@ namespace GpuNoise
 {
    public abstract class Module
    {
-      public enum Type {Output, AutoCorect, Bias, Combiner, Constant, Fractal, Gradient, Scale, Select, Translate };
+      public enum Type {Output, AutoCorect, Bias, Combiner, Constant, Fractal, Gradient, Scale, ScaleDomain, Select, Translate };
 
 		public Type myType;
 		public Texture output;
