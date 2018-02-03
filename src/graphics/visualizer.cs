@@ -91,49 +91,42 @@ namespace Graphics
 			return effect;
 		}
 
+      //prepare phase
+      public virtual void prepareFrameBegin() { }
+      public virtual void preparePerFrame(Renderable r) { }
+      public virtual void preparePerViewBegin(View v) { }
+      public virtual void preparePerView(Renderable r, View v) { }
+      public virtual void preparePerViewFinalize(View v) { }
+      public virtual void preparePerPassBegin(Pass p) { }
+      public virtual void preparePerPass(Renderable r, Pass p) { }
+      public virtual void preparePerPassFinalize(Pass p) { }
+      public virtual void prepareFrameFinalize() { }
 
-		//extract phase
-		public virtual void onFrameBeginExtract() { }
-		public virtual void extractPerFrame(Renderable r) { }
-		public virtual void extractPerView(Renderable r, View v) { }
-		public virtual void extractPerViewFinalize(BaseRenderQueue q, View v) { }
-		public virtual void onFrameExtractFinalize() { }
+      //generate command phase phase
+      public virtual void generateRenderCommandsBegin(BaseRenderQueue q) { }
+      public virtual void generateRenderCommand(RenderInfo r, BaseRenderQueue q) { }
+      public virtual void generateRenderCommandsFinalize(BaseRenderQueue q) { }
 
-		//prepare phase
-		public virtual void onFrameBeginPrepare() { }
-		public virtual void preparePerFrame(Renderable r) { }
-		public virtual void preparePerView(RenderInfo info, View v) { }
-		public virtual void preparePerViewFinalize(BaseRenderQueue q, View v) { }
-		public virtual void onFramePrepareFinalize() { }
-
-		//submit phase
-		public virtual void onSubmitNodeBlockBegin(BaseRenderQueue q) { }
-		public virtual void submitRenderInfo(RenderInfo r, BaseRenderQueue q) { }
-		public virtual void onSubmitNodeBlockEnd(BaseRenderQueue q) { }
-	}
+   }
 }
 /*  Template to copy to new visualizers 
  
-#region extract phase
-	public override void onFrameBeginExtract() { }
-	public override void extractPerFrame(Renderable r) { }
-	public override void extractPerView(Renderable r, View v) { }
-	public override void extractPerViewFinalize(RenderQueue q, View v) { }
-	public override void onFrameExtractFinalize() { }
-#endregion
-
 #region prepare phase
-	public override void onFrameBeginPrepare() { }
-	public override void preparePerFrame(Renderable r) { }
-	public override void preparePerView(RenderInfo info, View v) { }
-	public override void preparePerViewFinalize(BaseRenderQueue q, View v) { }
-	public override void onFramePrepareFinalize() { } 
+   public override void prepareFrameBegin() { }
+   public override void preparePerFrame(Renderable r) { }
+   public override void preparePerViewBegin(View v) { }
+   public override void preparePerView(Renderable r, View v) { }
+   public override void preparePerViewFinalize(View v) { }
+   public override void preparePerPassBegin(Pass p) { }
+   public override void preparePerPass(Renderable r, Pass p) { }
+   public override void preparePerPassFinalize(Pass p) { }
+   public override void prepareFrameFinalize() { }
 #endregion
 
-#region submit phase
-	public override void onSubmitNodeBlockBegin(BaseRenderQueue q) { }
-	public override void submitRenderInfo(RenderInfo r, BaseRenderQueue q) { }
-	public override void onSubmitNodeBlockEnd(BaseRenderQueue q) { }
+#region generate command phase
+	public override void generateRenderCommandsBegin(BaseRenderQueue q) { }
+	public override void generateRenderCommand(RenderInfo r, BaseRenderQueue q) { }
+	public override void generateRenderCommandsFinalize(BaseRenderQueue q) { }                 
 #endregion
 
 */

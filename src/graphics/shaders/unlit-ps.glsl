@@ -22,7 +22,9 @@ void main()
 	float outAlpha = min(color.a, alpha);
 	
 	if(hasDiffuseMap)
-		outColor = texture(diffuseMap, texCoord) * color;
+	{
+      outColor = texture(diffuseMap, texCoord) * color;
+   }
 
 	outColor.a = outAlpha;
 

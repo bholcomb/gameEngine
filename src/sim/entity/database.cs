@@ -44,7 +44,7 @@ namespace Sim
       public Entity addEntity(Entity e)
       {
          myEntityMap[e.id] = e;
-         entityAdded(e);
+         onEntityAdded(e);
 
          EntityAddedEvent em = new EntityAddedEvent(e.id, e.attribute<String>("type").value());
          Kernel.eventManager.queueEvent(em);
@@ -53,7 +53,7 @@ namespace Sim
 
       public void removeEntity(Entity e)
       {
-         entityRemoved(e);
+         onEntityRemoved(e);
          EntityRemovedEvent em = new EntityRemovedEvent(e.id);
          Kernel.eventManager.queueEvent(em);
       }
@@ -69,12 +69,13 @@ namespace Sim
          return null;
       }
 
-      public EntityDatabaseView getView(String viewName)
+      public EntityDatabaseView createView(String viewName)
       {
          EntityDatabaseViewCreator c;
          if (myViewCreators.TryGetValue(viewName, out c))
          {
             EntityDatabaseView view = c.create(this);
+            myViews[viewName] = view;
             return view;
          }
 
@@ -104,8 +105,8 @@ namespace Sim
          myViewCreators[creator.name] = creator;
       }
 
-      public event EntityAddedCb entityAdded;
-      public event EntityRemovedCb entityRemoved;
+      public event EntityAddedCb onEntityAdded;
+      public event EntityRemovedCb onEntityRemoved;
 
       public MultiMap<String, Entity> messageInterestMap
       {

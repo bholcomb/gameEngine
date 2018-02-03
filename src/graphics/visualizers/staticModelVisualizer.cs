@@ -47,10 +47,15 @@ namespace Graphics
          myType = "staticModel";
 		}
 
-		#region extract phase
-		//public override void onFrameBeginExtract() { }
-		//public override void extractPerFrame(Renderable r) {}
-		public override void extractPerView(Renderable r, View v)
+      #region prepare phase
+      //public override void prepareFrameBegin() { }
+      //public override void preparePerFrame(Renderable r) { }
+      //public override void preparePerViewBegin(View v) { }
+      //public override void preparePerView(Renderable r, View v) { }
+      //public override void preparePerViewFinalize(View v) { }
+      //public override void preparePerPassBegin(Pass p) { }
+      
+      public override void preparePerPass(Renderable r, Pass p)
 		{
 			StaticModelRenderable smr = r as StaticModelRenderable;
 
@@ -66,7 +71,7 @@ namespace Graphics
 
 			foreach (Mesh mesh in smr.model.myMeshes)
 			{
-				Effect effect = getEffect(v.passType, (UInt32)mesh.material.myFeatures);
+				Effect effect = getEffect(p.technique, (UInt32)mesh.material.myFeatures);
 				RenderQueue<StaticModelInfo> rq = Renderer.device.getRenderQueue(effect.getPipeline(mesh.material).id) as RenderQueue<StaticModelInfo>;
 				if (rq == null)
 				{
@@ -74,14 +79,14 @@ namespace Graphics
 					rq.myPipeline.vao = new VertexArrayObject();
 					rq.myPipeline.vao.bindVertexFormat<V3N3T2>(rq.myPipeline.shaderProgram);
 					rq.visualizer = this;
-					v.registerQueue(rq);
+			      p.registerQueue(rq);
 				}
 
 				StaticModelInfo info = rq.nextInfo();
 
 				effect.updateRenderState(mesh.material, info.renderState);
 				
-				float dist = (v.camera.position - r.position).Length;
+				float dist = (p.view.camera.position - r.position).Length;
 				info.distToCamera = dist;
 						
 				info.renderState.setUniform(new UniformData(0, Uniform.UniformType.Int, modelDataIndex));
@@ -95,32 +100,28 @@ namespace Graphics
 			}
 		}
 
-		//public override void extractPerViewFinalize(BaseRenderQueue q, View v) { }
-		//public override void onFrameExtractFinalize() { }
-		#endregion
+      //public override void preparePerPassFinalize(Pass p) { }
 
-		#region prepare phase
-		//public override void onFrameBeginPrepare() { }
-		//public override void preparePerFrame(Renderable r) { }
-		//public override void preparePerView(RenderInfo info, View v) { }
-		public override void preparePerViewFinalize(BaseRenderQueue q, View v)
-		{
-			myModelBuffer.setData(myModelData);
-			myModelData.Clear();
-		}
-		//public override void onFramePrepareFinalize() { } 
-		#endregion
+      public override void prepareFrameFinalize()
+      {
+         myModelBuffer.setData(myModelData);
+         myModelData.Clear();
+      }
+      #endregion
 
-		#region submit phase
-		//public override void onSubmitNodeBlockBegin(String technique) { }
-		public override void submitRenderInfo(RenderInfo r, BaseRenderQueue q)
+      #region generate command phase
+      //public override void generateCommandsBegin(BaseRenderQueue q) { }
+
+      public override void generateRenderCommand(RenderInfo r, BaseRenderQueue q)
 		{
 			StaticModelInfo smi = r as StaticModelInfo;
 
 			q.addCommand(new SetRenderStateCommand(r.renderState));
 			q.addCommand(new DrawIndexedCommand(PrimitiveType.Triangles, smi.indexCount, smi.indexOffset, DrawElementsType.UnsignedShort));
 		}
-		//public override void onSubmitNodeBlockEnd() { }
-		#endregion
+   
+      //public override void generateCommandsFinalize(BaseRenderQueue q) { }
+      #endregion
+
    }
 }

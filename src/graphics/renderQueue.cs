@@ -7,18 +7,19 @@ namespace Graphics
 {
 	public class BaseRenderQueue
 	{
-		public List<RenderCommand> commands;
+		public RenderCommandList commands;
 		public Visualizer visualizer;
 		public PipelineState myPipeline;
 
 		public BaseRenderQueue(PipelineState pipeline)
 		{
 			myPipeline = pipeline;
-			commands = new List<RenderCommand>();
+			commands = new RenderCommandList();
 		}
 
 		public virtual void reset()
 		{
+
 			commands.Clear();
 		}
 
@@ -32,16 +33,11 @@ namespace Graphics
 
 		}
 
-		public virtual void preparetRenderInfo(View v)
+		public virtual void generateRenderCommands()
 		{
-
-		}
-
-		public virtual void submitRenderInfo()
-		{
-
-		}
-	}
+         addCommand(new SetPipelineCommand(myPipeline));
+      }
+   }
 
 	public class RenderQueue<T> : BaseRenderQueue where T: RenderInfo, new()
 	{
@@ -84,24 +80,21 @@ namespace Graphics
 
 		public override void sort()
 		{
-
 			myInfos.Sort(0, myInfoCount, theComparer);
 		}
 
-		public override void preparetRenderInfo(View v)
+		public override void generateRenderCommands()
 		{
-			for(int i=0; i < myInfoCount; i++)
-			{
-				visualizer.preparePerView(myInfos[i], v);
-			}
-		}
+         base.generateRenderCommands();
 
-		public override void submitRenderInfo()
-		{
+         visualizer.generateRenderCommandsBegin(this);
+
 			for (int i = 0; i < myInfoCount; i++)
 			{
-				visualizer.submitRenderInfo(myInfos[i], this);
+				visualizer.generateRenderCommand(myInfos[i], this);
 			}
+
+         visualizer.generateRenderCommandsFinalize(this);
 		}
 	}
 }

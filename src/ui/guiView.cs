@@ -8,10 +8,12 @@ namespace UI
 	public class GuiView : View
 	{
 		BaseRenderQueue myRenderQueue;
+      RenderTarget myRenderTarget;
 
-		public GuiView(Camera c, Viewport v, RenderTarget rt) 
-			: base("gui view", c, v, rt, false)
+		public GuiView(string name, Camera c, Viewport v, RenderTarget rt) 
+			: base(name, c, v)
 		{
+         myRenderTarget = rt;
 			PipelineState ps = new PipelineState();
 			ps.blending.enabled = true;
 			ps.shaderProgram = UI.Canvas.theShader;
@@ -28,13 +30,6 @@ namespace UI
 			{
 				myRenderQueue = Renderer.device.createRenderQueue(ps);
 			}
-
-			registerQueue(myRenderQueue);
-		}
-
-		public override void extract()
-		{
-				
 		}
 
 		public override void prepare()
@@ -42,14 +37,13 @@ namespace UI
 			camera.updateCameraUniformBuffer();
 		}
 
-		public override void submit()
+		public override void generateRenderCommandLists()
 		{
-         stats.queueCount = 1;
-         stats.renderCalls = 0;
-         stats.viewName = name;
-
+         stats.name = name;
+         stats.passes = 1;
+         
          myRenderQueue.commands.Clear();
-			myRenderQueue.addCommand(new SetRenderTargetCommand(renderTarget));
+			myRenderQueue.addCommand(new SetRenderTargetCommand(myRenderTarget));
 			myRenderQueue.addCommand(new SetPipelineCommand(myRenderQueue.myPipeline));
 			myRenderQueue.addCommand(new BindCameraCommand(camera));
 

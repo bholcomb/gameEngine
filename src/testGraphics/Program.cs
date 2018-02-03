@@ -151,13 +151,13 @@ namespace testRenderer
 			myCameraEventHandler.tick((float)e.Time);
 
          //update the animated object
-			mySkinnedModel.update((float)TimeSource.timeThisFrame());
+			//mySkinnedModel.update((float)TimeSource.timeThisFrame());
 
          //update the sun and point lights
          double now = TimeSource.currentTime();
-         mySun.position = new Vector3((float)Math.Sin(now) * 5.0f, 5.0f, (float)Math.Cos(now) * 5.0f);
-         myPoint1.position = new Vector3(2.5f, 1, 0) + new Vector3(0.0f, (float)Math.Sin(now), (float)Math.Cos(now));
-         myPoint2.position = new Vector3(5.5f, 1, 0) + new Vector3(0.0f, (float)Math.Cos(now), (float)Math.Sin(now));
+         //mySun.position = new Vector3((float)Math.Sin(now) * 5.0f, 5.0f, (float)Math.Cos(now) * 5.0f);
+         //myPoint1.position = new Vector3(2.5f, 1, 0) + new Vector3(0.0f, (float)Math.Sin(now), (float)Math.Cos(now));
+         //myPoint2.position = new Vector3(5.5f, 1, 0) + new Vector3(0.0f, (float)Math.Cos(now), (float)Math.Sin(now));
 
 
          //high frequency filter on avg fps
@@ -172,9 +172,8 @@ namespace testRenderer
             ImGui.label("Camera position: {0}", myCamera.position);
             ImGui.label("Camera view vector: {0}", myCamera.viewVector);
 				ImGui.label("Cull Time: {0:0.00}ms", Renderer.stats.cullTime * 1000.0);
-				ImGui.label("Extract Time: {0:0.00}ms", Renderer.stats.extractTime * 1000.0);
 				ImGui.label("Prepare Time: {0:0.00}ms", Renderer.stats.prepareTime * 1000.0);
-				ImGui.label("Submit Time: {0:0.00}ms", Renderer.stats.submitTime * 1000.0);
+				ImGui.label("Submit Time: {0:0.00}ms", Renderer.stats.generateTime * 1000.0);
 				ImGui.label("Execute Time: {0:0.00}ms", Renderer.stats.executeTime * 1000.0);
 				ImGui.separator();
 				ImGui.label("Camera Visible Renderables");
@@ -186,9 +185,9 @@ namespace testRenderer
 				ImGui.label("View Stats");
 				for (int i = 0; i < Renderer.stats.viewStats.Count; i++)
 				{
-					ImGui.label("{0} {1}", i, Renderer.stats.viewStats[i].viewName);
-					ImGui.label("   Queue count {0}", Renderer.stats.viewStats[i].queueCount);
+					ImGui.label("{0} {1}", i, Renderer.stats.viewStats[i].name);
 					ImGui.label("   Render Calls {0}", Renderer.stats.viewStats[i].renderCalls);
+					ImGui.label("   Queue count {0}", Renderer.stats.viewStats[i].passes);
 				}
 
 				ImGui.endWindow();
@@ -239,7 +238,7 @@ namespace testRenderer
 			List<RenderTargetDescriptor> rtdesc = new List<RenderTargetDescriptor>();
 			rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.ColorAttachment0, format = SizedInternalFormat.Rgba32f }); //creates a texture internally
 			rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.DepthAttachment, tex = new Texture(x, y, PixelInternalFormat.DepthComponent32f) }); //uses an existing texture
-																																																							 //rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.DepthAttachment, bpp = 32 });
+			//rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.DepthAttachment, bpp = 32 });
 
 			if (myRenderTarget == null)
 			{
@@ -296,58 +295,32 @@ namespace testRenderer
 			myRenderTarget = new RenderTarget();
 			initRenderTarget();
 
-			//setup the rendering scene
-			SceneGraph sg = new SceneGraph();
+         //setup the rendering scene
+         Graphics.View v = new Graphics.View("Main View", myCamera, myViewport);
 
-			//add the "environment" pass to draw the skybox
-			RenderStage rs = new RenderStage("environment", "skybox");
-			rs.isActive = true;
-			sg.renderStages.Add(rs);
-			Graphics.View view = new Graphics.View("skyboxView", myCamera, myViewport, myRenderTarget);
-			view.filter = new TypeFilter(new List<String>() { "skybox" });
-			view.clearTarget = false;
-			rs.registerView(view);
+         Pass p = new Pass("environment", "skybox");
+         p.setRenderTarget(myRenderTarget);
+         p.filter = new TypeFilter(new List<String>() { "skybox" });
+         p.clearTarget = false; //default setting
+         v.addPass(p);
 
-			//add the "terrain" pass to draw the terrain
-			rs = new RenderStage("terrain", "forward-lighting");
-			rs.isActive = true;
-			sg.renderStages.Add(rs);
-			view = new Graphics.View("terrain view", myCamera, myViewport, myRenderTarget, false);
-			view.filter = new TypeFilter(new List<String>() { "terrain" });
-			rs.registerView(view);
+         p = new Pass("terrain", "forward-lighting");
+         p.filter = new TypeFilter(new List<String>() { "terrain" });
+         //v.addPass(p);
+         
+         p = new Pass("model", "forward-lighting");
+         p.filter = new TypeFilter(new List<String>() { /*"light",*/ "staticModel"/*, "skinnedModel" */ });
+         v.addPass(p);
 
-			//add the "model" pass to draw models
-			rs = new RenderStage("model", "forward-lighting");
-			rs.isActive = true;
-			sg.renderStages.Add(rs);
-			view = new Graphics.View("model view", myCamera, myViewport, myRenderTarget, false);
-			view.filter = new TypeFilter(new List<String>() { "light", "staticModel", "skinnedModel" });
-			rs.registerView(view);
+         //v.addSibling(new Graphics.DebugView("Debug View", myCamera, myViewport, myRenderTarget));
+         //v.addSibling(new UI.GuiView("UI View", myCamera, myViewport, myRenderTarget));
 
-			//add the "debug" pass to draw the debug visualizers
-			rs = new RenderStage("debug", "debug");
-			rs.isActive = true;
-			sg.renderStages.Add(rs);
-			view = new Graphics.DebugView(myCamera, myViewport, myRenderTarget);
-			rs.registerView(view);
-
-			//add the "UI" pass to draw the UI
-			rs = new RenderStage("UI", "UI");
-			rs.isActive = true;
-			sg.renderStages.Add(rs);
-			view = new UI.GuiView(myCamera, myViewport, myRenderTarget);
-			rs.registerView(view);
+         //add the view
+         Renderer.views[v.name] = v;         
 
 			Renderer.present = present;
 
-			//add the scene to the renderer
-			Renderer.scenes["main"] = sg;
-
-			//create the default font
-			//myFont = FontManager.findFont("DEFAULT");
-			//(myFont as SDFont).myEffects = SDFont.Effects.Outline;
-
-
+			
 			//create the skybox renderable
 			SkyboxRenderable skyboxRenderable = new SkyboxRenderable();
 			SkyBoxDescriptor sbmd = new SkyBoxDescriptor("../data/skyboxes/interstellar/interstellar.json");
@@ -356,9 +329,9 @@ namespace testRenderer
 
 			//create a tree instance
 			Random rand = new Random(230877);
-			for (int i = 0; i < 10000; i++)
+			for (int i = 1; i < 2; i++)
 			{
-				int size = 500;
+				int size = 2;
 				int halfSize = size / 2;
 				StaticModelRenderable smr = new StaticModelRenderable();
 				ObjModelDescriptor mdesc;
@@ -368,12 +341,14 @@ namespace testRenderer
 					mdesc = new ObjModelDescriptor("../data/models/props/rocks_3_by_nobiax-d6s8l2b/rocks_03-blend.obj");
 
 				smr.model = Renderer.resourceManager.getResource(mdesc) as StaticModel;
+				//smr.setPosition(new Vector3((rand.Next() % size) - halfSize, 0, (rand.Next() % size) - halfSize));
+            for(int j=0; j< smr.model.myMeshes.Count; j++)
+				   smr.model.myMeshes[j].material.myFeatures = Graphics.Material.Feature.DiffuseMap; //turn off lighting
 				Renderer.renderables.Add(smr);
-				smr.setPosition(new Vector3((rand.Next() % size) - halfSize, 0, (rand.Next() % size) - halfSize));
-				//smr.model.myMeshes[0].material.myFeatures = Material.Feature.DiffuseMap; //turn off lighting
 			}
 
-
+         /*
+          
          //create a test cube
          StaticModelRenderable testRenderable = new StaticModelRenderable();
          ObjModelDescriptor testDesc;
@@ -418,6 +393,8 @@ namespace testRenderer
 			myPoint2.linearAttenuation = 1.0f;
          myPoint2.quadraticAttenuation = 0.25f;
 			Renderer.renderables.Add(myPoint2);
+
+         */
 
 			myViewport.notifier += new Viewport.ViewportNotifier(handleViewportChanged);
 		}

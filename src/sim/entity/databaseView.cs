@@ -35,8 +35,8 @@ namespace Sim
       public EntityDatabaseView(EntityDatabase db, Predicate<Entity> criteria)
       {
          myDatabase = db;
-         myDatabase.entityAdded += new EntityAddedCb(checkEntityAdd);
-         myDatabase.entityRemoved += new EntityRemovedCb(checkEntityRemoved);
+         myDatabase.onEntityAdded += new EntityAddedCb(checkEntityAdd);
+         myDatabase.onEntityRemoved += new EntityRemovedCb(checkEntityRemoved);
          myCriteria = criteria;
       }
 

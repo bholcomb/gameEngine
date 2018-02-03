@@ -25,13 +25,18 @@ namespace Graphics
          myType = "skybox";
       }
 
-		#region extract phase
-		//public override void onFrameBeginExtract() { }
-		//public override void extractPerFrame(Renderable r) { }
-		public override void extractPerView(Renderable r, View v)
+      #region prepare phase
+      //public override void prepareFrameBegin() { }
+      //public override void preparePerFrame(Renderable r) { }
+      //public override void preparePerViewBegin(View v) { }
+      //public override void preparePerView(Renderable r, View v) { }
+      //public override void preparePerViewFinalize(View v) { }
+      //public override void preparePerPassBegin(Pass p) { }
+      
+      public override void preparePerPass(Renderable r, Pass p)
 		{
 			SkyboxRenderable skyboxModel = r as SkyboxRenderable;
-			Effect effect= getEffect(v.passType, (UInt32)Material.Feature.Skybox);
+			Effect effect= getEffect(p.technique, (UInt32)Material.Feature.Skybox);
 			RenderQueue<SkyboxRenderInfo> rq = Renderer.device.getRenderQueue(effect.getPipeline(skyboxModel.model.mesh.material).id) as RenderQueue<SkyboxRenderInfo>;
 			if (rq == null)
 			{
@@ -39,37 +44,33 @@ namespace Graphics
 				rq.myPipeline.vao = new VertexArrayObject();
 				rq.myPipeline.vao.bindVertexFormat<V3>(rq.myPipeline.shaderProgram);
 				rq.visualizer = this;
-				v.registerQueue(rq);
+	         p.registerQueue(rq);
 			}
 
 			SkyboxRenderInfo info = rq.nextInfo();
 
 			effect.updateRenderState(skyboxModel.model.mesh.material, info.renderState);
 
-         info.renderState.setUniformBuffer(v.camera.uniformBufferId(), 0);
+         info.renderState.setUniformBuffer(p.view.camera.uniformBufferId(), 0);
 		}
 
-		//public override void extractPerViewFinalize(BaseRenderQueue q, View v) {	}
-		//public override void onFrameExtractFinalize() { }
-		#endregion
+      //public override void preparePerPassFinalize(Pass p) { }
+      //public override void preparePerView(Renderable r, View v) { }
+      //public override void prepareFrameFinalize() { }
 
-		#region  prepare phase
-		//public override void onFrameBeginPrepare() { }
-		//public override void preparePerFrame(Renderable r) { }
-		//public override void preparePerView(RenderInfo info, View v) { }
-		//public override void preparePerViewFinalize(RenderQueue q, View v) {}
-		//public override void onFramePrepareFinalize() { }
-		#endregion
+      #endregion
 
-		#region submit phase
-		//public override void onSubmitNodeBlockBegin(String technique) { }
-		public override void submitRenderInfo(RenderInfo r, BaseRenderQueue q)
+      #region generate command phase
+      //public override void generateCommandsBegin(BaseRenderQueue q) { }
+
+      public override void generateRenderCommand(RenderInfo r, BaseRenderQueue q)
 		{
 			SkyboxRenderInfo skyInfo = r as SkyboxRenderInfo;
          q.addCommand(new SetRenderStateCommand(r.renderState));		
 			q.addCommand(new DrawIndexedCommand(PrimitiveType.Triangles, 36, 0, DrawElementsType.UnsignedShort));
 		}
-		//public override void onSubmitNodeBlockEnd() { }
-		#endregion
+
+      //public override void generateCommandsFinalize(BaseRenderQueue q) { }
+      #endregion
    }
 }

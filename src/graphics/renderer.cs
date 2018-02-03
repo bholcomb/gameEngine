@@ -16,7 +16,6 @@ namespace Graphics
 	{
 		public delegate void PresentFunction();
 
-		public static Dictionary<String, SceneGraph> scenes;
 		public static Dictionary<String, View> views;
 		public static Dictionary<String, Visualizer> visualizers;
 		public static List<Camera> activeCameras;
@@ -29,16 +28,29 @@ namespace Graphics
 		public static List<Renderable> renderables;
 		public static int frameNumber { get; set; }
 
-		public static PresentFunction present;
+      public delegate void RendererFunction();
+      public static event RendererFunction onPreRender;
+      public static event RendererFunction onPostRender;
+      public static event RendererFunction onPreCull;
+      public static event RendererFunction onPostCull;
+      public static event RendererFunction onPrePrepare;
+      public static event RendererFunction onPostPrepare;
+      public static event RendererFunction onPreGenerateCommands;
+      public static event RendererFunction onPostGenerateCommands;
+      public static event RendererFunction onPreExecuteCommands;
+      public static event RendererFunction onPostExecuteCommands;
+      public static event RendererFunction onPrePresent;
+      public static event RendererFunction onPostPresent;
+
+      public static PresentFunction present;
 
 		public class RenderStats
 		{
 			public float alpha = 0.1f;
 			public int renderableCount;
 			public double cullTime;
-			public double extractTime;
 			public double prepareTime;
-			public double submitTime;
+			public double generateTime;
 			public double executeTime;
 			public List<int> cameraVisibles = new List<int>();
 			public List<ViewStats> viewStats = new List<ViewStats>();
@@ -63,7 +75,6 @@ namespace Graphics
 			shaderManager = new ShaderManager();
 			visiblityManager = new VisibilityManager();
 
-			scenes = new Dictionary<string, SceneGraph>();
 			views = new Dictionary<string, View>();
 			visualizers = new Dictionary<string, Visualizer>();
 			renderables = new List<Renderable>();
@@ -83,100 +94,71 @@ namespace Graphics
 		{
 			if (initializer != null)
 			{
-				InitTable sceneConfigs = initializer.findDataOr<InitTable>("scenes", null);
-				if (sceneConfigs != null)
-				{
-					List<string> keys = sceneConfigs.keys;
-					for (int i = 0; i < keys.Count; i++)
-					{
-						SceneGraph sg = new SceneGraph();
-						sg.init(sceneConfigs.findData<InitTable>(keys[i]));
-						scenes[sceneConfigs.keys[i]] = sg;
-					}
-				}
 			}
 		}
 
 		public static void render()
 		{
 			//prep the frame
+         if(onPreRender != null)
+         {
+            onPreRender();
+         }
+
 			frameNumber++;
 			stats.reset();
 
 			double tdiff = 0;
 
-			#region cull phase
-			stats.renderableCount = renderables.Count;
+         #region cull phase
+         if (onPreCull != null)
+         {
+            onPreCull();
+         }
+
+         stats.renderableCount = renderables.Count;
 			tdiff = TimeSource.currentTime();
-			//get a list of all the views in the order they should be processed from the scene graph
-			//views in the same renderstage are processed in order of registration
+			//get a list of all the views in the order they should be processed
 			updateActiveViews();
 			updateActiveCameras();
 
-			//update cameras being used
-			visiblityManager.updateCameraVisibilityList(activeViews);
-
 			//update renderable objects in each camera
-			visiblityManager.updateCameraVisibleObjects(renderables);  //actual camera culling happens here
+			visiblityManager.cullRenderablesPerCamera(renderables, activeViews); 
 
-			//get camera visible stats
-			foreach (Camera c in activeCameras)
-				stats.cameraVisibles.Add(visiblityManager.renderableCount(c));
+         //get camera visible stats
+         foreach (Camera c in activeCameras)
+         {
+            stats.cameraVisibles.Add(visiblityManager.renderableCount(c));
+         }
 
-			//for each state in the scenegraph update the view visibility list
+			//for each view, update the list of renderables used in each of its passes
 			//done in parallel
-			updateSceneViewVisibility(activeViews);
+			updateViewRenderables(activeViews);
 
 			tdiff = TimeSource.currentTime() - tdiff;
 			stats.cullTime = (1.0f - stats.alpha) * stats.cullTime + (stats.alpha) * tdiff;
-			#endregion
 
-			#region extract phase
-			tdiff = TimeSource.currentTime();
-
-         //prep each visualizer for the beginning of the frame
-         foreach (Visualizer vis in visualizers.Values)
+         if (onPostCull != null)
          {
-            vis.onFrameBeginExtract();
+            onPostCull();
+         }
+         #endregion
+
+         #region prepare phase
+         if (onPrePrepare != null)
+         {
+            onPrePrepare();
          }
 
-			//run per-frame extract for each visible renderable, visualizer will need to protect against the same 
-			//renderable being submitted more than once for a different camera
-			foreach (Camera c in activeCameras)
-			{
-				foreach (Renderable r in visiblityManager.camaraVisibles(c))
-				{
-					Visualizer vis = visualizers[r.type];
-					vis.extractPerFrame(r);
-				}
-			}
-
-			//run extract for each view
-			foreach (View v in activeViews)
-			{
-				v.extract();
-			}
-
-         //finalize extract for each visualizer
-         foreach (Visualizer vis in visualizers.Values)
-         {
-            vis.onFrameExtractFinalize();
-         }
-
-			tdiff = TimeSource.currentTime() - tdiff;
-			stats.extractTime = (1.0f - stats.alpha) * stats.extractTime + (stats.alpha) * tdiff;
-			#endregion
-
-			#region prepare phase
-			tdiff = TimeSource.currentTime();
+         tdiff = TimeSource.currentTime();
 
          foreach (Visualizer vis in visualizers.Values)
          {
-            vis.onFrameBeginPrepare();
+            vis.prepareFrameBegin();
          }
 
 			//run per-frame prepare for each visible renderable, visualizer will need to protect against the same 
-			//renderable being submitted more than once for a different camera
+			//renderable being prepared more than once for a different camera
 			foreach (Camera c in activeCameras)
 			{
 				foreach (Renderable r in visiblityManager.camaraVisibles(c))
@@ -186,6 +168,7 @@ namespace Graphics
 				}
 			}
 
+         //prepare each renderable per view (will process per-pass)
 			foreach (View v in activeViews)
 			{
 				v.prepare();
@@ -193,76 +176,90 @@ namespace Graphics
 
          foreach (Visualizer vis in visualizers.Values)
          {
-            vis.onFramePrepareFinalize();
+            vis.prepareFrameFinalize();
          }
 
 			tdiff = TimeSource.currentTime() - tdiff;
 			stats.prepareTime = (1.0f - stats.alpha) * stats.prepareTime + (stats.alpha) * tdiff;
-			#endregion
 
-			#region submit phase
-			tdiff = TimeSource.currentTime();
+         if (onPostPrepare != null)
+         {
+            onPostPrepare();
+         }
+         #endregion
+
+         #region generate command list phase
+         if (onPreGenerateCommands != null)
+         {
+            onPreGenerateCommands();
+         }
+
+         tdiff = TimeSource.currentTime();
+
 			foreach (View v in activeViews)
 			{
 				//generate the commands
-				v.submit();
+				v.generateRenderCommandLists();
 				stats.viewStats.Add(v.stats);
 			}
+
 			tdiff = TimeSource.currentTime() - tdiff;
-			stats.submitTime = (1.0f - stats.alpha) * stats.submitTime + (stats.alpha) * tdiff;
-			#endregion
+			stats.generateTime = (1.0f - stats.alpha) * stats.generateTime + (stats.alpha) * tdiff;
 
-			#region execute phase
-			tdiff = TimeSource.currentTime();
-			foreach (SceneGraph sg in scenes.Values)
-			{
-            if (sg.isActive == false)
+         if (onPostGenerateCommands != null)
+         {
+            onPostGenerateCommands();
+         }
+         #endregion
+
+         #region execute phase
+         if (onPreExecuteCommands != null)
+         {
+            onPreExecuteCommands();
+         }
+
+         tdiff = TimeSource.currentTime();
+         foreach (View v in activeViews)
+         {
+            foreach(RenderCommandList cmdList in v.getRenderCommandLists())
             {
-               continue;
-            }
-
-				foreach (RenderStage rs in sg.renderStages)
-				{
-               if (rs.isActive == false)
+               if (cmdList.Count > 0)
                {
-                  continue;
+                  device.executeCommandList(cmdList);
                }
-
-					rs.preExectue();
-
-					device.executeCommandList(rs.preStageCommands);
-
-					foreach (View v in rs.views)
-					{
-						if (v.isActive == true)
-						{
-							IEnumerable<BaseRenderQueue> renderQueues = v.getRenderQueues();
-                     foreach (BaseRenderQueue rq in renderQueues)
-                     {
-                        device.executeRenderQueue(rq);
-                     }
-						}
-					}
-
-					device.executeCommandList(rs.postStageCommands);
-
-					rs.postExectue();
-
-					//cleanup the pre/post command queues
-					rs.preStageCommands.Clear();
-					rs.postStageCommands.Clear();
-				}
+            }
 			}
 			tdiff = TimeSource.currentTime() - tdiff;
 			stats.executeTime = (1.0f - stats.alpha) * stats.executeTime + (stats.alpha) * tdiff;
+
+         if (onPostExecuteCommands != null)
+         {
+            onPostExecuteCommands();
+         }
          #endregion
 
-         //present
+         #region present phase
          if (present != null)
          {
+            if (onPrePresent != null)
+            {
+               onPrePresent();
+            }
+
             present();
+
+            if (onPostPresent != null)
+            {
+               onPostPresent();
+            }
          }
-		}
+         #endregion
+
+         if (onPostRender != null)
+         {
+            onPostRender();
+         }
+      }
 
 		public static void registerVisualizer(String name, Visualizer vis)
 		{
@@ -274,37 +271,18 @@ namespace Graphics
 		{
 			activeViews.Clear();
 
-			foreach (SceneGraph sg in scenes.Values)
-			{
-            if (sg.isActive == false)
-            {
-               continue;
-            }
-
-				foreach (RenderStage rs in sg.renderStages)
-				{
-               if (rs.isActive == false)
-               {
-                  continue;
-               }
-
-					foreach (View v in rs.views)
-					{
-                  if (v.isActive == true)
-                  {
-                     activeViews.Add(v);
-                  }
-					}
-				}
-			}
+         foreach(View v in views.Values)
+         {
+            v.getViews(activeViews);
+         }
 		}
 
-		static void updateSceneViewVisibility(List<View> sceneviews)
+		static void updateViewRenderables(List<View> activeViews)
 		{
-			Parallel.ForEach(sceneviews, (view) =>
+			Parallel.ForEach(activeViews, (view) =>
 			{
 				IEnumerable<Renderable> cameraVisibles = visiblityManager.camaraVisibles(view.camera);
-				view.updateVisibles(cameraVisibles);
+				view.updateVisableRenderables(cameraVisibles);
 			});
 		}
 
@@ -323,7 +301,9 @@ namespace Graphics
 			}
 		}
 
-		static void installDefaultVisualizers()
+      #region default visualizers and effects/shaders
+
+      static void installDefaultVisualizers()
 		{
 			registerVisualizer("skybox", new SkyboxVisualizer());
 			registerVisualizer("light", new LightVisualizer());
@@ -375,5 +355,7 @@ namespace Graphics
 			sp = resourceManager.getResource(sd) as ShaderProgram;
 			visualizers["skinnedModel"].registerEffect("forward-lighting", new PerPixelLightinglEffect(sp));
 		}
-	}
+
+      #endregion
+   }
 }

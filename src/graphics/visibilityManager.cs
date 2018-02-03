@@ -17,21 +17,22 @@ namespace Graphics
 			myCameraVisibles = new Dictionary<Camera, List<Renderable>>();
 		}
 
-		public IEnumerable<Renderable> camaraVisibles(Camera c)
+		public List<Renderable> camaraVisibles(Camera c)
 		{
 			return myCameraVisibles[c];
 		}
 
-		public void updateCameraVisibilityList(List<View> sceneviews)
+		public void initializeCamaraVisibleLists(List<View> activeViews)
 		{
 			myCameraVisibles.Clear();
 
-			foreach (View view in sceneviews)
+			foreach (View view in activeViews)
 			{
-				List<Renderable> cameraList = null;
-				if (myCameraVisibles.TryGetValue(view.camera, out cameraList) == false)
+				List<Renderable> cameraVisibleList = null;
+				if (myCameraVisibles.TryGetValue(view.camera, out cameraVisibleList) == false)
 				{
-					myCameraVisibles[view.camera] = new List<Renderable>();
+               cameraVisibleList = new List<Renderable>();
+               myCameraVisibles[view.camera] = cameraVisibleList;
 				}
 			}
 		}
@@ -41,8 +42,11 @@ namespace Graphics
 			return myCameraVisibles[c].Count;
 		}
 
-		public void updateCameraVisibleObjects(List<Renderable> renderables)
+		public void cullRenderablesPerCamera(List<Renderable> renderables, List<View> activeViews)
 		{
+         //generate lists for each active camera
+         initializeCamaraVisibleLists(activeViews);
+
 #if false
 			foreach (KeyValuePair<Camera, ConcurrentBag<Renderable>> cameraList in myCameraVisibles)
 			{

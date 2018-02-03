@@ -20,15 +20,18 @@ namespace Graphics
 
 		public override void updateRenderState(Material m, RenderState state)
 		{
-			if(m.hasAttribute("diffuseMap"))
-			{
-				Texture tex = (m.findAttribute("diffuseMap") as TextureAttribute).value();
-				state.setTexture((int)tex.id(), 0, TextureTarget.Texture2D);
-				state.setUniform(new UniformData(0, Uniform.UniformType.Bool, true));
-				state.setUniform(new UniformData(1, Uniform.UniformType.Int, 0));
-			}
-			else
-				state.setUniform(new UniformData(0, Uniform.UniformType.Bool, false));
+
+         if (m.myTextures[(int)Material.TextureId.Diffuse] != null)
+         {
+            Texture tex = m.myTextures[(int)Material.TextureId.Diffuse].value();
+            state.setTexture((int)tex.id(), 0, TextureTarget.Texture2D);
+            state.setUniform(new UniformData(0, Uniform.UniformType.Bool, true));
+            state.setUniform(new UniformData(1, Uniform.UniformType.Int, 0));
+         }
+         else
+         {
+            state.setUniform(new UniformData(0, Uniform.UniformType.Bool, false));
+         }
 
 			state.setUniform(new UniformData(2, Uniform.UniformType.Color4, m.diffuse));
 			state.setUniform(new UniformData(3, Uniform.UniformType.Float, m.alpha));
@@ -37,7 +40,7 @@ namespace Graphics
 		public override PipelineState getPipeline(Material m)
 		{
 			PipelineState state = new PipelineState();
-			Texture tex = (m.findAttribute("diffuseMap") as TextureAttribute).value();
+			Texture tex = m.myTextures[(int)Material.TextureId.Diffuse].value();
 
 			//disable culling if this texture has alpha values so it can be seen from both sides
 			if (tex.hasAlpha == true || m.alpha != 1.0)

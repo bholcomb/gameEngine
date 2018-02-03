@@ -54,7 +54,7 @@ namespace Graphics
 				onPostExecute(this);
 		}
 
-		public virtual void registerView(View v)
+		public virtual void registerView(P v)
       {
 			v.passType = passType;
 			views.Add(v);

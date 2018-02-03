@@ -6,10 +6,13 @@ namespace Graphics
 	public class DebugView : View
 	{
 		BaseRenderQueue myRenderQueue;
+      RenderTarget myRenderTarget;
 
-		public DebugView(Camera c, Viewport v, RenderTarget rt) 
-			: base("debug view", c, v, rt, false)
+		public DebugView(string name, Camera c, Viewport v, RenderTarget rt) 
+			: base(name, c, v)
 		{
+         myRenderTarget = rt;
+
 			PipelineState ps = new PipelineState();
 			ps.blending.enabled = true;
 			ps.shaderProgram = DebugRenderer.canvas.myShader;
@@ -21,13 +24,6 @@ namespace Graphics
 			{
 				myRenderQueue = Renderer.device.createRenderQueue(ps);
 			}
-
-			registerQueue(myRenderQueue);
-		}
-
-		public override void extract()
-		{
-				
 		}
 
 		public override void prepare()
@@ -35,14 +31,13 @@ namespace Graphics
 			camera.updateCameraUniformBuffer();
 		}
 
-		public override void submit()
+		public override void generateRenderCommandLists()
 		{
-         stats.queueCount = 1;
-         stats.renderCalls = 0;
-         stats.viewName = name;
+         stats.name = name;
+         stats.passes = 1;
 
          myRenderQueue.commands.Clear();
-			myRenderQueue.addCommand(new SetRenderTargetCommand(renderTarget));
+			myRenderQueue.addCommand(new SetRenderTargetCommand(myRenderTarget));
 			
 			DebugRenderer.update();
 
@@ -55,8 +50,6 @@ namespace Graphics
 
 			//these are stateless commands, so no need to setup a pipeline, thats part of each command (usually the same)
 			myRenderQueue.commands.AddRange(cmds);
-
-         stats.renderCalls = myRenderQueue.commands.Count;
       }
 	}
 }

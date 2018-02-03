@@ -139,38 +139,35 @@ namespace Terrain
 			rs.setVertexBuffer(myRenderManager.memoryManager.buffer.id, 0, 0, I1I1B12.stride);
 		}
 
-		#region extract phase
-		// 		public override void onFrameBeginExtract() { }
-		// 		public override void extractPerFrame(Renderable r) { }
-		// 		public override IEnumerable<RenderInfo> extractPerView(Renderable r, View v) { }
-		public override void extractPerViewFinalize(BaseRenderQueue q, View v)
-		{
-			base.extractPerViewFinalize(q, v);
 
-			RenderQueue<TerrainRenderInfo> rq = q as RenderQueue<TerrainRenderInfo>;
+      #region prepare phase
+      //public override void prepareFrameBegin() { }
+      //public override void preparePerFrame(Renderable r) { }
+      //public override void preparePerViewBegin(View v) { }
+      //public override void preparePerView(Renderable r, View v) { }
+      //public override void preparePerViewFinalize(View v) { }
+      //public override void preparePerPassBegin(Pass p) { }
+      //public override void preparePerPass(Renderable r, Pass p) { }
 
-			if (q.myPipeline.vao == null)
-			{
-				q.myPipeline.vao = new VertexArrayObject();
-				q.myPipeline.vao.bindVertexFormat<I1I1B12>(q.myPipeline.shaderProgram);
-			}
-		}
-		// 		public override void onFrameExtractFinalize() { }
-		#endregion
+      public override void preparePerPassFinalize(Pass p)
+      {
+         base.preparePerPassFinalize(p);
 
-		#region prepare phase
-		// 		public override void onFrameBeginPrepare() { }
-		// 		public override void preparePerFrame(Renderable r) { }
-		// 		public override void preparePerView(RenderInfo info, View v) { }
-		// 		public override void preparePerViewFinalize(RenderQueue q, View v) { }
-		// 		public override void onFramePrepareFinalize() { }
-		#endregion
+         foreach (BaseRenderQueue rq in p.renderQueues.Values)
+            if (rq.myPipeline.vao == null)
+            {
+               rq.myPipeline.vao = new VertexArrayObject();
+               rq.myPipeline.vao.bindVertexFormat<I1I1B12>(rq.myPipeline.shaderProgram);
+            }
+      }
 
-		#region submit phase
-		// 		public override void onSubmitNodeBlockBegin(RenderQueue q) { }
-		// 		public override void submitRenderInfo(RenderInfo r, RenderQueue q) { }
-		// 		public override void onSubmitNodeBlockEnd(RenderQueue q) { }
-		#endregion
+      //public override void prepareFrameFinalize() { }
+      #endregion
 
+      #region generate command phase
+      //public override void generateRenderCommandsBegin(BaseRenderQueue q) { }
+      //public override void generateRenderCommand(RenderInfo r, BaseRenderQueue q) { }
+      //public override void generateRenderCommandsFinalize(BaseRenderQueue q) { }
+      #endregion
 	}
 }

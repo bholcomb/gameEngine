@@ -71,25 +71,18 @@ namespace Graphics
 
 			myLightUniforBuffer = new UniformBufferObject(BufferUsageHint.DynamicDraw);
 		}
-		
 
-		#region extract phase
-		//public override void onFrameBeginExtract() { }
-		//public override void extractPerFrame(Renderable r) { }
-		public override void extractPerView(Renderable r, View v)
+
+      #region prepare phase
+      //public override void prepareFrameBegin() { }
+      //public override void preparePerFrame(Renderable r) { }
+      //public override void preparePerViewBegin(View v) { }    
+
+      public override void preparePerView(Renderable r, View v)
 		{
 			LightRenderable lr = r as LightRenderable;
 
 			float dist = (v.camera.position - r.position).Length;
-
-			PipelineState pipelineState = new PipelineState();
-			RenderQueue<LightInfo> rq = Renderer.device.getRenderQueue(pipelineState.id) as RenderQueue<LightInfo>;
-			if (rq == null)
-			{
-				rq = Renderer.device.createRenderQueue<LightInfo>(pipelineState);
-				rq.visualizer = this;
-				v.registerQueue(rq);
-			}
 
 			switch (lr.myLightType)
 			{
@@ -118,27 +111,24 @@ namespace Graphics
 			}
 			myCurrentLightIndex++;
 		}
-		//public override void extractPerViewFinalize(RenderQueue q, View v){}
-		//public override void onFrameExtractFinalize() { }
-		#endregion
+      //public override void preparePerViewFinalize(View v) { }  
 
-		#region prepare phase
-		//public override void onFrameBeginPrepare() { }
-		//public override void preparePerFrame(Renderable r) { }
-		//public override void preparePerView(RenderInfo info, View v) { }
-		public override void preparePerViewFinalize(BaseRenderQueue q, View v)
+      //public override void preparePerPassBegin(Pass p) { }
+      //public override void preparePerPass(Renderable r, Pass p) { }
+      //public override void preparePerPassFinalize(Pass p) { }
+
+      public override void prepareFrameFinalize()
 		{
 			myLightUniforBuffer.setData(myLightData, 0, 255 * Marshal.SizeOf(typeof(LightUniformData)));
 			myCurrentLightIndex = 0;
 		}
-		
-		//public override void onFramePrepareFinalize() { } 
-		#endregion
 
-		#region submit phase
-		//public override void onSubmitNodeBlockBegin(BaseRenderQueue q) {	}
-		//public override void submitRenderInfo(RenderInfo r, RenderQueue q) { }
-		//public override void onSubmitNodeBlockEnd(RenderQueue q) { }
-		#endregion
-	}
+      #endregion
+
+      #region generate command phase
+      //public override void generateCommandsBegin(BaseRenderQueue q) { }
+      //public override void generateRenderCommand(RenderInfo r, BaseRenderQueue q) { }
+      //public override void generateCommandsFinalize(BaseRenderQueue q) { }
+      #endregion
+   }
 }

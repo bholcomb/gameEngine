@@ -180,7 +180,7 @@ namespace UI
          colors[(int)ElementColor.ComboBg] = new Color4(0.20f, 0.20f, 0.20f, 0.99f);
          colors[(int)ElementColor.CheckMark] = new Color4(0.90f, 0.90f, 0.90f, 0.50f);
          colors[(int)ElementColor.SliderGrab] = new Color4(1.00f, 1.00f, 1.00f, 0.30f);
-         colors[(int)ElementColor.SliderGrabActive] = new Color4(0.80f, 0.50f, 0.50f, 1.00f);
+         colors[(int)ElementColor.SliderGrabActive] = new Color4(0.80f, 0.80f, 0.80f, 1.00f);
          colors[(int)ElementColor.Button] = new Color4(0.67f, 0.40f, 0.40f, 0.60f);
          colors[(int)ElementColor.ButtonHovered] = new Color4(0.67f, 0.40f, 0.40f, 1.00f);
          colors[(int)ElementColor.ButtonActive] = new Color4(0.80f, 0.50f, 0.50f, 1.00f);
@@ -253,9 +253,9 @@ namespace UI
          colors[(int)ElementColor.ScrollbarGrabHovered] = new Color4(0.56f, 0.56f, 0.58f, 1.00f);
          colors[(int)ElementColor.ScrollbarGrabActive] = new Color4(0.06f, 0.05f, 0.07f, 1.00f);
          colors[(int)ElementColor.ComboBg] = new Color4(0.19f, 0.18f, 0.21f, 1.00f);
-         colors[(int)ElementColor.CheckMark] = new Color4(0.80f, 0.80f, 0.83f, 0.31f);
-         colors[(int)ElementColor.SliderGrab] = new Color4(0.80f, 0.80f, 0.83f, 0.31f);
-         colors[(int)ElementColor.SliderGrabActive] = new Color4(0.06f, 0.05f, 0.07f, 1.00f);
+         colors[(int)ElementColor.CheckMark] = new Color4(0.80f, 0.80f, 0.83f, 0.5f);
+         colors[(int)ElementColor.SliderGrab] = new Color4(0.8f, 0.8f, 0.8f, 0.5f);
+         colors[(int)ElementColor.SliderGrabActive] = new Color4(0.8f, 0.8f, 0.8f, 1.00f);
          colors[(int)ElementColor.Button] = new Color4(0.10f, 0.09f, 0.12f, 1.00f);
          colors[(int)ElementColor.ButtonHovered] = new Color4(0.24f, 0.23f, 0.29f, 1.00f);
          colors[(int)ElementColor.ButtonActive] = new Color4(0.56f, 0.56f, 0.58f, 1.00f);

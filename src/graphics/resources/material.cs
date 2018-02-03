@@ -112,7 +112,8 @@ namespace Graphics
 			Displacement,
 			Glow,
 			Environment,
-			Reflection
+			Reflection,
+         Skybox
 		}
 
 		public String name { get; protected set; }

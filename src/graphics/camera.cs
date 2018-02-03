@@ -304,14 +304,6 @@ namespace Graphics
 			updateViewMatrix();
 		}
 
-		public void setPosition(float x, float y, float z)
-		{
-			myEye.X = x;
-			myEye.Y = y;
-			myEye.Z = z;
-			updateViewMatrix();
-		}
-
 		public void updateViewMatrix()
 		{
 			myOrientation.setMatrix(ref myViewMatrix);
@@ -470,8 +462,8 @@ namespace Graphics
 
 			if(myIsDebugging == true)
 			{
-				myDebugCamera.setPosition(position.X, position.Y, position.Z);
-				myDebugCamera.setOrientation(myOrientation);
+            myDebugCamera.position = position;
+            myDebugCamera.setOrientation(myOrientation);
 			}
 		}
 

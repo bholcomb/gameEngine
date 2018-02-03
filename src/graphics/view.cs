@@ -11,56 +11,6 @@ using Util;
 
 namespace Graphics
 {
-	public abstract class RenderableFilter
-	{
-		public RenderableFilter() { }
-		public abstract bool shouldAccept(Renderable r);
-	}
-
-	#region common filters
-	public class NullFilter : RenderableFilter
-	{
-		public NullFilter() : base() { }
-		public override bool shouldAccept(Renderable r)
-		{
-			return false;
-		}
-	}
-
-	public class TypeFilter : RenderableFilter
-	{
-		List<String> myTypes;
-		public TypeFilter(List<String> acceptedTypes) : base() { myTypes = acceptedTypes; }
-		public override bool shouldAccept(Renderable r)
-		{
-			return myTypes.Contains(r.type);
-		}
-	}
-
-	public class DistanceFilter : RenderableFilter
-	{
-		Camera myCamera;
-		float myDistanceSquared;
-		public DistanceFilter(Camera c, float minDist): base() { myCamera = c; myDistanceSquared = minDist * minDist; }
-		public override bool shouldAccept(Renderable r)
-		{
-			float dist = (r.position - myCamera.position).LengthSquared;
-			return dist < myDistanceSquared;
-		}
-	}
-
-	public class InstanceFilter : RenderableFilter
-	{
-		List<Renderable> myInstances;
-		public InstanceFilter(List<Renderable> renderables) : base () { myInstances = renderables; }
-		public override bool shouldAccept(Renderable r)
-		{
-			return myInstances.Contains(r);
-		}
-	}
-
-	#endregion
-
 	public class RenderInfo
 	{
 		public UInt64 sortId;
@@ -73,158 +23,231 @@ namespace Graphics
 
    public class ViewStats
    {
-      public String viewName;
-      public int queueCount;
+      public String name;
+      public int passes;
       public int renderCalls;
    }
 
 	public class View
    {
-		public delegate void ViewFunction(View view);
+      public View child = null;
+      public View sibling = null;
 
 		public bool isActive { get; set; }
       public String name { get; set; }
 
       public Camera camera { get; set; }
       public Viewport viewport { get; set; }
-		public RenderTarget renderTarget { get; set; }
-		public String passType { get; set; }
-		public bool clearTarget { get; set; }
 
-		Dictionary<string, List<Renderable>> myVisibleRenderables;
-		Dictionary<UInt64, BaseRenderQueue> myRenderQueues;
+      List<Pass> myPasses;
+      public List<Pass> passes { get { return myPasses; } }
+      List<RenderCommandList> myRenderCommandLists;
+      public List<RenderCommandList> renderCommandLists { get { return myRenderCommandLists; } }
+
+      Dictionary<string, List<Renderable>> myVisibleRenderablesByType;
+      public Dictionary<string, List<Renderable>> visibleRenderablesByType { get { return myVisibleRenderablesByType; } }
 
       public ViewStats stats = new ViewStats();
 
-		public RenderableFilter filter;
+      public RenderCommandList preCommands;
+      public RenderCommandList postCommands;
 
-		public event ViewFunction onPreExtract;
-		public event ViewFunction onPostExtract;
-		public event ViewFunction onPrePrepare;
-		public event ViewFunction onPostPrepare;
-		public event ViewFunction onPreSubmit;
-		public event ViewFunction onPostSubmit;
+      public delegate void ViewFunction(View view);
+      public event ViewFunction onPrePrepare;
+      public event ViewFunction onPostPrepare;
+      public event ViewFunction onPreGenerateCommands;
+      public event ViewFunction onPostGenerateCommands;
 
-		public View(String viewName, Camera c, Viewport v, RenderTarget rt, bool shouldClear=true)
+      public View(String viewName, Camera c, Viewport v)
       {
 			name = viewName;
 			camera = c;
 			viewport = v;
-			renderTarget = rt;
-			clearTarget = shouldClear;
-
 			isActive = true;
-			filter =  new NullFilter();
-			myVisibleRenderables = new Dictionary<string, List<Renderable>>();
-			myRenderQueues = new Dictionary<UInt64, BaseRenderQueue>();
+         myPasses = new List<Pass>();
+         myRenderCommandLists = new List<RenderCommandList>();
+         myVisibleRenderablesByType = new Dictionary<string, List<Renderable>>();
+
+         preCommands = new RenderCommandList();
+         postCommands = new RenderCommandList();
       }
 
-		public virtual void updateVisibles(IEnumerable<Renderable> renderables)
-		{
-			//cleanup previous frames data
-			foreach (List<Renderable> tl in myVisibleRenderables.Values)
-				tl.Clear();
-
-			//reset the render queues
-			foreach (BaseRenderQueue rq in myRenderQueues.Values)
-				rq.reset();
-
-			foreach (Renderable r in renderables)
-			{
-				if(filter.shouldAccept(r) == true)
-				{
-					List<Renderable> tl = null;
-					if (myVisibleRenderables.TryGetValue(r.type, out tl) == false)
-					{
-						tl = new List<Renderable>();
-						myVisibleRenderables[r.type] = tl;
-					}
-
-					tl.Add(r);
-				}
-			}
-		}
-
-      public virtual void extract()
+		public virtual void updateVisableRenderables(IEnumerable<Renderable> cameraVisibles)
       {
-			//create the render infos for each renderable and put it in it's appropriate render queue
-			foreach(String visType in myVisibleRenderables.Keys)
-			{
-				Visualizer visualizer = Renderer.visualizers[visType];
-				List<Renderable> renderables = myVisibleRenderables[visType];
+         foreach (List<Renderable> tl in myVisibleRenderablesByType.Values)
+         {
+            tl.Clear();
+         }
 
-				foreach (Renderable r in renderables)
-				{
-					visualizer.extractPerView(r, this);
-				}
-			}
+         foreach (Renderable r in cameraVisibles)
+         {
+            List<Renderable> typeList = null;
+            if (myVisibleRenderablesByType.TryGetValue(r.type, out typeList) == false)
+            {
+               typeList = new List<Renderable>();
+               myVisibleRenderablesByType[r.type] = typeList;
+            }
 
-			//finalize each render queue's list of render infos 
-			foreach (BaseRenderQueue rq in myRenderQueues.Values)
-			{
-				rq.visualizer.extractPerViewFinalize(rq, this);
-				rq.sort();
-			}
-		}
+            typeList.Add(r);
+         }
 
-      public virtual void prepare()
-      {
-			camera.updateCameraUniformBuffer();
-
-			foreach (BaseRenderQueue rq in myRenderQueues.Values)
-			{
-				rq.preparetRenderInfo(this);
-
-				rq.visualizer.preparePerViewFinalize(rq, this);
-			}
-		}
-
-      public virtual void submit()
-      {
-         stats.queueCount = myRenderQueues.Count;
-         stats.renderCalls = 0;
-         stats.viewName = name;
-
-			//add the view specific commands for each render queue
-			foreach(BaseRenderQueue rq in myRenderQueues.Values)
-			{
-				rq.commands.Clear();
-				rq.addCommand(new SetViewportCommand(camera.viewport()));
-				rq.addCommand(new SetRenderTargetCommand(renderTarget));
-				rq.addCommand(new SetPipelineCommand(rq.myPipeline));
-				if (clearTarget == true)
-					rq.addCommand(new ClearCommand());
-
-				rq.addCommand(new BindCameraCommand(camera));
-
-				rq.visualizer.onSubmitNodeBlockBegin(rq);
-
-				rq.submitRenderInfo();
-
-				rq.visualizer.onSubmitNodeBlockEnd(rq);
-
-            stats.renderCalls += rq.commands.Count;
+         foreach(Pass p in myPasses)
+         {
+            p.updateVisibleRenderables(cameraVisibles);
          }
       }
 
-		public IEnumerable<BaseRenderQueue> getRenderQueues()
-		{
-			List<BaseRenderQueue> rq = new List<BaseRenderQueue>();
-			foreach(BaseRenderQueue r in myRenderQueues.Values)
-			{
-				rq.Add(r);
-			}
+      public virtual void prepare()
+      {
+         if (onPrePrepare != null)
+         {
+            onPrePrepare(this);
+         }
 
-			//sort by pipeline state, puts opaques before transparents
-			rq.Sort((a, b) => a.myPipeline.id.CompareTo(b.myPipeline.id));
+         camera.updateCameraUniformBuffer();
 
-			return rq;
+         //per view prepare
+         foreach (String visType in myVisibleRenderablesByType.Keys)
+         {
+            Visualizer visualizer = Renderer.visualizers[visType];
+
+            visualizer.preparePerViewBegin(this);
+
+            List<Renderable> renderables = myVisibleRenderablesByType[visType];
+
+            foreach (Renderable r in renderables)
+            {
+               visualizer.preparePerView(r, this);
+            }
+
+            visualizer.preparePerViewFinalize(this);
+         }
+
+         //per pass prepare
+         foreach (Pass p in passes)
+         {
+            p.prepare();
+         }
+
+         if (onPostPrepare != null)
+         {
+            onPostPrepare(this);
+         }
 		}
 
-		public void registerQueue(BaseRenderQueue rq)
-		{
-			if (myRenderQueues.ContainsKey(rq.myPipeline.id) == false)
-				myRenderQueues[rq.myPipeline.id] = rq;
+      public virtual void generateRenderCommandLists()
+      {
+         preCommands.Clear();
+         postCommands.Clear();
+
+         if (onPreGenerateCommands != null)
+         {
+            onPreGenerateCommands(this);
+         }
+
+         foreach (Pass p in myPasses)
+         {
+            p.generateRenderCommandLists();
+         }
+
+         if (onPostGenerateCommands != null)
+         {
+            onPostGenerateCommands(this);
+         }
+      }
+
+      public List<RenderCommandList> getRenderCommandLists()
+      { 
+         //update stats
+         stats.passes = myPasses.Count;
+         stats.name = name;
+         stats.renderCalls = 0;
+
+         myRenderCommandLists.Clear();
+
+         myRenderCommandLists.Add(preCommands);
+
+         foreach (Pass p in myPasses)
+         {
+            p.getRenderCommands(myRenderCommandLists);
+         }
+
+         myRenderCommandLists.Add(postCommands);
+
+         //update render call stats
+         foreach(RenderCommandList rcl in myRenderCommandLists)
+         {
+            stats.renderCalls += rcl.Count;
+         }
+
+			return myRenderCommandLists;
 		}
-	}
+
+      #region pass and child/sibling view management
+      public void addPass(Pass p)
+      {
+         p.view = this;
+         myPasses.Add(p);
+      }
+
+      public void removePass(Pass p)
+      {
+         myPasses.Remove(p);
+      }
+
+      public Pass findPass(string name)
+      {
+         foreach(Pass p in myPasses)
+         {
+            if(p.name == name)
+            {
+               return p;
+            }
+         }
+
+         return null;
+      }
+
+      public void getViews(List<View> views)
+      {
+         if(child != null)
+         {
+            child.getViews(views);
+         }
+
+         views.Add(this);
+
+         if(sibling != null)
+         {
+            sibling.getViews(views);
+         }
+
+      }
+
+      public void addChild(View v)
+      {
+         if(child == null)
+         {
+            child = v;
+         }
+         else
+         {
+            child.addSibling(v);
+         }
+      }
+
+      public void addSibling(View v)
+      {
+         if(sibling == null)
+         {
+            sibling = v;
+         }
+         else
+         {
+            sibling.addSibling(v);
+         }
+      }
+
+      #endregion
+   }
 }
