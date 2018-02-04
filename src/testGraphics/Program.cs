@@ -186,8 +186,15 @@ namespace testRenderer
 				for (int i = 0; i < Renderer.stats.viewStats.Count; i++)
 				{
 					ImGui.label("{0} {1}", i, Renderer.stats.viewStats[i].name);
-					ImGui.label("   Render Calls {0}", Renderer.stats.viewStats[i].renderCalls);
-					ImGui.label("   Queue count {0}", Renderer.stats.viewStats[i].passes);
+               ImGui.label("   Command List count {0}", Renderer.stats.viewStats[i].commandLists);
+               ImGui.label("   Passes {0}", Renderer.stats.viewStats[i].passStats.Count);
+               for(int j = 0; j < Renderer.stats.viewStats[i].passStats.Count; j++)
+               {
+                  PassStats ps = Renderer.stats.viewStats[i].passStats[j];
+                  ImGui.label("      {0} ({1})", ps.name, ps.technique);
+                  ImGui.label("         Queues: {0}", ps.queueCount);
+                  ImGui.label("         Render Commands: {0}", ps.renderCalls);
+               }               
 				}
 
 				ImGui.endWindow();
@@ -206,23 +213,7 @@ namespace testRenderer
 		{
 			base.OnRenderFrame(e);
 
-			//DebugRenderer.addOffsetCube(new Vector3(0, 1, 0), 1.2f, Color4.Blue, Fill.WIREFRAME, false, 0.0f);
-
 			Renderer.render();
-
-			//render some text
-			//          int y = 20;
-			//          myFont.print(20, y += 20, "FPS: {0:0}/{1:0}", TimeSource.avgFps(), TimeSource.fps());
-			//          myFont.print(20, y += 20, "Time: {0:0.0000}/{1:0.0000}", TimeSource.avgFrameMs(), TimeSource.frameMs());
-			//          myFont.print(20, y += 20, "View Vector: {0}", myCamera.myViewDir);
-			//          myFont.print(20, y += 20, "Eye Position: {0}", myCamera.myEye);
-			// 
-			//          y = 20;
-			//          myFont.print(Width - 300, y += 20, String.Format("Loaded Chunks: {0}", myWorld.chunks.Count));
-			//          myFont.print(Width - 300, y += 20, String.Format("Requested Blocks: {0}", myWorld.pendingChunks));
-			//          myFont.print(Width - 300, y += 20, String.Format("Total cached Chunks: {0}", myWorld.database.chunkCount));
-			//          myFont.print(Width - 300, y += 20, String.Format("GPU Memory usage: {0}", Formatter.bytesHumanReadable(myTerrainRenderer.memoryUsage)));
-			//          myFont.print(Width - 300, y += 20, String.Format("Primatives Rendered: {0:n0}", myTerrainRenderer.primativesRendered));
 
 			//update the timers
 			TimeSource.frameStep();
@@ -238,7 +229,6 @@ namespace testRenderer
 			List<RenderTargetDescriptor> rtdesc = new List<RenderTargetDescriptor>();
 			rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.ColorAttachment0, format = SizedInternalFormat.Rgba32f }); //creates a texture internally
 			rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.DepthAttachment, tex = new Texture(x, y, PixelInternalFormat.DepthComponent32f) }); //uses an existing texture
-			//rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.DepthAttachment, bpp = 32 });
 
 			if (myRenderTarget == null)
 			{
@@ -257,30 +247,6 @@ namespace testRenderer
 
 		void present()
 		{
-// 			RenderWireframeCubeCommand wc = new RenderWireframeCubeCommand(Vector3.Zero, Vector3.One, Color4.Yellow);
-// 			wc.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-// 			wc.execute();
-// 
-// 			RenderLineCommand l = new RenderLineCommand(Vector3.Zero, Vector3.One, Color4.Green);
-// 			l.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-// 			l.execute();
-// 
-// 			RenderSphereCommand s = new RenderSphereCommand(Vector3.Zero, 1.0f, Color4.Red);
-// 			s.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-// 			s.renderState.wireframe.enabled = true;
-// 			s.execute();
-// 
-// 			Vector3[] verts = new Vector3[4] {new Vector3(0,0,0), new Vector3(1,0,0), new Vector3(1,0,1), new Vector3(0,0,1) };
-// 			TextureDescriptor td = new TextureDescriptor("../data/textures/circle.png");
-// 			Texture tex = Renderer.resourceManager.getResource(td) as Texture;
-// 			RenderTexturedQuadCommand t = new RenderTexturedQuadCommand(verts, tex);
-// 			t.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-// 			t.execute();
-// 
-// 			RenderTextureCubeCommand tc = new RenderTextureCubeCommand(Vector3.Zero, Vector3.One, tex);
-// 			tc.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-// 			tc.execute();
-
 			RenderCommand cmd = new BlitFrameBufferCommand(myRenderTarget);
 			cmd.execute();
 
@@ -312,15 +278,18 @@ namespace testRenderer
          p.filter = new TypeFilter(new List<String>() { "light", "staticModel", "skinnedModel"});
          v.addPass(p);
 
+         //add some sub-views for debug graphics and UI
          v.addSibling(new Graphics.DebugView("Debug View", myCamera, myViewport, myRenderTarget));
          v.addSibling(new UI.GuiView("UI View", myCamera, myViewport, myRenderTarget));
 
          //add the view
          Renderer.views[v.name] = v;         
 
+         //set the present function
 			Renderer.present = present;
 
-			
+         //setup the scene by adding a bunch of lights and renderables
+
 			//create the skybox renderable
 			SkyboxRenderable skyboxRenderable = new SkyboxRenderable();
 			SkyBoxDescriptor sbmd = new SkyBoxDescriptor("../data/skyboxes/interstellar/interstellar.json");
@@ -392,6 +361,7 @@ namespace testRenderer
          myPoint2.quadraticAttenuation = 0.25f;
 			Renderer.renderables.Add(myPoint2);
 
+         //add a callback in case the window size changes
 			myViewport.notifier += new Viewport.ViewportNotifier(handleViewportChanged);
 		}
 	}

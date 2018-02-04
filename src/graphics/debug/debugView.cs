@@ -55,8 +55,12 @@ namespace Graphics
       {
          //update stats
          stats.name = name;
-         stats.passes = 1;
-         stats.renderCalls = myRenderQueue.commands.Count;
+         stats.passStats.Clear();
+         stats.passStats.Add(new PassStats());
+         stats.passStats[0].name = "Debug";
+         stats.passStats[0].technique = "debug";
+         stats.passStats[0].queueCount = 1;
+         stats.passStats[0].renderCalls = myRenderQueue.commands.Count;
 
          myRenderCommandLists.Clear();
 
@@ -66,11 +70,7 @@ namespace Graphics
 
          myRenderCommandLists.Add(postCommands);
 
-         //update render call stats
-         foreach (RenderCommandList rcl in myRenderCommandLists)
-         {
-            stats.renderCalls += rcl.Count;
-         }
+         stats.commandLists = myRenderCommandLists.Count;
 
          return myRenderCommandLists;
       }

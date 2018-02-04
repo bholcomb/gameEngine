@@ -39,7 +39,7 @@ namespace Graphics
       public RenderCommandList preCommands;
       public RenderCommandList postCommands;
 
-      PassStats stats = new PassStats();
+      public PassStats stats = new PassStats();
 
       public Pass(string name, string technique)
       {

@@ -24,8 +24,8 @@ namespace Graphics
    public class ViewStats
    {
       public String name;
-      public int passes;
-      public int renderCalls;
+      public int commandLists;
+      public List<PassStats> passStats = new List<PassStats>();
    }
 
 	public class View
@@ -163,9 +163,9 @@ namespace Graphics
       public virtual List<RenderCommandList> getRenderCommandLists()
       { 
          //update stats
-         stats.passes = myPasses.Count;
          stats.name = name;
-         stats.renderCalls = 0;
+         stats.passStats.Clear();
+
 
          myRenderCommandLists.Clear();
 
@@ -174,15 +174,13 @@ namespace Graphics
          foreach (Pass p in myPasses)
          {
             p.getRenderCommands(myRenderCommandLists);
+            stats.passStats.Add(p.stats);
          }
 
          myRenderCommandLists.Add(postCommands);
 
          //update render call stats
-         foreach(RenderCommandList rcl in myRenderCommandLists)
-         {
-            stats.renderCalls += rcl.Count;
-         }
+         stats.commandLists = myRenderCommandLists.Count;
 
 			return myRenderCommandLists;
 		}

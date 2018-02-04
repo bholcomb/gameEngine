@@ -49,7 +49,7 @@ namespace UI
          foreach (RenderCommand rc in ImGui.getRenderCommands())
          {
             //previous command was custom and reset the pipeline for UI drawing
-            if(needsCameraRebind == true && rc is UiRenderCommand)
+            if (needsCameraRebind == true && rc is UiRenderCommand)
             {
                myRenderQueue.addCommand(new SetPipelineCommand(myRenderQueue.myPipeline));
                myRenderQueue.addCommand(new BindCameraCommand(camera));
@@ -58,20 +58,23 @@ namespace UI
             //add the command
             myRenderQueue.addCommand(rc);
 
-            if(rc is StatelessRenderCommand)
+            if (rc is StatelessRenderCommand)
             {
                needsCameraRebind = true;
             }
-         }
-
-         stats.renderCalls = myRenderQueue.commands.Count;
+         }        
 		}
 
       public override List<RenderCommandList> getRenderCommandLists()
       {
          //update stats
          stats.name = name;
-         stats.passes = 1;
+         stats.passStats.Clear();
+         stats.passStats.Add(new PassStats());
+         stats.passStats[0].name = "UI";
+         stats.passStats[0].technique = "UI";
+         stats.passStats[0].queueCount = 1;
+         stats.passStats[0].renderCalls = myRenderQueue.commands.Count;
 
          myRenderCommandLists.Clear();
 
@@ -81,11 +84,7 @@ namespace UI
 
          myRenderCommandLists.Add(postCommands);
 
-         //update render call stats
-         foreach (RenderCommandList rcl in myRenderCommandLists)
-         {
-            stats.renderCalls += rcl.Count;
-         }
+         stats.commandLists = myRenderCommandLists.Count;
 
          return myRenderCommandLists;
       }
