@@ -151,13 +151,13 @@ namespace testRenderer
 			myCameraEventHandler.tick((float)e.Time);
 
          //update the animated object
-			//mySkinnedModel.update((float)TimeSource.timeThisFrame());
+			mySkinnedModel.update((float)TimeSource.timeThisFrame());
 
          //update the sun and point lights
          double now = TimeSource.currentTime();
-         //mySun.position = new Vector3((float)Math.Sin(now) * 5.0f, 5.0f, (float)Math.Cos(now) * 5.0f);
-         //myPoint1.position = new Vector3(2.5f, 1, 0) + new Vector3(0.0f, (float)Math.Sin(now), (float)Math.Cos(now));
-         //myPoint2.position = new Vector3(5.5f, 1, 0) + new Vector3(0.0f, (float)Math.Cos(now), (float)Math.Sin(now));
+         mySun.position = new Vector3((float)Math.Sin(now) * 5.0f, 5.0f, (float)Math.Cos(now) * 5.0f);
+         myPoint1.position = new Vector3(2.5f, 1, 0) + new Vector3(0.0f, (float)Math.Sin(now), (float)Math.Cos(now));
+         myPoint2.position = new Vector3(5.5f, 1, 0) + new Vector3(0.0f, (float)Math.Cos(now), (float)Math.Sin(now));
 
 
          //high frequency filter on avg fps
@@ -198,8 +198,8 @@ namespace testRenderer
 			ImGui.endFrame();
 
 			//get any new chunks based on the camera position
-			//myWorld.setInterest(myCamera.position);
-			//myWorld.tick(e.Time);
+			myWorld.setInterest(myCamera.position);
+			myWorld.tick(e.Time);
 		}
 
 		protected override void OnRenderFrame(FrameEventArgs e)
@@ -301,19 +301,19 @@ namespace testRenderer
          Pass p = new Pass("environment", "skybox");
          p.setRenderTarget(myRenderTarget);
          p.filter = new TypeFilter(new List<String>() { "skybox" });
-         p.clearTarget = false; //default setting
+         p.clearTarget = true; //false is default setting
          v.addPass(p);
 
          p = new Pass("terrain", "forward-lighting");
          p.filter = new TypeFilter(new List<String>() { "terrain" });
-         //v.addPass(p);
+         v.addPass(p);
          
          p = new Pass("model", "forward-lighting");
-         p.filter = new TypeFilter(new List<String>() { /*"light",*/ "staticModel"/*, "skinnedModel" */ });
+         p.filter = new TypeFilter(new List<String>() { "light", "staticModel", "skinnedModel"});
          v.addPass(p);
 
-         //v.addSibling(new Graphics.DebugView("Debug View", myCamera, myViewport, myRenderTarget));
-         //v.addSibling(new UI.GuiView("UI View", myCamera, myViewport, myRenderTarget));
+         v.addSibling(new Graphics.DebugView("Debug View", myCamera, myViewport, myRenderTarget));
+         v.addSibling(new UI.GuiView("UI View", myCamera, myViewport, myRenderTarget));
 
          //add the view
          Renderer.views[v.name] = v;         
@@ -329,9 +329,9 @@ namespace testRenderer
 
 			//create a tree instance
 			Random rand = new Random(230877);
-			for (int i = 1; i < 2; i++)
+			for (int i = 0; i < 10000; i++)
 			{
-				int size = 2;
+				int size = 1000;
 				int halfSize = size / 2;
 				StaticModelRenderable smr = new StaticModelRenderable();
 				ObjModelDescriptor mdesc;
@@ -341,13 +341,11 @@ namespace testRenderer
 					mdesc = new ObjModelDescriptor("../data/models/props/rocks_3_by_nobiax-d6s8l2b/rocks_03-blend.obj");
 
 				smr.model = Renderer.resourceManager.getResource(mdesc) as StaticModel;
-				//smr.setPosition(new Vector3((rand.Next() % size) - halfSize, 0, (rand.Next() % size) - halfSize));
-            for(int j=0; j< smr.model.myMeshes.Count; j++)
-				   smr.model.myMeshes[j].material.myFeatures = Graphics.Material.Feature.DiffuseMap; //turn off lighting
+				smr.setPosition(new Vector3((rand.Next() % size) - halfSize, 0, (rand.Next() % size) - halfSize));
+            //for(int j=0; j< smr.model.myMeshes.Count; j++)
+ 				//   smr.model.myMeshes[j].material.myFeatures = Graphics.Material.Feature.DiffuseMap; //turn off lighting
 				Renderer.renderables.Add(smr);
 			}
-
-         /*
           
          //create a test cube
          StaticModelRenderable testRenderable = new StaticModelRenderable();
@@ -393,8 +391,6 @@ namespace testRenderer
 			myPoint2.linearAttenuation = 1.0f;
          myPoint2.quadraticAttenuation = 0.25f;
 			Renderer.renderables.Add(myPoint2);
-
-         */
 
 			myViewport.notifier += new Viewport.ViewportNotifier(handleViewportChanged);
 		}

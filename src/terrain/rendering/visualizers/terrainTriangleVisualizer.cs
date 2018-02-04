@@ -254,11 +254,13 @@ namespace Terrain
          base.preparePerPassFinalize(p);
 
          foreach (BaseRenderQueue rq in p.renderQueues.Values)
+         {
             if (rq.myPipeline.vao == null)
             {
                rq.myPipeline.vao = new VertexArrayObject();
                rq.myPipeline.vao.bindVertexFormat<TerrainVertex>(rq.myPipeline.shaderProgram);
             }
+         }
       }
 
       //public override void prepareFrameFinalize() { }

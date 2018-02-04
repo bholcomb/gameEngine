@@ -197,7 +197,8 @@ namespace Graphics
 				if (vao != null)
 				{
 					vao.bind();
-				}
+               Renderer.device.clearVboIboState();
+            }
 				thePipelineState.vao = vao;
 			}
 

@@ -121,6 +121,8 @@ namespace Terrain
                info.offset = dc.solidOffset;
                info.sortId = getSortId(info);
                effect.updateRenderState(MaterialManager.visualMaterial, info.renderState);
+
+               addDraw(info.offset, info.count, info.model);
             }
 
             //add transparent render info
@@ -142,6 +144,8 @@ namespace Terrain
                info.offset = dc.solidOffset;
                info.sortId = getSortId(info);
                effect.updateRenderState(MaterialManager.visualMaterial, info.renderState);
+
+               addDraw(info.offset, info.count, info.model);
             }
 
             //add water renderinfo

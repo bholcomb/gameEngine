@@ -130,6 +130,17 @@ namespace Graphics
          }
       }
 
+      public void clearVboIboState()
+      {
+         for (int i = 0; i < myBoundVertexBuffers.Length; i++)
+         {
+            bindVertexBuffer(0, i, 0, 0);
+            myBoundVertexBuffers[i] = 0;
+         }
+
+         bindIndexBuffer(0);
+      }
+
       public void clearRenderState()
       {
          for (int i = 0; i < myBoundUniformBuffers.Length; i++)
