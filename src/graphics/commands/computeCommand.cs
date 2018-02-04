@@ -20,7 +20,7 @@ namespace Graphics
       public ComputeCommand(ShaderProgram shader, int x, int y, int z)
          : base()
       {
-			pipelineState.shaderProgram = shader;
+			pipelineState.shaderState.shaderProgram = shader;
 			pipelineState.generateId();
          myWorgroupX = x;
          myWorkgroupY = y;

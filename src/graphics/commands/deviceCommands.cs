@@ -65,9 +65,6 @@ namespace Graphics
 
 		public override void execute()
 		{
-			if (myClearMask.HasFlag(ClearBufferMask.DepthBufferBit))
-				Renderer.device.setDepthWrite(true);
-
 			GL.Clear(myClearMask);
 		}
 	}
@@ -221,4 +218,16 @@ namespace Graphics
 			Renderer.device.drawIndexed(myType, myCount, myOffset, myIndexType);
 		}
 	}
+
+   public class DeviceResetCommand : RenderCommand
+   {
+      public DeviceResetCommand() : base()
+      {
+      }
+
+      public override void execute()
+      {
+         Renderer.device.reset();
+      }
+   }
 }

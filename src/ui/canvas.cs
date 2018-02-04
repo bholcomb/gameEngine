@@ -63,12 +63,12 @@ namespace UI
       {
          thePipelineState = new PipelineState();
          thePipelineState.blending.enabled = true;
-         thePipelineState.shaderProgram = UI.Canvas.theShader;
+         thePipelineState.shaderState.shaderProgram = UI.Canvas.theShader;
          thePipelineState.blending.enabled = true;
          thePipelineState.culling.enabled = false;
          thePipelineState.depthTest.enabled = false;
-         thePipelineState.vao = new VertexArrayObject();
-         thePipelineState.vao.bindVertexFormat<V2T2B4>(UI.Canvas.theShader);
+         thePipelineState.vaoState.vao = new VertexArrayObject();
+         thePipelineState.vaoState.vao.bindVertexFormat<V2T2B4>(UI.Canvas.theShader);
          thePipelineState.generateId();
       }
 

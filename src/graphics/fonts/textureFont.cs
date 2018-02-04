@@ -60,8 +60,8 @@ namespace Graphics
       public override void setupRenderCommand(StatelessRenderCommand rc)
       {
 			//setup the pipeline
-			rc.pipelineState.shaderProgram = myShader;
-			rc.pipelineState.vao = myVao;
+			rc.pipelineState.shaderState.shaderProgram = myShader;
+			rc.pipelineState.vaoState.vao = myVao;
 
 			//set renderstate
 			rc.renderState.setVertexBuffer(myVbo.id, 0, 0, V3T2.stride);

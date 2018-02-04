@@ -64,8 +64,8 @@ namespace Graphics
 			renderState.setUniform(new UniformData(25, Uniform.UniformType.Bool, isDepthBuffer));
 
 			pipelineState = new PipelineState();
-			pipelineState.shaderProgram = theShader;
-			pipelineState.vao = theVAO;
+			pipelineState.shaderState.shaderProgram = theShader;
+			pipelineState.vaoState.vao = theVAO;
 			pipelineState.depthTest.enabled = false;
 			pipelineState.blending.enabled = alpha < 1.0f;
 			pipelineState.generateId();
@@ -93,8 +93,8 @@ namespace Graphics
          renderState.setUniform(new UniformData(25, Uniform.UniformType.Bool, isDepthBuffer));
 
          pipelineState = new PipelineState();
-         pipelineState.shaderProgram = theShader;
-         pipelineState.vao = theVAO;
+         pipelineState.shaderState.shaderProgram = theShader;
+         pipelineState.vaoState.vao = theVAO;
          pipelineState.depthTest.enabled = false;
          pipelineState.blending.enabled = alpha < 1.0f;
          pipelineState.generateId();
@@ -123,8 +123,8 @@ namespace Graphics
          renderState.setUniform(new UniformData(25, Uniform.UniformType.Bool, isDepthBuffer));
 
          pipelineState = new PipelineState();
-         pipelineState.shaderProgram = theShader;
-         pipelineState.vao = theVAO;
+         pipelineState.shaderState.shaderProgram = theShader;
+         pipelineState.vaoState.vao = theVAO;
          pipelineState.depthTest.enabled = false;
          pipelineState.blending.enabled = alpha < 1.0f;
          pipelineState.culling.enabled = false;
@@ -234,8 +234,8 @@ namespace Graphics
 			renderState.setUniform(new UniformData(25, Uniform.UniformType.Bool, false));
 
 			pipelineState = new PipelineState();
-			pipelineState.shaderProgram = theShader;
-			pipelineState.vao = theVAO;
+			pipelineState.shaderState.shaderProgram = theShader;
+			pipelineState.vaoState.vao = theVAO;
 			pipelineState.depthTest.enabled = false;
 			pipelineState.blending.enabled = t.hasAlpha || alpha < 1.0f;
 			pipelineState.generateId();
@@ -310,8 +310,8 @@ namespace Graphics
 			renderState.primativeRestart.value = PRIM_RESTART;
 
 			pipelineState = new PipelineState();
-			pipelineState.shaderProgram = theShader;
-			pipelineState.vao = theVAO;
+			pipelineState.shaderState.shaderProgram = theShader;
+			pipelineState.vaoState.vao = theVAO;
 			pipelineState.depthTest.enabled = false;
 			pipelineState.blending.enabled = c.A < 1.0f;
 			pipelineState.generateId();
@@ -378,8 +378,8 @@ namespace Graphics
 			pipelineState = new PipelineState();
 			if (t.hasAlpha == true || alpha < 1.0f)
 				pipelineState.blending.enabled = true;
-			pipelineState.shaderProgram = theShader;
-			pipelineState.vao = theVAO;
+			pipelineState.shaderState.shaderProgram = theShader;
+			pipelineState.vaoState.vao = theVAO;
 			pipelineState.depthTest.enabled = false;
 			pipelineState.culling.enabled = false;
 			pipelineState.generateId();
@@ -450,8 +450,8 @@ namespace Graphics
 
 			pipelineState = new PipelineState();
 			pipelineState.blending.enabled = c.A < 1.0f;
-			pipelineState.shaderProgram = theShader;
-			pipelineState.vao = theVAO;
+			pipelineState.shaderState.shaderProgram = theShader;
+			pipelineState.vaoState.vao = theVAO;
 			pipelineState.depthTest.enabled = false;
 			pipelineState.generateId();
 
@@ -517,8 +517,8 @@ namespace Graphics
 			
 			pipelineState = new PipelineState();
 			pipelineState.blending.enabled = c.A < 1.0f;
-			pipelineState.shaderProgram = theShader;
-			pipelineState.vao = theVAO;
+			pipelineState.shaderState.shaderProgram = theShader;
+			pipelineState.vaoState.vao = theVAO;
 			pipelineState.depthTest.enabled = false;
 			pipelineState.generateId();
 
@@ -627,8 +627,8 @@ namespace Graphics
 
 			pipelineState = new PipelineState();
 			pipelineState.blending.enabled = c.A < 1.0f;
-			pipelineState.shaderProgram = theShader;
-			pipelineState.vao = theVAO;
+			pipelineState.shaderState.shaderProgram = theShader;
+			pipelineState.vaoState.vao = theVAO;
 			pipelineState.depthTest.enabled = false;
 			pipelineState.generateId();
 

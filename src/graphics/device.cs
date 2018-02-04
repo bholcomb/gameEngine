@@ -15,6 +15,9 @@ namespace Graphics
       Dictionary<String, RenderTarget> myRenderTargets = new Dictionary<string, RenderTarget>();
       Dictionary<UInt64, BaseRenderQueue> myRenderQueues = new Dictionary<UInt64, BaseRenderQueue>();
 
+      public static RenderState theRenderState;
+      public static PipelineState thePipelineState;
+
       //shadow state for the device, uses commands to set these
       UInt64 myBoundPipeline = 0;
       Int32[] myBoundUniformBuffers = new Int32[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; //TODO: categorize UBOs into per-frame, per-view, per-draw groups
@@ -31,14 +34,17 @@ namespace Graphics
 
       Int32 myBoundIndexBuffer = 0;
 
-      bool myDepthWrite = true;
-
       public PipelineState currentPipeline;
       public RenderTarget currentRenderTarget;
 
       public Device()
       {
+         //initialize all the things
+         theRenderState = new RenderState();
+         theRenderState.force();
 
+         thePipelineState = new PipelineState();
+         thePipelineState.force();
       }
 
       public bool init()
@@ -130,7 +136,9 @@ namespace Graphics
          }
       }
 
-      public void clearVboIboState()
+      //reset just the bound VBO and IBO, useful for after binding a VAO to set the input assembler vertex structure
+      //but update the vbo
+      public void resetVboIboState()
       {
          for (int i = 0; i < myBoundVertexBuffers.Length; i++)
          {
@@ -141,8 +149,13 @@ namespace Graphics
          bindIndexBuffer(0);
       }
 
-      public void clearRenderState()
+      public void resetRenderState()
       {
+         //create a blank/default renderstate and apply it (this will update the global render state
+         RenderState rs = new RenderState();
+         rs.apply();
+
+         //clear out any previously bound buffers
          for (int i = 0; i < myBoundUniformBuffers.Length; i++)
          {
             bindUniformBuffer(0, i);
@@ -174,16 +187,18 @@ namespace Graphics
          }
 
          bindIndexBuffer(0);
-         setDepthWrite(true);
       }
 
-      public void setDepthWrite(bool write)
+      public void resetPipelineState()
       {
-         if (myDepthWrite != write)
-         {
-            myDepthWrite = write;
-            GL.DepthMask(myDepthWrite);
-         }
+         PipelineState ps = new PipelineState();
+         ps.apply();
+      }
+
+      public void reset()
+      {
+         resetPipelineState();
+         resetRenderState();
       }
 
       public void clearTargets(ClearBufferMask clearMask)

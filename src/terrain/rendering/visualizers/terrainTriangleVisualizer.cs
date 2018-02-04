@@ -255,10 +255,10 @@ namespace Terrain
 
          foreach (BaseRenderQueue rq in p.renderQueues.Values)
          {
-            if (rq.myPipeline.vao == null)
+            if (rq.myPipeline.vaoState.vao == null)
             {
-               rq.myPipeline.vao = new VertexArrayObject();
-               rq.myPipeline.vao.bindVertexFormat<TerrainVertex>(rq.myPipeline.shaderProgram);
+               rq.myPipeline.vaoState.vao = new VertexArrayObject();
+               rq.myPipeline.vaoState.vao.bindVertexFormat<TerrainVertex>(rq.myPipeline.shaderState.shaderProgram);
             }
          }
       }

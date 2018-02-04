@@ -154,10 +154,10 @@ namespace Terrain
          base.preparePerPassFinalize(p);
 
          foreach (BaseRenderQueue rq in p.renderQueues.Values)
-            if (rq.myPipeline.vao == null)
+            if (rq.myPipeline.vaoState.vao == null)
             {
-               rq.myPipeline.vao = new VertexArrayObject();
-               rq.myPipeline.vao.bindVertexFormat<I1I1B12>(rq.myPipeline.shaderProgram);
+               rq.myPipeline.vaoState.vao = new VertexArrayObject();
+               rq.myPipeline.vaoState.vao.bindVertexFormat<I1I1B12>(rq.myPipeline.shaderState.shaderProgram);
             }
       }
 

@@ -75,14 +75,14 @@ namespace Graphics
          myFeatures |= Material.Feature.ParallaxMap;
 
 			//enable blending
-			myTransparentPipeline.shaderProgram = myShader;
+			myTransparentPipeline.shaderState.shaderProgram = myShader;
 			myTransparentPipeline.culling.enabled = false;
 			myTransparentPipeline.blending.enabled = true;
-			myTransparentPipeline.depthWrite = false;
+			myTransparentPipeline.depthWrite.enabled = false;
 			myTransparentPipeline.generateId();
 
 			//use default settings
-			myOpaquePipeline.shaderProgram = myShader;
+			myOpaquePipeline.shaderState.shaderProgram = myShader;
 			myOpaquePipeline.generateId();
 		}
 

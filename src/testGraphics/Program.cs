@@ -164,7 +164,7 @@ namespace testRenderer
          avgFps = (0.99f * avgFps) + (0.01f * (float)TimeSource.fps());
 
 			ImGui.beginFrame();
-			if(ImGui.beginWindow("Render Stats", ref myShowRenderStats, Window.Flags.Borders))
+			if(ImGui.beginWindow("Render Stats", ref myShowRenderStats, Window.Flags.DefaultWindow))
 			{
 				ImGui.setWindowPosition(new Vector2(20, 100), SetCondition.FirstUseEver);
 				ImGui.setWindowSize(new Vector2(500, 600), SetCondition.FirstUseEver);
@@ -331,7 +331,7 @@ namespace testRenderer
 			Random rand = new Random(230877);
 			for (int i = 0; i < 10000; i++)
 			{
-				int size = 1000;
+				int size = 500;
 				int halfSize = size / 2;
 				StaticModelRenderable smr = new StaticModelRenderable();
 				ObjModelDescriptor mdesc;
@@ -405,7 +405,6 @@ namespace testRenderer
 				example.Title = "Test Renderer";
 				example.Run(/*60.0*/);
 			}
-
 		}
 	}
 }

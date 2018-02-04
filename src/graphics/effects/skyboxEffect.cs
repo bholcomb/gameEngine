@@ -30,11 +30,11 @@ namespace Graphics
 		public override PipelineState getPipeline(Material m)
 		{
 			PipelineState ps = new PipelineState();
-			ps.shaderProgram = myShader;
+			ps.shaderState.shaderProgram = myShader;
 			ps.depthTest.enabled = false;
-			ps.depthWrite = false;
-			ps.culling.cullMode = CullFaceMode.Front;
-			ps.depthTest.depthFunc = DepthFunction.Lequal;
+			ps.depthWrite.enabled = false;
+         ps.culling.enabled = false;
+         ps.depthTest.depthFunc = DepthFunction.Lequal;
 			ps.generateId();
 			return ps;
 		}

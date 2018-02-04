@@ -16,13 +16,13 @@ namespace UI
          myRenderTarget = rt;
 			PipelineState ps = new PipelineState();
 			ps.blending.enabled = true;
-			ps.shaderProgram = UI.Canvas.theShader;
+			ps.shaderState.shaderProgram = UI.Canvas.theShader;
 			ps.blending.enabled = true;
 			ps.culling.enabled = false;
 			ps.depthTest.enabled = false;
 
-			ps.vao = new VertexArrayObject();
-			ps.vao.bindVertexFormat<V2T2B4>(ps.shaderProgram);
+			ps.vaoState.vao = new VertexArrayObject();
+			ps.vaoState.vao.bindVertexFormat<V2T2B4>(ps.shaderState.shaderProgram);
 			ps.generateId();
 
 			myRenderQueue = Renderer.device.getRenderQueue(ps.id);
@@ -39,10 +39,8 @@ namespace UI
 
 		public override void generateRenderCommandLists()
 		{
-         stats.name = name;
-         stats.passes = 1;
-         
          myRenderQueue.commands.Clear();
+         myRenderQueue.addCommand(new DeviceResetCommand());
 			myRenderQueue.addCommand(new SetRenderTargetCommand(myRenderTarget));
 			myRenderQueue.addCommand(new SetPipelineCommand(myRenderQueue.myPipeline));
 			myRenderQueue.addCommand(new BindCameraCommand(camera));
@@ -50,11 +48,11 @@ namespace UI
          bool needsCameraRebind = false;
          foreach (RenderCommand rc in ImGui.getRenderCommands())
          {
-            //previous command was custom and reset the camera binding
+            //previous command was custom and reset the pipeline for UI drawing
             if(needsCameraRebind == true && rc is UiRenderCommand)
             {
                myRenderQueue.addCommand(new SetPipelineCommand(myRenderQueue.myPipeline));
-               //myRenderQueue.addCommand(new BindCameraCommand(camera));
+               myRenderQueue.addCommand(new BindCameraCommand(camera));
             }
 
             //add the command
@@ -68,5 +66,28 @@ namespace UI
 
          stats.renderCalls = myRenderQueue.commands.Count;
 		}
-	}
+
+      public override List<RenderCommandList> getRenderCommandLists()
+      {
+         //update stats
+         stats.name = name;
+         stats.passes = 1;
+
+         myRenderCommandLists.Clear();
+
+         myRenderCommandLists.Add(preCommands);
+
+         myRenderCommandLists.Add(myRenderQueue.commands);
+
+         myRenderCommandLists.Add(postCommands);
+
+         //update render call stats
+         foreach (RenderCommandList rcl in myRenderCommandLists)
+         {
+            stats.renderCalls += rcl.Count;
+         }
+
+         return myRenderCommandLists;
+      }
+   }
 }

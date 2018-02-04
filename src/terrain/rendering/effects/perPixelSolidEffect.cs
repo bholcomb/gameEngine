@@ -42,9 +42,9 @@ namespace Terrain
 			PipelineState state = new PipelineState();
 			state.culling.enabled = true;
 			state.blending.enabled = false;
-			state.depthWrite = true;
+			state.depthWrite.enabled = true;
 
-			state.shaderProgram = myShader;
+			state.shaderState.shaderProgram = myShader;
 			state.generateId();
 			return state;
 		}

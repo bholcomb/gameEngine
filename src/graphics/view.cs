@@ -39,12 +39,12 @@ namespace Graphics
       public Camera camera { get; set; }
       public Viewport viewport { get; set; }
 
-      List<Pass> myPasses;
+      protected List<Pass> myPasses;
       public List<Pass> passes { get { return myPasses; } }
-      List<RenderCommandList> myRenderCommandLists;
+      protected List<RenderCommandList> myRenderCommandLists;
       public List<RenderCommandList> renderCommandLists { get { return myRenderCommandLists; } }
 
-      Dictionary<string, List<Renderable>> myVisibleRenderablesByType;
+      protected Dictionary<string, List<Renderable>> myVisibleRenderablesByType;
       public Dictionary<string, List<Renderable>> visibleRenderablesByType { get { return myVisibleRenderablesByType; } }
 
       public ViewStats stats = new ViewStats();
@@ -145,6 +145,10 @@ namespace Graphics
             onPreGenerateCommands(this);
          }
 
+         //reset the device so this view can update as appropriate
+         preCommands.Add(new DeviceResetCommand());
+
+
          foreach (Pass p in myPasses)
          {
             p.generateRenderCommandLists();
@@ -156,7 +160,7 @@ namespace Graphics
          }
       }
 
-      public List<RenderCommandList> getRenderCommandLists()
+      public virtual List<RenderCommandList> getRenderCommandLists()
       { 
          //update stats
          stats.passes = myPasses.Count;

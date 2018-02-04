@@ -15,8 +15,8 @@ namespace Graphics
 
 			PipelineState ps = new PipelineState();
 			ps.blending.enabled = true;
-			ps.shaderProgram = DebugRenderer.canvas.myShader;
-			ps.vao = DebugRenderer.canvas.myVao;
+			ps.shaderState.shaderProgram = DebugRenderer.canvas.myShader;
+			ps.vaoState.vao = DebugRenderer.canvas.myVao;
 			ps.generateId();
 
 			myRenderQueue = Renderer.device.getRenderQueue(ps.id);
@@ -33,13 +33,12 @@ namespace Graphics
 
 		public override void generateRenderCommandLists()
 		{
-         stats.name = name;
-         stats.passes = 1;
-
          myRenderQueue.commands.Clear();
-			myRenderQueue.addCommand(new SetRenderTargetCommand(myRenderTarget));
-			
-			DebugRenderer.update();
+         myRenderQueue.addCommand(new DeviceResetCommand());
+         myRenderQueue.addCommand(new SetRenderTargetCommand(myRenderTarget));
+         myRenderQueue.addCommand(new BindCameraCommand(camera));
+
+         DebugRenderer.update();
 
 			List<RenderCommand> cmds = DebugRenderer.canvas.getRenderCommands();
 			foreach(RenderCommand rc in cmds)
@@ -51,5 +50,29 @@ namespace Graphics
 			//these are stateless commands, so no need to setup a pipeline, thats part of each command (usually the same)
 			myRenderQueue.commands.AddRange(cmds);
       }
-	}
+
+      public override List<RenderCommandList> getRenderCommandLists()
+      {
+         //update stats
+         stats.name = name;
+         stats.passes = 1;
+         stats.renderCalls = myRenderQueue.commands.Count;
+
+         myRenderCommandLists.Clear();
+
+         myRenderCommandLists.Add(preCommands);
+
+         myRenderCommandLists.Add(myRenderQueue.commands);
+
+         myRenderCommandLists.Add(postCommands);
+
+         //update render call stats
+         foreach (RenderCommandList rcl in myRenderCommandLists)
+         {
+            stats.renderCalls += rcl.Count;
+         }
+
+         return myRenderCommandLists;
+      }
+   }
 }

@@ -432,8 +432,8 @@ namespace Graphics
 			cmd.renderState.setUniform(new UniformData(20, Uniform.UniformType.Int, 0));
 			cmd.renderState.setUniform(new UniformData(23, Uniform.UniformType.Int, 0));
 			cmd.renderState.wireframe.enabled = fill == Fill.WIREFRAME;
-			cmd.pipelineState.shaderProgram = myShader;
-			cmd.pipelineState.vao = myVao;
+			cmd.pipelineState.shaderState.shaderProgram = myShader;
+			cmd.pipelineState.vaoState.vao = myVao;
 			cmd.pipelineState.blending.enabled = true;
 			cmd.pipelineState.generateId();
 
