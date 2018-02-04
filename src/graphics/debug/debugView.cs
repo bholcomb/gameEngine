@@ -28,11 +28,30 @@ namespace Graphics
 
 		public override void prepare()
 		{
+         Renderer.device.pushDebugMarker(String.Format("View {0}-prepare", name));
+
+         onPrePrepare();
+
 			camera.updateCameraUniformBuffer();
+
+         onPostPrepare();
+
+         Renderer.device.popDebugMarker();
 		}
 
 		public override void generateRenderCommandLists()
 		{
+         preCommands.Clear();
+         postCommands.Clear();
+
+         preCommands.Add(new PushDebugMarkerCommand(String.Format("View {0}-execute", name)));
+
+         onPreGenerateCommands();
+
+         //reset the device so this view can update as appropriate
+         preCommands.Add(new DeviceResetCommand());
+
+
          myRenderQueue.commands.Clear();
          myRenderQueue.addCommand(new DeviceResetCommand());
          myRenderQueue.addCommand(new SetRenderTargetCommand(myRenderTarget));
@@ -49,6 +68,10 @@ namespace Graphics
 
 			//these are stateless commands, so no need to setup a pipeline, thats part of each command (usually the same)
 			myRenderQueue.commands.AddRange(cmds);
+
+         onPostGenerateCommands();
+
+         postCommands.Add(new PopDebugMarkerCommand());
       }
 
       public override List<RenderCommandList> getRenderCommandLists()

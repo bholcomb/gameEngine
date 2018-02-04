@@ -31,10 +31,10 @@ namespace Graphics
       
 
       public delegate void PassFunction(Pass pass);
-      public event PassFunction onPrePrepare;
-      public event PassFunction onPostPrepare;
-      public event PassFunction onPreGenerateCommands;
-      public event PassFunction onPostGenerateCommands;
+      public event PassFunction PrePrepare;
+      public event PassFunction PostPrepare;
+      public event PassFunction PreGenerateCommands;
+      public event PassFunction PostGenerateCommands;
 
       public RenderCommandList preCommands;
       public RenderCommandList postCommands;
@@ -86,10 +86,9 @@ namespace Graphics
 
       public void prepare()
       {
-         if (onPrePrepare != null)
-         {
-            onPrePrepare(this);
-         }
+         Renderer.device.pushDebugMarker(String.Format("Pass {0}:{1}-prepare", view.name, name));
+
+         onPrePrepare();
 
          foreach (BaseRenderQueue rq in myRenderQueues.Values)
          {
@@ -113,16 +112,17 @@ namespace Graphics
             visualizer.preparePerPassFinalize(this);
          }
 
-         if (onPostPrepare != null)
-         {
-            onPostPrepare(this);
-         }
+         onPostPrepare();
+
+         Renderer.device.popDebugMarker();
       }
 
       public void generateRenderCommandLists()
       {
          preCommands.Clear();
          postCommands.Clear();
+
+         preCommands.Add(new PushDebugMarkerCommand(String.Format("Pass {0}:{1}-execute", view.name, name)));
 
          if (myRenderTarget != null)
          {
@@ -134,10 +134,7 @@ namespace Graphics
          }
 
          //called after setting render target so that any user commands inserted will affect (or change) the render target
-         if (onPreGenerateCommands != null)
-         {
-            onPreGenerateCommands(this);
-         }
+         onPreGenerateCommands();
 
          stats.queueCount = myRenderQueues.Count;
          stats.renderCalls = 0;
@@ -154,10 +151,9 @@ namespace Graphics
             stats.renderCalls += rq.commands.Count;
          }
 
-         if (onPostGenerateCommands != null)
-         {
-            onPostGenerateCommands(this);
-         }
+         onPostGenerateCommands();
+
+         postCommands.Add(new PopDebugMarkerCommand());
       }
 
       public void getRenderCommands(List<RenderCommandList> renderCmdLists)
@@ -186,5 +182,40 @@ namespace Graphics
          if (myRenderQueues.ContainsKey(rq.myPipeline.id) == false)
             myRenderQueues[rq.myPipeline.id] = rq;
       }
+
+      #region protected onEvent functions
+      protected void onPrePrepare()
+      {
+         if (PrePrepare != null)
+         {
+            PrePrepare(this);
+         }
+      }
+
+      protected void onPostPrepare()
+      {
+         if (PostPrepare != null)
+         {
+            PostPrepare(this);
+         }
+      }
+
+      protected void onPreGenerateCommands()
+      {
+         if (PreGenerateCommands != null)
+         {
+            PreGenerateCommands(this);
+         }
+      }
+
+      protected void onPostGenerateCommands()
+      {
+         if (PostGenerateCommands != null)
+         {
+            PostGenerateCommands(this);
+         }
+      }
+
+      #endregion
    }
 }

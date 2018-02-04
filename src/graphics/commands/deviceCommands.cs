@@ -6,6 +6,34 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Graphics
 {
+   public class PushDebugMarkerCommand : RenderCommand
+   {
+      string marker;
+
+      public PushDebugMarkerCommand(String m) : base()
+      {
+         marker = m;
+      }
+
+      public override void execute()
+      {
+         GL.PushDebugGroup(DebugSourceExternal.DebugSourceApplication, 0, marker.Length, marker);
+      }
+   }
+
+   public class PopDebugMarkerCommand : RenderCommand
+   {
+      public PopDebugMarkerCommand() : base()
+      {
+
+      }
+
+      public override void execute()
+      {
+         GL.PopDebugGroup();
+      }
+   }
+
 	public class SetRenderTargetCommand : RenderCommand
 	{
 		RenderTarget myRenderTarget;

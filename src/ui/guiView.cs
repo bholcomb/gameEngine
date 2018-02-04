@@ -34,11 +34,29 @@ namespace UI
 
 		public override void prepare()
 		{
-			camera.updateCameraUniformBuffer();
-		}
+         Renderer.device.pushDebugMarker(String.Format("View {0}-prepare", name));
+
+         onPrePrepare();
+
+         camera.updateCameraUniformBuffer();
+
+         onPostPrepare();
+
+         Renderer.device.popDebugMarker();
+      }
 
 		public override void generateRenderCommandLists()
 		{
+         preCommands.Clear();
+         postCommands.Clear();
+
+         preCommands.Add(new PushDebugMarkerCommand(String.Format("View {0}-execute", name)));
+
+         onPreGenerateCommands();
+
+         //reset the device so this view can update as appropriate
+         preCommands.Add(new DeviceResetCommand());
+
          myRenderQueue.commands.Clear();
          myRenderQueue.addCommand(new DeviceResetCommand());
 			myRenderQueue.addCommand(new SetRenderTargetCommand(myRenderTarget));
@@ -62,8 +80,12 @@ namespace UI
             {
                needsCameraRebind = true;
             }
-         }        
-		}
+         }
+
+         onPostGenerateCommands();
+
+         postCommands.Add(new PopDebugMarkerCommand());
+      }
 
       public override List<RenderCommandList> getRenderCommandLists()
       {

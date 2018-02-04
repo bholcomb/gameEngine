@@ -53,10 +53,10 @@ namespace Graphics
       public RenderCommandList postCommands;
 
       public delegate void ViewFunction(View view);
-      public event ViewFunction onPrePrepare;
-      public event ViewFunction onPostPrepare;
-      public event ViewFunction onPreGenerateCommands;
-      public event ViewFunction onPostGenerateCommands;
+      public event ViewFunction PrePrepare;
+      public event ViewFunction PostPrepare;
+      public event ViewFunction PreGenerateCommands;
+      public event ViewFunction PostGenerateCommands;
 
       public View(String viewName, Camera c, Viewport v)
       {
@@ -99,10 +99,8 @@ namespace Graphics
 
       public virtual void prepare()
       {
-         if (onPrePrepare != null)
-         {
-            onPrePrepare(this);
-         }
+         Renderer.device.pushDebugMarker(String.Format("View {0}-prepare", name));
+         onPrePrepare();
 
          camera.updateCameraUniformBuffer();
 
@@ -129,21 +127,19 @@ namespace Graphics
             p.prepare();
          }
 
-         if (onPostPrepare != null)
-         {
-            onPostPrepare(this);
-         }
-		}
+         onPostPrepare();
+         Renderer.device.popDebugMarker();
+      }
 
       public virtual void generateRenderCommandLists()
       {
          preCommands.Clear();
          postCommands.Clear();
 
-         if (onPreGenerateCommands != null)
-         {
-            onPreGenerateCommands(this);
-         }
+         preCommands.Add(new PushDebugMarkerCommand(String.Format("View {0}-execute", name)));
+
+
+         onPreGenerateCommands();
 
          //reset the device so this view can update as appropriate
          preCommands.Add(new DeviceResetCommand());
@@ -154,10 +150,9 @@ namespace Graphics
             p.generateRenderCommandLists();
          }
 
-         if (onPostGenerateCommands != null)
-         {
-            onPostGenerateCommands(this);
-         }
+         onPostGenerateCommands();
+
+         postCommands.Add(new PopDebugMarkerCommand());
       }
 
       public virtual List<RenderCommandList> getRenderCommandLists()
@@ -251,5 +246,41 @@ namespace Graphics
       }
 
       #endregion
+
+      #region protected onEvent functions
+      protected void onPrePrepare()
+      {
+         if(PrePrepare != null)
+         {
+            PrePrepare(this);
+         }
+      }
+
+      protected void onPostPrepare()
+      {
+         if (PostPrepare != null)
+         {
+            PostPrepare(this);
+         }
+      }
+
+      protected void onPreGenerateCommands()
+      {
+         if (PreGenerateCommands != null)
+         {
+            PreGenerateCommands(this);
+         }
+      }
+
+      protected void onPostGenerateCommands()
+      {
+         if (PostGenerateCommands != null)
+         {
+            PostGenerateCommands(this);
+         }
+      }
+
+      #endregion
+
    }
 }

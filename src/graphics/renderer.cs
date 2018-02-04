@@ -241,6 +241,8 @@ namespace Graphics
          #region present phase
          if (present != null)
          {
+            device.pushDebugMarker("Renderer Present");
+
             if (onPrePresent != null)
             {
                onPrePresent();
@@ -252,6 +254,8 @@ namespace Graphics
             {
                onPostPresent();
             }
+
+            device.popDebugMarker();
          }
          #endregion
 

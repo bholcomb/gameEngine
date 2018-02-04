@@ -286,7 +286,21 @@ namespace Graphics
 
       #endregion
 
-      #region debug calbacks
+      #region debugging functions
+      public void pushDebugMarker(String marker)
+      {
+#if DEBUG
+         GL.PushDebugGroup(DebugSourceExternal.DebugSourceApplication, 0, marker.Length, marker);
+#endif
+      }
+
+      public void popDebugMarker()
+      {
+#if DEBUG
+         GL.PopDebugGroup();
+#endif
+      }
+
       uint[] disabledIds;
       DebugProc myDebugCallback;
       void setupDebugCapture()
@@ -298,7 +312,7 @@ namespace Graphics
 
          //filter out noise messages
          disabledIds = new uint[4] { 131185, 131186, 131204, 1282 };
-         GL.DebugMessageControl(DebugSourceControl.DebugSourceApi, DebugTypeControl.DebugTypeOther, DebugSeverityControl.DontCare, disabledIds.Length, disabledIds, false);
+         GL.DebugMessageControl(DebugSourceControl.DebugSourceApi, DebugTypeControl.DontCare, DebugSeverityControl.DontCare, disabledIds.Length, disabledIds, false);
 
          myDebugCallback = new DebugProc(debugOutput);
          GL.DebugMessageCallback(myDebugCallback, IntPtr.Zero);
