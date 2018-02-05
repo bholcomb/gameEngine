@@ -88,8 +88,8 @@ namespace GpuNoise
          theVAO.bindVertexFormat<V3>(theShader);
 
          thePipeline = new PipelineState();
-         thePipeline.shaderProgram = theShader;
-         thePipeline.vao = theVAO;
+         thePipeline.shaderState.shaderProgram = theShader;
+         thePipeline.vaoState.vao = theVAO;
          thePipeline.generateId();
 
 

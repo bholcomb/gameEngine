@@ -109,6 +109,7 @@ namespace Terrain
                if (rq == null)
                {
                   rq = Renderer.device.createRenderQueue<TerrainRenderInfo>(effect.getPipeline(MaterialManager.visualMaterial));
+                  rq.name = rq.myPipeline.shaderState.shaderProgram.name + "-" + "opaque";
                   rq.visualizer = this;
                   p.registerQueue(rq);
                }
@@ -133,6 +134,7 @@ namespace Terrain
                if (rq == null)
                {
                   rq = Renderer.device.createRenderQueue<TerrainRenderInfo>(effect.getPipeline(MaterialManager.visualMaterial));
+                  rq.name = rq.myPipeline.shaderState.shaderProgram.name + "-" + "transparent";
                   p.registerQueue(rq);
                }
 
@@ -156,6 +158,7 @@ namespace Terrain
                if (rq == null)
                {
                   rq = Renderer.device.createRenderQueue<TerrainRenderInfo>(effect.getPipeline(MaterialManager.visualMaterial));
+                  rq.name = rq.myPipeline.shaderState.shaderProgram.name + "-" + "water";
                   p.registerQueue(rq);
                }
 

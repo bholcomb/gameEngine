@@ -29,6 +29,7 @@ namespace UI
 			if (myRenderQueue == null)
 			{
 				myRenderQueue = Renderer.device.createRenderQueue(ps);
+            myRenderQueue.name = "UI";
 			}
 		}
 

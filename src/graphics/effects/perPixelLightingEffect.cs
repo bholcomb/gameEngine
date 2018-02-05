@@ -74,16 +74,19 @@ namespace Graphics
 			myFeatures |= Material.Feature.NormalMap;
          myFeatures |= Material.Feature.ParallaxMap;
 
-			//enable blending
+			//transparent drawing
 			myTransparentPipeline.shaderState.shaderProgram = myShader;
 			myTransparentPipeline.culling.enabled = false;
 			myTransparentPipeline.blending.enabled = true;
 			myTransparentPipeline.depthWrite.enabled = false;
 			myTransparentPipeline.generateId();
 
-			//use default settings
+			//opaque drawing 
 			myOpaquePipeline.shaderState.shaderProgram = myShader;
-			myOpaquePipeline.generateId();
+         myOpaquePipeline.culling.enabled = true;
+         myOpaquePipeline.blending.enabled = false;
+         myOpaquePipeline.depthWrite.enabled = true;
+         myOpaquePipeline.generateId();
 		}
 
 		public override void updateRenderState(Material m, RenderState state)

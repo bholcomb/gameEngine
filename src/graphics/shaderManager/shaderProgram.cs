@@ -229,6 +229,7 @@ namespace Graphics
       int myId = -1;
       bool myIsLinked = false;
       List<Shader> myShaders = new List<Shader>();
+      string myName;
 
       Dictionary<string, AttributeInfo> myVertexBindings = new Dictionary<string, AttributeInfo>();
       Dictionary<string, UniformInfo> myUniformInfo = new Dictionary<string, UniformInfo>();
@@ -244,6 +245,7 @@ namespace Graphics
       public bool isLinked { get { return myIsLinked; } }
       public bool hasUniformBlocks { get { return myUniformBlockIndexes.Count > 0; } }
       public bool hasShaderStorageBlocks { get { return myShaderStorageBlockIndexes.Count > 0; } }
+      public string name { get { return myName; } }
 
       public ShaderProgram(List<Shader> shaders)
       {
@@ -303,6 +305,7 @@ namespace Graphics
 
       public void setName(String name)
       {
+         myName = name;
          GL.ObjectLabel(ObjectLabelIdentifier.Program, myId, name.Length, name);
       }
 

@@ -10,6 +10,7 @@ namespace Graphics
 		public RenderCommandList commands;
 		public Visualizer visualizer;
 		public PipelineState myPipeline;
+      public string name;
 
 		public BaseRenderQueue(PipelineState pipeline)
 		{
@@ -19,7 +20,6 @@ namespace Graphics
 
 		public virtual void reset()
 		{
-
 			commands.Clear();
 		}
 
@@ -36,6 +36,9 @@ namespace Graphics
 		public virtual void generateRenderCommands()
 		{
          addCommand(new SetPipelineCommand(myPipeline));
+
+         //sort the renders infos
+         sort();
       }
    }
 
@@ -85,6 +88,8 @@ namespace Graphics
 
 		public override void generateRenderCommands()
 		{
+         addCommand(new PushDebugMarkerCommand(String.Format("Render Queue: {0}", name)));
+
          base.generateRenderCommands();
 
          visualizer.generateRenderCommandsBegin(this);
@@ -95,6 +100,8 @@ namespace Graphics
 			}
 
          visualizer.generateRenderCommandsFinalize(this);
-		}
+
+         addCommand(new PopDebugMarkerCommand());
+      }
 	}
 }

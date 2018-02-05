@@ -290,8 +290,6 @@ namespace Graphics
 			});
 		}
 
-		#endregion
-
 		static void updateActiveCameras()
 		{
 			activeCameras.Clear();
@@ -304,6 +302,8 @@ namespace Graphics
 				}
 			}
 		}
+
+		#endregion
 
       #region default visualizers and effects/shaders
 
@@ -324,7 +324,7 @@ namespace Graphics
 
 			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\skybox-vs.glsl", ShaderDescriptor.Source.File));
 			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Graphics\\shaders\\skybox-ps.glsl", ShaderDescriptor.Source.File));
-			sd = new ShaderProgramDescriptor(desc);
+			sd = new ShaderProgramDescriptor(desc, null, "skyboxShader");
 			sp = resourceManager.getResource(sd) as ShaderProgram;
 			visualizers["skybox"].registerEffect("skybox", new SkyboxEffect(sp));
 
@@ -332,14 +332,14 @@ namespace Graphics
 			desc.Clear();
 			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\staticModel-vs.glsl", ShaderDescriptor.Source.File));
 			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Graphics\\shaders\\unlit-ps.glsl", ShaderDescriptor.Source.File));
-			sd = new ShaderProgramDescriptor(desc);
+			sd = new ShaderProgramDescriptor(desc, null, "static:unlit");
 			sp = resourceManager.getResource(sd) as ShaderProgram;
 			visualizers["staticModel"].registerEffect("forward-lighting", new UnlitEffect(sp));
 
 			desc.Clear();
 			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\staticModel-vs.glsl", ShaderDescriptor.Source.File));
 			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Graphics\\shaders\\perpixel-lighting-ps.glsl", ShaderDescriptor.Source.File));
-			sd = new ShaderProgramDescriptor(desc);
+			sd = new ShaderProgramDescriptor(desc, null, "static:perpixel");
 			sp = resourceManager.getResource(sd) as ShaderProgram;
 			visualizers["staticModel"].registerEffect("forward-lighting", new PerPixelLightinglEffect(sp));
 
@@ -347,7 +347,7 @@ namespace Graphics
 			desc.Clear();
 			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\skinnedModel-vs.glsl", ShaderDescriptor.Source.File));
 			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Graphics\\shaders\\unlit-ps.glsl", ShaderDescriptor.Source.File));
-			sd = new ShaderProgramDescriptor(desc);
+			sd = new ShaderProgramDescriptor(desc, null, "skinned:unlit");
 			sp = resourceManager.getResource(sd) as ShaderProgram;
 			visualizers["skinnedModel"].registerEffect("forward-lighting", new UnlitEffect(sp));
 
@@ -355,7 +355,7 @@ namespace Graphics
 			desc.Clear();
 			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\skinnedModel-vs.glsl", ShaderDescriptor.Source.File));
 			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Graphics\\shaders\\perpixel-lighting-ps.glsl", ShaderDescriptor.Source.File));
-			sd = new ShaderProgramDescriptor(desc);
+			sd = new ShaderProgramDescriptor(desc, null, "skinned:perpixel");
 			sp = resourceManager.getResource(sd) as ShaderProgram;
 			visualizers["skinnedModel"].registerEffect("forward-lighting", new PerPixelLightinglEffect(sp));
 		}

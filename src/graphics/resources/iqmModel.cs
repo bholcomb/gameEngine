@@ -305,7 +305,7 @@ namespace Graphics
                TextureDescriptor td = new TextureDescriptor(fn);
                Texture tex = myResourceManager.getResource(td) as Texture;
                Material m = new Material(temp.material);
-					m.myTextures[(int)Material.TextureId.Diffuse] = new TextureAttribute("diffuseMap", tex);
+               m.addAttribute(new TextureAttribute("diffuseMap", tex));
 					m.myFeatures |= Material.Feature.Lighting;
 					m.myFeatures |= Material.Feature.DiffuseMap;
 

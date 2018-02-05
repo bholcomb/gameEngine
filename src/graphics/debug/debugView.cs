@@ -23,6 +23,7 @@ namespace Graphics
 			if (myRenderQueue == null)
 			{
 				myRenderQueue = Renderer.device.createRenderQueue(ps);
+            myRenderQueue.name = "debug";
 			}
 		}
 

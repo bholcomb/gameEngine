@@ -98,9 +98,8 @@ namespace Graphics
 			DetailMap			= 0x0040,
 			DisplacementMap	= 0x0080,
 			GlowMap				= 0x0100,
-			EnvironmentMap		= 0x0200,
-			ReflectionMap		= 0x0400,
-			Skybox				= 0x0800,
+			ReflectionMap		= 0x0200,
+			Skybox				= 0x0400,
 		}
 
 		public enum TextureId
@@ -111,7 +110,6 @@ namespace Graphics
 			Detail,
 			Displacement,
 			Glow,
-			Environment,
 			Reflection,
          Skybox
 		}
@@ -130,7 +128,7 @@ namespace Graphics
       public Color4 emission { get; set; }
       public float shininess { get; set; }
       public float alpha { get { return myAlpha; } set { if (value < 1.0f) hasTransparency = true; myAlpha = value;  } }
-      public bool hasTransparency { get; protected set; }
+      public bool hasTransparency { get; set; }
 
       public Material(String n ="")
       {
@@ -167,11 +165,37 @@ namespace Graphics
       {
          myAttributes[obj.name] = obj;
 
-         if(hasTransparency == false && obj is TextureAttribute)
+         if(obj is TextureAttribute)
          {
             TextureAttribute tex = obj as TextureAttribute;
-            if (tex.hasTransparency() == true)
-               hasTransparency = true;
+            switch(tex.name)
+            {
+               case "diffuseMap":
+                  myTextures[(int)TextureId.Diffuse] = tex;
+                  hasTransparency = tex.hasTransparency();
+                  break;
+               case "specularMap":
+                  myTextures[(int)TextureId.Specular] = tex;
+                  break;
+               case "normalMap":
+                  myTextures[(int)TextureId.Normal] = tex;
+                  break;
+               case "detailMap":
+                  myTextures[(int)TextureId.Detail] = tex;
+                  break;
+               case "displaceMap":
+                  myTextures[(int)TextureId.Displacement] = tex;
+                  break;
+               case "glowMap":
+                  myTextures[(int)TextureId.Glow] = tex;
+                  break;
+               case "reflectionMap":
+                  myTextures[(int)TextureId.Reflection] = tex;
+                  break;
+               case "skybox":
+                  myTextures[(int)TextureId.Skybox] = tex;
+                  break;
+            }
          }
       }
    }

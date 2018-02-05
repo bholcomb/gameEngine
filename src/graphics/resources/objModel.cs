@@ -270,8 +270,9 @@ namespace Graphics
                                  Texture t = myResourceManager.getResource(td) as Texture;
 											if (t != null)
 											{
-												m.myTextures[(int)Material.TextureId.Diffuse] = new TextureAttribute("diffuseMap", t);
+                                    m.addAttribute(new TextureAttribute("diffuseMap", t));
 												m.myFeatures |= Material.Feature.DiffuseMap;
+                                    m.hasTransparency = t.hasAlpha;
 											}
                                  break;
                               }
@@ -283,7 +284,7 @@ namespace Graphics
                                  Texture t = myResourceManager.getResource(td) as Texture;
                                  if (t != null)
 											{
-												m.myTextures[(int)Material.TextureId.Specular] = new TextureAttribute("specularMap", t);
+                                    m.addAttribute(new TextureAttribute("specularMap", t));
 												m.myFeatures |= Material.Feature.SpecMap;
 											}
 											break;
@@ -294,7 +295,9 @@ namespace Graphics
                                  TextureDescriptor td = new TextureDescriptor(Path.Combine(rootPath, textureName), true);
                                  Texture t = myResourceManager.getResource(td) as Texture;
 											if (t != null)
-												m.addAttribute(new TextureAttribute("alphaMap", t));
+											{
+                                    m.addAttribute(new TextureAttribute("alphaMap", t));
+                                 }
                                  break;
                               }
                            case "bump":
@@ -305,7 +308,7 @@ namespace Graphics
                                  Texture t = myResourceManager.getResource(td) as Texture;
 											if (t != null)
 											{
-												m.myTextures[(int)Material.TextureId.Normal] = new TextureAttribute("normalMap", t);
+                                    m.addAttribute(new TextureAttribute("normalMap", t));
 												m.myFeatures |= Material.Feature.NormalMap;
 											}
                                  break;
@@ -317,7 +320,7 @@ namespace Graphics
                                  Texture t = myResourceManager.getResource(td) as Texture;
 											if (t != null)
 											{
-												m.myTextures[(int)Material.TextureId.Displacement] = new TextureAttribute("displaceMap", t);
+                                    m.addAttribute(new TextureAttribute("displaceMap", t));
 												m.myFeatures |= Material.Feature.DisplacementMap;
 											}
                                  break;

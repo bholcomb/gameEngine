@@ -349,7 +349,7 @@ namespace Graphics
                   Texture diffText = findTexture(diffuseMapName);
                   if (diffText != null)
                   {
-                     m.addAttribute(new TextureAttribute("diffuseTexture", diffText));
+                     m.addAttribute(new TextureAttribute("diffuseMap", diffText));
                   }
                }
 

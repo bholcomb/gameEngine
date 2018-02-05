@@ -330,16 +330,5 @@ namespace Graphics
          shaderState.apply();
          vaoState.apply();
 		}
-
-		public void force()
-		{
-         blending.apply();
-         depthTest.apply();
-         depthWrite.apply();
-         culling.apply();
-         stencilTest.apply();
-         shaderState.apply();
-         vaoState.apply();
-		}
 	}
 }

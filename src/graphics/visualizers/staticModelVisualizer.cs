@@ -76,7 +76,8 @@ namespace Graphics
 				if (rq == null)
 				{
 					rq = Renderer.device.createRenderQueue<StaticModelInfo>(effect.getPipeline(mesh.material));
-					rq.myPipeline.vaoState.vao = new VertexArrayObject();
+               rq.name = rq.myPipeline.shaderState.shaderProgram.name + "-" + (mesh.material.hasTransparency == true ? "transparent" : "opaque");
+               rq.myPipeline.vaoState.vao = new VertexArrayObject();
 					rq.myPipeline.vaoState.vao.bindVertexFormat<V3N3T2>(rq.myPipeline.shaderState.shaderProgram);
 					rq.visualizer = this;
 			      p.registerQueue(rq);

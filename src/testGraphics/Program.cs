@@ -166,15 +166,17 @@ namespace testRenderer
 			ImGui.beginFrame();
 			if(ImGui.beginWindow("Render Stats", ref myShowRenderStats, Window.Flags.DefaultWindow))
 			{
-				ImGui.setWindowPosition(new Vector2(20, 100), SetCondition.FirstUseEver);
-				ImGui.setWindowSize(new Vector2(500, 600), SetCondition.FirstUseEver);
+				ImGui.setWindowPosition(new Vector2(20, 50), SetCondition.FirstUseEver);
+				ImGui.setWindowSize(new Vector2(500, 650), SetCondition.FirstUseEver);
 				ImGui.label("FPS: {0:0.00}", avgFps);
             ImGui.label("Camera position: {0}", myCamera.position);
             ImGui.label("Camera view vector: {0}", myCamera.viewVector);
-				ImGui.label("Cull Time: {0:0.00}ms", Renderer.stats.cullTime * 1000.0);
-				ImGui.label("Prepare Time: {0:0.00}ms", Renderer.stats.prepareTime * 1000.0);
-				ImGui.label("Submit Time: {0:0.00}ms", Renderer.stats.generateTime * 1000.0);
-				ImGui.label("Execute Time: {0:0.00}ms", Renderer.stats.executeTime * 1000.0);
+            ImGui.separator();
+            ImGui.label("Frame Time: {0:0.00}ms", (Renderer.stats.cullTime + Renderer.stats.prepareTime + Renderer.stats.generateTime + Renderer.stats.executeTime)* 1000.0);
+            ImGui.label("   Cull Time: {0:0.00}ms", Renderer.stats.cullTime * 1000.0);
+				ImGui.label("   Prepare Time: {0:0.00}ms", Renderer.stats.prepareTime * 1000.0);
+				ImGui.label("   Submit Time: {0:0.00}ms", Renderer.stats.generateTime * 1000.0);
+				ImGui.label("   Execute Time: {0:0.00}ms", Renderer.stats.executeTime * 1000.0);
 				ImGui.separator();
 				ImGui.label("Camera Visible Renderables");
 				for (int i = 0; i < Renderer.stats.cameraVisibles.Count; i++)
