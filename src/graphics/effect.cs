@@ -25,7 +25,7 @@ namespace Graphics
 
 		public abstract void updateRenderState(Material m, RenderState state);
 
-		public abstract PipelineState getPipeline(Material m);
+		public abstract PipelineState createPipeline(Material m);
 
 		public bool isValid()
 		{

@@ -148,7 +148,7 @@ namespace Graphics
 			state.setUniformBuffer(myLightVisualizer.myLightUniforBuffer.id, 1);
 		}
 
-		public override PipelineState getPipeline(Material m)
+		public override PipelineState createPipeline(Material m)
 		{
 			Texture tex = m.myTextures[(int)Material.TextureId.Diffuse].value();
 

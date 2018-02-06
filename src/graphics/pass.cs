@@ -17,11 +17,14 @@ namespace Graphics
    {
       string myName;
       string myTechnique;
-      RenderTarget myRenderTarget;
+      public RenderTarget renderTarget { get; set; }
       public bool clearTarget { get; set; }
       public View view { get; set; }
 
-      
+      public string name { get { return myName; } }
+      public string technique { get { return myTechnique; } }
+
+
       public RenderableFilter filter;
 
       Dictionary<UInt64, BaseRenderQueue> myRenderQueues;
@@ -45,7 +48,7 @@ namespace Graphics
       {
          myName = name;
          myTechnique = technique;
-         myRenderTarget = null;
+         renderTarget = null;
          clearTarget = false;
          myRenderQueues = new Dictionary<ulong, BaseRenderQueue>();
          myVisibleRenderablesByType = new Dictionary<string, List<Renderable>>();
@@ -53,12 +56,12 @@ namespace Graphics
          postCommands = new RenderCommandList();
       }
 
-      public string name { get { return myName; } }
-      public string technique { get { return myTechnique; } }
-
-      public void setRenderTarget(RenderTarget rt)
+      public Pass(Pass p) 
+         : this(p.name, p.technique)
       {
-         myRenderTarget = rt;
+         filter = p.filter;
+         renderTarget = p.renderTarget;
+         clearTarget = p.clearTarget;
       }
 
       public void updateVisibleRenderables(IEnumerable<Renderable> cameraVisibles)
@@ -124,9 +127,9 @@ namespace Graphics
 
          preCommands.Add(new PushDebugMarkerCommand(String.Format("Pass {0}:{1}-execute", view.name, name)));
 
-         if (myRenderTarget != null)
+         if (renderTarget != null)
          {
-            preCommands.Add(new SetRenderTargetCommand(myRenderTarget));
+            preCommands.Add(new SetRenderTargetCommand(renderTarget));
             if (clearTarget == true)
             {
                preCommands.Add(new ClearCommand());
@@ -177,10 +180,19 @@ namespace Graphics
          renderCmdLists.Add(postCommands);
       }
 
+      public BaseRenderQueue findRenderQueue(UInt64 pipelineId)
+      {
+         BaseRenderQueue rq = null;
+         myRenderQueues.TryGetValue(pipelineId, out rq);
+         return rq;
+      }
+
       public void registerQueue(BaseRenderQueue rq)
       {
          if (myRenderQueues.ContainsKey(rq.myPipeline.id) == false)
+         {
             myRenderQueues[rq.myPipeline.id] = rq;
+         }
       }
 
       #region protected onEvent functions

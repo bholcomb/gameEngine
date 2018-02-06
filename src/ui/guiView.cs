@@ -25,12 +25,8 @@ namespace UI
 			ps.vaoState.vao.bindVertexFormat<V2T2B4>(ps.shaderState.shaderProgram);
 			ps.generateId();
 
-			myRenderQueue = Renderer.device.getRenderQueue(ps.id);
-			if (myRenderQueue == null)
-			{
-				myRenderQueue = Renderer.device.createRenderQueue(ps);
-            myRenderQueue.name = "UI";
-			}
+			myRenderQueue = Renderer.device.createRenderQueue(ps);
+         myRenderQueue.name = "UI";
 		}
 
 		public override void prepare()

@@ -19,12 +19,8 @@ namespace Graphics
 			ps.vaoState.vao = DebugRenderer.canvas.myVao;
 			ps.generateId();
 
-			myRenderQueue = Renderer.device.getRenderQueue(ps.id);
-			if (myRenderQueue == null)
-			{
-				myRenderQueue = Renderer.device.createRenderQueue(ps);
-            myRenderQueue.name = "debug";
-			}
+			myRenderQueue = Renderer.device.createRenderQueue(ps);
+         myRenderQueue.name = "debug";
 		}
 
 		public override void prepare()

@@ -51,7 +51,7 @@ include("terrainServer.lua")
 group "Tests"
 include("testTerrain.lua")
 include("testGraphics.lua")
---include("testGraphicsVr.lua")
+include("testGraphicsVr.lua")
 include("testLua.lua")
 include("testUi.lua")
 include("testNoise.lua")

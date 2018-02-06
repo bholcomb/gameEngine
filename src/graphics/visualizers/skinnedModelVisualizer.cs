@@ -85,10 +85,11 @@ namespace Graphics
 			foreach (Mesh mesh in smr.model.myMeshes)
 			{
 				Effect effect = getEffect(p.technique, (UInt32)mesh.material.myFeatures);
-				RenderQueue<SkinnedModelInfo> rq = Renderer.device.getRenderQueue(effect.getPipeline(mesh.material).id) as RenderQueue<SkinnedModelInfo>;
+            PipelineState pipeline = effect.createPipeline(mesh.material);
+            RenderQueue<SkinnedModelInfo> rq = p.findRenderQueue(pipeline.id) as RenderQueue<SkinnedModelInfo>;
 				if (rq == null)
 				{
-					rq = Renderer.device.createRenderQueue<SkinnedModelInfo>(effect.getPipeline(mesh.material));
+					rq = Renderer.device.createRenderQueue<SkinnedModelInfo>(effect.createPipeline(mesh.material));
                rq.name = rq.myPipeline.shaderState.shaderProgram.name + "-" + (mesh.material.hasTransparency == true ? "transparent" : "opaque"); 
                rq.myPipeline.vaoState.vao = new VertexArrayObject();
 					rq.myPipeline.vaoState.vao.bindVertexFormat<V3N3T2B4W4>(rq.myPipeline.shaderState.shaderProgram);

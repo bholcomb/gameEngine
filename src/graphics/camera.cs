@@ -240,6 +240,8 @@ namespace Graphics
 		public void setProjection(Matrix4 projection)
 		{
 			myProjMatrix = projection;
+
+
 			updateFrustum();
 		}
 

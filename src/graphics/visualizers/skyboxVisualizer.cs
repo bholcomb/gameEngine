@@ -37,10 +37,12 @@ namespace Graphics
 		{
 			SkyboxRenderable skyboxModel = r as SkyboxRenderable;
 			Effect effect= getEffect(p.technique, (UInt32)Material.Feature.Skybox);
-			RenderQueue<SkyboxRenderInfo> rq = Renderer.device.getRenderQueue(effect.getPipeline(skyboxModel.model.mesh.material).id) as RenderQueue<SkyboxRenderInfo>;
+         PipelineState pipeline = effect.createPipeline(skyboxModel.model.mesh.material);
+
+         RenderQueue<SkyboxRenderInfo> rq = p.findRenderQueue(pipeline.id) as RenderQueue<SkyboxRenderInfo>;
 			if (rq == null)
 			{
-				rq = Renderer.device.createRenderQueue<SkyboxRenderInfo>(effect.getPipeline(skyboxModel.model.mesh.material));
+				rq = Renderer.device.createRenderQueue<SkyboxRenderInfo>(effect.createPipeline(skyboxModel.model.mesh.material));
             rq.name = rq.myPipeline.shaderState.shaderProgram.name;
             rq.myPipeline.vaoState.vao = new VertexArrayObject();
 				rq.myPipeline.vaoState.vao.bindVertexFormat<V3>(rq.myPipeline.shaderState.shaderProgram);

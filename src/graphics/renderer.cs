@@ -296,7 +296,7 @@ namespace Graphics
 
 			foreach (View view in activeViews)
 			{
-				if(activeCameras.Contains(view.camera) == false)
+            if(activeCameras.Contains(view.camera) == false)
 				{
 					activeCameras.Add(view.camera);
 				}

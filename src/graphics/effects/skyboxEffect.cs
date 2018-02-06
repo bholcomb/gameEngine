@@ -27,7 +27,7 @@ namespace Graphics
 			rs.setIndexBuffer(SkyBox.theIbo.id);
 		}
 
-		public override PipelineState getPipeline(Material m)
+		public override PipelineState createPipeline(Material m)
 		{
 			PipelineState ps = new PipelineState();
 			ps.shaderState.shaderProgram = myShader;

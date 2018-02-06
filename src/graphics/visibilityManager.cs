@@ -28,7 +28,7 @@ namespace Graphics
 
 			foreach (View view in activeViews)
 			{
-				List<Renderable> cameraVisibleList = null;
+            List<Renderable> cameraVisibleList = null;
 				if (myCameraVisibles.TryGetValue(view.camera, out cameraVisibleList) == false)
 				{
                cameraVisibleList = new List<Renderable>();

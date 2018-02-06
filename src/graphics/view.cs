@@ -102,7 +102,10 @@ namespace Graphics
          Renderer.device.pushDebugMarker(String.Format("View {0}-prepare", name));
          onPrePrepare();
 
-         camera.updateCameraUniformBuffer();
+         if (camera != null)
+         {
+            camera.updateCameraUniformBuffer();
+         }
 
          //per view prepare
          foreach (String visType in myVisibleRenderablesByType.Keys)
@@ -144,6 +147,8 @@ namespace Graphics
          //reset the device so this view can update as appropriate
          preCommands.Add(new DeviceResetCommand());
 
+         //bind the camera for the view
+         preCommands.Add(new BindCameraCommand(camera));
 
          foreach (Pass p in myPasses)
          {
@@ -181,18 +186,30 @@ namespace Graphics
 		}
 
       #region pass and child/sibling view management
-      public void addPass(Pass p)
+      public virtual void addPass(Pass p)
       {
          p.view = this;
          myPasses.Add(p);
       }
 
-      public void removePass(Pass p)
+      public virtual void removePass(Pass p)
       {
          myPasses.Remove(p);
       }
 
-      public Pass findPass(string name)
+      public virtual void removePass(String name)
+      {
+         foreach(Pass p in myPasses)
+         {
+            if(p.name == name)
+            {
+               myPasses.Remove(p);
+               return;
+            }
+         }
+      }
+
+      public virtual Pass findPass(string name)
       {
          foreach(Pass p in myPasses)
          {
@@ -205,14 +222,17 @@ namespace Graphics
          return null;
       }
 
-      public void getViews(List<View> views)
+      public virtual void getViews(List<View> views)
       {
          if(child != null)
          {
             child.getViews(views);
          }
 
-         views.Add(this);
+         if (camera != null)
+         {
+            views.Add(this);
+         }
 
          if(sibling != null)
          {
@@ -221,7 +241,7 @@ namespace Graphics
 
       }
 
-      public void addChild(View v)
+      public virtual void addChild(View v)
       {
          if(child == null)
          {
@@ -233,7 +253,7 @@ namespace Graphics
          }
       }
 
-      public void addSibling(View v)
+      public virtual void addSibling(View v)
       {
          if(sibling == null)
          {

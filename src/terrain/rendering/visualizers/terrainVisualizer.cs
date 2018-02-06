@@ -105,10 +105,11 @@ namespace Terrain
             if (dc.solidCount > 0)
             {
                Effect effect = getEffect(p.technique, 1);
-               RenderQueue<TerrainRenderInfo> rq = Renderer.device.getRenderQueue(effect.getPipeline(MaterialManager.visualMaterial).id) as RenderQueue<TerrainRenderInfo>;
+               PipelineState pipeline = effect.createPipeline(MaterialManager.visualMaterial);
+               RenderQueue<TerrainRenderInfo> rq = p.findRenderQueue(pipeline.id) as RenderQueue<TerrainRenderInfo>;
                if (rq == null)
                {
-                  rq = Renderer.device.createRenderQueue<TerrainRenderInfo>(effect.getPipeline(MaterialManager.visualMaterial));
+                  rq = Renderer.device.createRenderQueue<TerrainRenderInfo>(effect.createPipeline(MaterialManager.visualMaterial));
                   rq.name = rq.myPipeline.shaderState.shaderProgram.name + "-" + "opaque";
                   rq.visualizer = this;
                   p.registerQueue(rq);
@@ -130,10 +131,11 @@ namespace Terrain
             if (dc.transCount > 0)
             {
                Effect effect = getEffect(p.technique, 2);
-               RenderQueue<TerrainRenderInfo> rq = Renderer.device.getRenderQueue(effect.getPipeline(MaterialManager.visualMaterial).id) as RenderQueue<TerrainRenderInfo>;
+               PipelineState pipeline = effect.createPipeline(MaterialManager.visualMaterial);
+               RenderQueue<TerrainRenderInfo> rq = p.findRenderQueue(pipeline.id) as RenderQueue<TerrainRenderInfo>;
                if (rq == null)
                {
-                  rq = Renderer.device.createRenderQueue<TerrainRenderInfo>(effect.getPipeline(MaterialManager.visualMaterial));
+                  rq = Renderer.device.createRenderQueue<TerrainRenderInfo>(effect.createPipeline(MaterialManager.visualMaterial));
                   rq.name = rq.myPipeline.shaderState.shaderProgram.name + "-" + "transparent";
                   p.registerQueue(rq);
                }
@@ -154,10 +156,11 @@ namespace Terrain
             if (dc.waterCount > 0)
             {
                Effect effect = getEffect(p.technique, 3);
-               RenderQueue<TerrainRenderInfo> rq = Renderer.device.getRenderQueue(effect.getPipeline(MaterialManager.visualMaterial).id) as RenderQueue<TerrainRenderInfo>;
+               PipelineState pipeline = effect.createPipeline(MaterialManager.visualMaterial);
+               RenderQueue<TerrainRenderInfo> rq = p.findRenderQueue(pipeline.id) as RenderQueue<TerrainRenderInfo>;
                if (rq == null)
                {
-                  rq = Renderer.device.createRenderQueue<TerrainRenderInfo>(effect.getPipeline(MaterialManager.visualMaterial));
+                  rq = Renderer.device.createRenderQueue<TerrainRenderInfo>(effect.createPipeline(MaterialManager.visualMaterial));
                   rq.name = rq.myPipeline.shaderState.shaderProgram.name + "-" + "water";
                   p.registerQueue(rq);
                }

@@ -19,7 +19,7 @@ namespace Graphics
       public static PipelineState thePipelineState;
 
       //shadow state for the device, uses commands to set these
-      UInt64 myBoundPipeline = 0;
+      UInt64 myCurrentPipelineId = 0;
       Int32[] myBoundUniformBuffers = new Int32[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; //TODO: categorize UBOs into per-frame, per-view, per-draw groups
       Int32[] myBoundStorageBuffers = new Int32[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
       Int32[] myBoundImageBuffers = new Int32[10] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -61,13 +61,6 @@ namespace Graphics
       public RenderTarget getRenderTarget(String name)
       {
          return myRenderTargets[name]; //throws if not found
-      }
-
-      public BaseRenderQueue getRenderQueue(UInt64 pipelineId)
-      {
-         BaseRenderQueue rq = null;
-         myRenderQueues.TryGetValue(pipelineId, out rq);
-         return rq;
       }
 
       public void executeCommandList(List<RenderCommand> cmds)
@@ -127,11 +120,11 @@ namespace Graphics
 
       public void bindPipeline(PipelineState ps)
       {
-         if (myBoundPipeline != ps.id)
+         if (myCurrentPipelineId != ps.id)
          {
             //Renderer.device.clearRenderState();  //this clears per-frame UBO as well.  Need to find a way to segregate these
             ps.apply();
-            myBoundPipeline = ps.id;
+            myCurrentPipelineId = ps.id;
             currentPipeline = ps;
          }
       }
@@ -193,6 +186,7 @@ namespace Graphics
       {
          PipelineState ps = new PipelineState();
          ps.apply();
+         myCurrentPipelineId = ps.id;
       }
 
       public void reset()

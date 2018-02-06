@@ -37,7 +37,7 @@ namespace Graphics
 			state.setUniform(new UniformData(3, Uniform.UniformType.Float, m.alpha));
 		}
 
-		public override PipelineState getPipeline(Material m)
+		public override PipelineState createPipeline(Material m)
 		{
 			PipelineState state = new PipelineState();
 			Texture tex = m.myTextures[(int)Material.TextureId.Diffuse].value();

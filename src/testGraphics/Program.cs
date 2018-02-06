@@ -39,8 +39,6 @@ namespace testRenderer
 		World myWorld;
 		TerrainRenderManager myTerrainRenderManager;
 
-		//Renderer2.Font myFont;
-
 		public TestRenderer()
 			: base(theWidth, theHeigth, new GraphicsMode(32, 24, 0, 0), "Haven Test", GameWindowFlags.Default, DisplayDevice.Default, 4, 4,
 #if DEBUG
@@ -159,7 +157,6 @@ namespace testRenderer
          myPoint1.position = new Vector3(2.5f, 1, 0) + new Vector3(0.0f, (float)Math.Sin(now), (float)Math.Cos(now));
          myPoint2.position = new Vector3(5.5f, 1, 0) + new Vector3(0.0f, (float)Math.Cos(now), (float)Math.Sin(now));
 
-
          //high frequency filter on avg fps
          avgFps = (0.99f * avgFps) + (0.01f * (float)TimeSource.fps());
 
@@ -201,7 +198,6 @@ namespace testRenderer
 
 				ImGui.endWindow();
 			}
-
 
 			//ImGui.debug();
 			ImGui.endFrame();
@@ -267,7 +263,7 @@ namespace testRenderer
          Graphics.View v = new Graphics.View("Main View", myCamera, myViewport);
 
          Pass p = new Pass("environment", "skybox");
-         p.setRenderTarget(myRenderTarget);
+         p.renderTarget = myRenderTarget;
          p.filter = new TypeFilter(new List<String>() { "skybox" });
          p.clearTarget = true; //false is default setting
          v.addPass(p);

@@ -37,7 +37,7 @@ namespace Terrain
 			state.setUniformBuffer(myLightVisualizer.myLightUniforBuffer.id, 1);
 		}
 
-		public override PipelineState getPipeline(Graphics.Material m)
+		public override PipelineState createPipeline(Graphics.Material m)
 		{
 			PipelineState state = new PipelineState();
 			state.culling.enabled = false;
