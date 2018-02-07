@@ -141,8 +141,8 @@ namespace Graphics
 			bind();
          GL.TexParameter(target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
          GL.TexParameter(target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-         GL.TexParameter(target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-         GL.TexParameter(target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+         GL.TexParameter(target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+         GL.TexParameter(target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
 
          GL.GetTexLevelParameter(TextureTarget.Texture2D, 0, GetTextureParameter.TextureWidth, out myWidth);
          GL.GetTexLevelParameter(TextureTarget.Texture2D, 0, GetTextureParameter.TextureHeight, out myHeight);
@@ -218,7 +218,7 @@ namespace Graphics
 			unbind();
 		}
 
-		public void setWrapping(TextureWrapMode s, TextureWrapMode t, TextureWrapMode r = TextureWrapMode.ClampToEdge)
+		public void setWrapping(TextureWrapMode s, TextureWrapMode t, TextureWrapMode r = TextureWrapMode.Repeat)
 		{
 			bind();
 			GL.TexParameter(target, TextureParameterName.TextureWrapS, (int)s);
@@ -345,8 +345,8 @@ namespace Graphics
             GL.TexImage2D(target, 0, myPixelFormat, myWidth, myHeight, 0, pf, pt, Data.Scan0);
             GL.TexParameter(target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
             GL.TexParameter(target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            GL.TexParameter(target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-            GL.TexParameter(target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+            GL.TexParameter(target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
             bm.UnlockBits(Data);
          }
 
@@ -387,8 +387,8 @@ namespace Graphics
          GL.TexParameter(target, TextureParameterName.TextureMaxLevel, 0);
          GL.TexParameter(target, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
          GL.TexParameter(target, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-         GL.TexParameter(target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-         GL.TexParameter(target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+         GL.TexParameter(target, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+         GL.TexParameter(target, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
 
          GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 

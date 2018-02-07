@@ -131,6 +131,7 @@ namespace Graphics
 
 			myTexture = Graphics.Util.getEmbeddedTexture("Graphics.data.debugFont.png");
 			myTexture.setMinMagFilters(TextureMinFilter.NearestMipmapNearest, TextureMagFilter.Nearest);
+         myTexture.setWrapping(TextureWrapMode.ClampToEdge, TextureWrapMode.ClampToEdge);
 			myFont = FontManager.findFont("DEFAULT");
 		}
 
