@@ -241,9 +241,15 @@ namespace Graphics
 		{
 			myProjMatrix = projection;
 
-
 			updateFrustum();
 		}
+
+      public void setView(Matrix4 view)
+      {
+         myViewMatrix = view;
+
+         updateFrustum();
+      }
 
 		public void setPerspective(float fovx, float aspect, float znear, float zfar)
 		{

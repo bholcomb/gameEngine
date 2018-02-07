@@ -27,7 +27,7 @@ namespace testRenderer
 
       public RenderTarget[] myRenderTargets = new RenderTarget[2];
       public Camera[] myCameras = new Camera[2];
-      Vector3[] myEyeTransform = new Vector3[2];
+      Matrix4[] myEyeTransform = new Matrix4[2];
 
       static CVRSystem vrSystem;
 
@@ -93,6 +93,11 @@ namespace testRenderer
          return true;
       }
 
+      public void resetPose()
+      {
+         vrSystem.ResetSeatedZeroPose();
+      }
+
       public static Matrix4 convertToMatrix4(HmdMatrix34_t m)
       {
          Matrix4 mat = new  Matrix4(
@@ -138,7 +143,7 @@ namespace testRenderer
             myCameras[i].setProjection(Matrix4.CreatePerspectiveOffCenter(left, right, bottom, top, 0.01f, 1000.0f));
 
             //openVR uses a right-back-up system, just like our convention, so no conversion necessary
-            myEyeTransform[i] = convertToMatrix4(vrSystem.GetEyeToHeadTransform((EVREye)i)).ExtractTranslation();
+            myEyeTransform[i] = convertToMatrix4(vrSystem.GetEyeToHeadTransform((EVREye)i));
          }
       }
 
@@ -154,14 +159,11 @@ namespace testRenderer
          }
 
          //get head position
-         Vector3 headPos = Vector3.Zero;
-         Quaternion headOri = Quaternion.Identity;
          TrackedDevicePose_t pose = renderPoseArray[OpenVR.k_unTrackedDeviceIndex_Hmd];
-         if(pose.bDeviceIsConnected == true && pose.bPoseIsValid == true)
+         Matrix4 headPose = Matrix4.Identity;
+         if (pose.bDeviceIsConnected == true && pose.bPoseIsValid == true)
          {
-            Matrix4 headPose = convertToMatrix4(pose.mDeviceToAbsoluteTracking);
-            headPos = headPose.ExtractTranslation();
-            headOri = headPose.ExtractRotation().Inverted(); //TODO: why?
+             headPose = convertToMatrix4(pose.mDeviceToAbsoluteTracking);
          }
          else
          {
@@ -170,11 +172,11 @@ namespace testRenderer
          }
 
          //update camera matrix for each eye
-         for(int i = 0; i < 2; i++)
+         for (int i = 0; i < 2; i++)
          {
-            Vector3 rotatedEyeTrans = headOri * myEyeTransform[i];
-            myCameras[i].position = position + headPos + rotatedEyeTrans;
-            myCameras[i].setOrientation(headOri * orientation);
+            //TODO:  this doesn't look right, but seems to work.  Work through the math.
+            Matrix4 view = Matrix4.CreateTranslation(-position) * Matrix4.CreateFromQuaternion(orientation) * myEyeTransform[i].Inverted() * headPose.Inverted();
+            myCameras[i].setView(view);
          }
 
          return true;
@@ -319,6 +321,11 @@ namespace testRenderer
 			{
 				//myWorld.newWorld();
 			}
+
+         if(e.Key == Key.F12)
+         {
+            myHmd.resetPose();
+         }
 		}
 
 		protected override void OnLoad(EventArgs e)
