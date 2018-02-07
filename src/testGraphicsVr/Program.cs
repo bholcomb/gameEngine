@@ -36,6 +36,8 @@ namespace testRenderer
       LightRenderable myPoint1;
       LightRenderable myPoint2;
 
+      Overlay myUiOverlay;
+
 		bool myShowRenderStats = true;
 
 		World myWorld;
@@ -144,12 +146,13 @@ namespace testRenderer
 			GL.ClearDepth(1.0f);
 
          myHmd = new HMD();
-
-
+         
 			initRenderTarget();
 			initRenderer();
 
-			myCamera.position = new Vector3(0, 2, 10);
+         myUiOverlay = new Overlay("UI", "UI", myUiRenderTarget.buffers[FramebufferAttachment.ColorAttachment0]);
+
+         myCamera.position = new Vector3(0, 2, 10);
          myHmd.position = myCamera.position;
          myHmd.orientation = myCamera.myOrientation;
 
@@ -165,6 +168,7 @@ namespace testRenderer
 		protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
 		{
 			base.OnClosing(e);
+         myUiOverlay.release();
          VR.VR.shutdown();
 			myWorld.shutdown();
 		}
@@ -199,6 +203,10 @@ namespace testRenderer
 
          //high frequency filter on avg fps
          avgFps = (0.99f * avgFps) + (0.01f * (float)TimeSource.fps());
+
+         //myUiOverlay.setOffsetMatrix(Matrix4.CreateTranslation(new Vector3(0f, 0f, -1f)));
+
+         myUiOverlay.visible = myShowRenderStats;
 
 			ImGui.beginFrame();
 			if(ImGui.beginWindow("Render Stats", ref myShowRenderStats, Window.Flags.Borders))
@@ -272,25 +280,33 @@ namespace testRenderer
 			rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.ColorAttachment0, format = SizedInternalFormat.Rgba32f }); //creates a texture internally
 			rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.DepthAttachment, tex = new Texture(x, y, PixelInternalFormat.DepthComponent32f) }); //uses an existing texture			
 
-			if (myRenderTarget == null)
+
+         List<RenderTargetDescriptor> uidesc = new List<RenderTargetDescriptor>();
+         uidesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.ColorAttachment0, format = SizedInternalFormat.Rgba8 }); //creates a texture internally
+         uidesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.DepthAttachment, tex = new Texture(x, y, PixelInternalFormat.DepthComponent32f) }); //uses an existing texture			
+
+         if (myRenderTarget == null)
 			{
 				myRenderTarget = new RenderTarget(x, y, rtdesc);
-            myUiRenderTarget = new RenderTarget(x, y, rtdesc);
+            myUiRenderTarget = new RenderTarget(x, y, uidesc);
 			}
 			else
 			{
 				myRenderTarget.update(x, y, rtdesc);
-            myUiRenderTarget.update(x, y, rtdesc);
+            myUiRenderTarget.update(x, y, uidesc);
 			}
-		}
 
-		void handleViewportChanged(int x, int y, int w, int h)
+      }
+
+      void handleViewportChanged(int x, int y, int w, int h)
 		{
 			initRenderTarget();
 		}
 
 		void present()
 		{
+         myUiOverlay.submit();
+
          myCamera.bind();
          GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
          GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -318,14 +334,19 @@ namespace testRenderer
 
          p = new Pass("terrain", "forward-lighting");
          p.filter = new TypeFilter(new List<String>() { "terrain" });
-         v.addPass(p);
+         //v.addPass(p);
 
          p = new Pass("model", "forward-lighting");
          p.filter = new TypeFilter(new List<String>() { "light", "staticModel", "skinnedModel" });
-         v.addPass(p);
+         //v.addPass(p);
 
-
-         Graphics.View uiView = new UI.GuiView("ui", myCamera, myViewport, myUiRenderTarget);
+         //setup UI 
+         Graphics.View uiView = new Graphics.View("ui", myCamera, myViewport);
+         GuiPass uiPass = new GuiPass(myUiRenderTarget);
+         uiPass.clearTarget = true;
+         uiPass.clearColor = new Color4(0.2f, 0.2f, 0.2f, 1.0f);
+         uiView.addPass(uiPass);
+         v.addSibling(uiView);
 
 
          //add the view
@@ -342,7 +363,7 @@ namespace testRenderer
 
 			//create a tree instance
 			Random rand = new Random(230877);
-			for (int i = 0; i < 10000; i++)
+			for (int i = 0; i < 1000; i++)
 			{
 				int size = 500;
 				int halfSize = size / 2;
@@ -369,7 +390,7 @@ namespace testRenderer
          testDesc = new ObjModelDescriptor("../data/models/props/testCube/testCube.obj");
          testRenderable.model = Renderer.resourceManager.getResource(testDesc) as StaticModel;
          Renderer.renderables.Add(testRenderable);
-         testRenderable.setPosition(new Vector3(0, 1, 0));
+         testRenderable.setPosition(new Vector3(0, 1, -2));
 
          //create a skinned model instance
          mySkinnedModel = new SkinnedModelRenderable();

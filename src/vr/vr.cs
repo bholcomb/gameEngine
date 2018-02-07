@@ -2,6 +2,7 @@ using System;
 
 using Util;
 
+using OpenTK;
 using Valve.VR;
 
 namespace VR
@@ -72,6 +73,36 @@ namespace VR
          }
 
          return "unkown";
+      }
+
+      public static Matrix4 convertToMatrix4(HmdMatrix34_t m)
+      {
+         Matrix4 mat = new Matrix4(
+            m.m0, m.m4, m.m8, 0.0f,
+            m.m1, m.m5, m.m9, 0.0f,
+            m.m2, m.m6, m.m10, 0.0f,
+            m.m3, m.m7, m.m11, 1.0f
+            );
+
+         return mat;
+      }
+
+      public static HmdMatrix34_t convertToMatrix34(Matrix4 m)
+      {
+         HmdMatrix34_t mat;
+         mat.m0 = m.M11;
+         mat.m1 = m.M21;
+         mat.m2 = m.M31;
+         mat.m3 = m.M41;
+         mat.m4 = m.M12;
+         mat.m5 = m.M22;
+         mat.m6 = m.M32;
+         mat.m7 = m.M42;
+         mat.m8 = m.M13;
+         mat.m9 = m.M23;
+         mat.m10 = m.M33;
+         mat.m11 = m.M43;
+         return mat;
       }
    }
 }

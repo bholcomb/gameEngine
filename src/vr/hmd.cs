@@ -32,18 +32,6 @@ namespace VR
          VR.vrSystem.ResetSeatedZeroPose();
       }
 
-      public static Matrix4 convertToMatrix4(HmdMatrix34_t m)
-      {
-         Matrix4 mat = new Matrix4(
-            m.m0, m.m4, m.m8, 0.0f,
-            m.m1, m.m5, m.m9, 0.0f,
-            m.m2, m.m6, m.m10, 0.0f,
-            m.m3, m.m7, m.m11, 1.0f
-            );
-
-         return mat;
-      }
-
       void initEyes()
       {
          List<RenderTargetDescriptor> rtdesc = new List<RenderTargetDescriptor>();
@@ -77,7 +65,7 @@ namespace VR
             myCameras[i].setProjection(Matrix4.CreatePerspectiveOffCenter(left, right, bottom, top, zNear, zFar));
 
             //openVR uses a right-back-up system, just like our convention, so no conversion necessary
-            myEyeTransform[i] = convertToMatrix4(VR.vrSystem.GetEyeToHeadTransform((EVREye)i));
+            myEyeTransform[i] = VR.convertToMatrix4(VR.vrSystem.GetEyeToHeadTransform((EVREye)i));
          }
       }
 
@@ -97,7 +85,7 @@ namespace VR
          Matrix4 headPose = Matrix4.Identity;
          if (pose.bDeviceIsConnected == true && pose.bPoseIsValid == true)
          {
-            headPose = convertToMatrix4(pose.mDeviceToAbsoluteTracking);
+            headPose = VR.convertToMatrix4(pose.mDeviceToAbsoluteTracking);
          }
          else
          {

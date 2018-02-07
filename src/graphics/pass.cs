@@ -1,6 +1,10 @@
 using System;
 using System.Collections.Generic;
 
+using OpenTK;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL;
+
 using Util;
 
 namespace Graphics
@@ -15,10 +19,12 @@ namespace Graphics
 
    public class Pass
    {
-      string myName;
-      string myTechnique;
+      protected string myName;
+      protected string myTechnique;
       public RenderTarget renderTarget { get; set; }
       public bool clearTarget { get; set; }
+      public Color4 clearColor { get; set; }
+      public ClearBufferMask clearMask { get; set; }
       public View view { get; set; }
 
       public string name { get { return myName; } }
@@ -27,9 +33,9 @@ namespace Graphics
 
       public RenderableFilter filter;
 
-      Dictionary<UInt64, BaseRenderQueue> myRenderQueues;
+      protected Dictionary<UInt64, BaseRenderQueue> myRenderQueues;
       public Dictionary<UInt64, BaseRenderQueue> renderQueues { get { return myRenderQueues; } }
-      Dictionary<string, List<Renderable>> myVisibleRenderablesByType;
+      protected Dictionary<string, List<Renderable>> myVisibleRenderablesByType;
       public Dictionary<string, List<Renderable>> visibleRenderablesByType { get { return myVisibleRenderablesByType; } }
       
 
@@ -54,6 +60,10 @@ namespace Graphics
          myVisibleRenderablesByType = new Dictionary<string, List<Renderable>>();
          preCommands = new RenderCommandList();
          postCommands = new RenderCommandList();
+
+         clearTarget = false;
+         clearColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
+         clearMask = ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit;
       }
 
       public Pass(Pass p) 
@@ -62,9 +72,11 @@ namespace Graphics
          filter = p.filter;
          renderTarget = p.renderTarget;
          clearTarget = p.clearTarget;
+         clearColor = p.clearColor;
+         clearMask = p.clearMask;
       }
 
-      public void updateVisibleRenderables(IEnumerable<Renderable> cameraVisibles)
+      public virtual void updateVisibleRenderables(IEnumerable<Renderable> cameraVisibles)
       {
          foreach (List<Renderable> tl in myVisibleRenderablesByType.Values)
          {
@@ -87,7 +99,7 @@ namespace Graphics
          }
       }
 
-      public void prepare()
+      public virtual void prepare()
       {
          Renderer.device.pushDebugMarker(String.Format("Pass {0}:{1}-prepare", view.name, name));
 
@@ -120,7 +132,7 @@ namespace Graphics
          Renderer.device.popDebugMarker();
       }
 
-      public void generateRenderCommandLists()
+      public virtual void generateRenderCommandLists()
       {
          preCommands.Clear();
          postCommands.Clear();
@@ -132,7 +144,8 @@ namespace Graphics
             preCommands.Add(new SetRenderTargetCommand(renderTarget));
             if (clearTarget == true)
             {
-               preCommands.Add(new ClearCommand());
+               preCommands.Add(new ClearColorCommand(clearColor));
+               preCommands.Add(new ClearCommand(clearMask));
             }
          }
 
@@ -159,7 +172,7 @@ namespace Graphics
          postCommands.Add(new PopDebugMarkerCommand());
       }
 
-      public void getRenderCommands(List<RenderCommandList> renderCmdLists)
+      public virtual void getRenderCommands(List<RenderCommandList> renderCmdLists)
       {
          renderCmdLists.Add(preCommands);
 
@@ -180,14 +193,14 @@ namespace Graphics
          renderCmdLists.Add(postCommands);
       }
 
-      public BaseRenderQueue findRenderQueue(UInt64 pipelineId)
+      public virtual BaseRenderQueue findRenderQueue(UInt64 pipelineId)
       {
          BaseRenderQueue rq = null;
          myRenderQueues.TryGetValue(pipelineId, out rq);
          return rq;
       }
 
-      public void registerQueue(BaseRenderQueue rq)
+      public virtual void registerQueue(BaseRenderQueue rq)
       {
          if (myRenderQueues.ContainsKey(rq.myPipeline.id) == false)
          {

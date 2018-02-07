@@ -79,8 +79,23 @@ namespace Graphics
 			myRenderState.apply();
 		}
 	}
+   public class ClearColorCommand : RenderCommand
+   {
+      Color4 myColor;
 
-	public class ClearCommand : RenderCommand
+      public ClearColorCommand(Color4 color)
+         : base()
+      {
+         myColor = color;
+      }
+
+      public override void execute()
+      {
+         GL.ClearColor(myColor);
+      }
+   }
+
+   public class ClearCommand : RenderCommand
 	{
 		ClearBufferMask myClearMask;
 

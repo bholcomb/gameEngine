@@ -27,6 +27,15 @@ namespace Graphics
       }
    }
 
+   public class AlwaysFilter : RenderableFilter
+   {
+      public AlwaysFilter() : base() { }
+      public override bool shouldAccept(Renderable r)
+      {
+         return true;
+      }
+   }
+
    public class TypeFilter : RenderableFilter
    {
       List<String> myTypes;

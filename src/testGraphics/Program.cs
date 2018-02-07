@@ -277,8 +277,12 @@ namespace testRenderer
          v.addPass(p);
 
          //add some sub-views for debug graphics and UI
+         Graphics.View uiView = new Graphics.View("UI", myCamera, myViewport);
+         GuiPass uiPass = new GuiPass(myRenderTarget);
+         uiView.addPass(uiPass);
+         v.addSibling(uiView);
+
          v.addSibling(new Graphics.DebugView("Debug View", myCamera, myViewport, myRenderTarget));
-         v.addSibling(new UI.GuiView("UI View", myCamera, myViewport, myRenderTarget));
 
          //add the view
          Renderer.views[v.name] = v;         

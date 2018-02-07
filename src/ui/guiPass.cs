@@ -1,0 +1,93 @@
+using System;
+using System.Collections.Generic;
+
+using Graphics;
+
+namespace UI
+{
+   public class GuiPass : Pass
+   {
+      BaseRenderQueue myRenderQueue;
+      public GuiPass(RenderTarget target) 
+         :base ("UI", "ui")
+      {
+         renderTarget = target;
+
+         PipelineState ps = new PipelineState();
+         ps.blending.enabled = true;
+         ps.shaderState.shaderProgram = UI.Canvas.theShader;
+         ps.blending.enabled = true;
+         ps.culling.enabled = false;
+         ps.depthTest.enabled = false;
+
+         ps.vaoState.vao = new VertexArrayObject();
+         ps.vaoState.vao.bindVertexFormat<V2T2B4>(ps.shaderState.shaderProgram);
+         ps.generateId();
+
+         myRenderQueue = Renderer.device.createRenderQueue(ps);
+         myRenderQueue.name = "UI";
+         registerQueue(myRenderQueue);
+      }
+
+      public override void updateVisibleRenderables(IEnumerable<Renderable> cameraVisibles)
+      {
+         //noop since the renderables are all contained in IMGUI
+      }
+
+      public override void generateRenderCommandLists()
+      {
+         preCommands.Clear();
+         postCommands.Clear();
+
+         preCommands.Add(new PushDebugMarkerCommand(String.Format("Pass {0}:{1}-execute", view.name, name)));
+
+         //clear render target if needed
+         if (renderTarget != null)
+         {
+            preCommands.Add(new SetRenderTargetCommand(renderTarget));
+            if (clearTarget == true)
+            {
+               preCommands.Add(new ClearColorCommand(clearColor));
+               preCommands.Add(new ClearCommand(clearMask));
+            }
+         }
+
+         //called after setting render target so that any user commands inserted will affect (or change) the render target
+         onPreGenerateCommands();
+
+         stats.queueCount = myRenderQueues.Count;
+         stats.renderCalls = 0;
+         stats.name = name;
+         stats.technique = technique;
+
+
+         //process all the IMGUI commands
+         myRenderQueue.addCommand(new SetPipelineCommand(myRenderQueue.myPipeline));
+         myRenderQueue.addCommand(new BindCameraCommand(view.camera));
+
+         //add the view specific commands for each render queue
+         bool needsCameraRebind = false;
+         foreach (RenderCommand rc in ImGui.getRenderCommands())
+         {
+            //previous command was custom and reset the pipeline for UI drawing
+            if (needsCameraRebind == true && rc is UiRenderCommand)
+            {
+               myRenderQueue.addCommand(new SetPipelineCommand(myRenderQueue.myPipeline));
+               myRenderQueue.addCommand(new BindCameraCommand(view.camera));
+            }
+
+            //add the command
+            myRenderQueue.addCommand(rc);
+
+            if (rc is StatelessRenderCommand)
+            {
+               needsCameraRebind = true;
+            }
+         }
+
+         onPostGenerateCommands();
+
+         postCommands.Add(new PopDebugMarkerCommand());
+      }
+   }
+}
