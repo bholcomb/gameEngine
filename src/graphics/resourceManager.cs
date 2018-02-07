@@ -54,6 +54,11 @@ namespace Graphics
          //need to try and load the IResource here
          res = load(desc);
 
+         if(res == null)
+         {
+            throw new Exception("Failed to create resource");
+         }
+
          return res;
       }
 

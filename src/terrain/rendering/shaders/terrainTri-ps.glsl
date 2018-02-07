@@ -176,10 +176,10 @@ void main()
          lightContribution += directionalLight(light, dirToEye, n);
       }
       else if (light.lightType == 1) {
-         lightContribution += pointLight(light, dirToEye, n);
+        // lightContribution += pointLight(light, dirToEye, n);
       }
       else if (light.lightType == 2) {
-         lightContribution += spotLight(light, dirToEye, n);
+        // lightContribution += spotLight(light, dirToEye, n);
       }
 
       outputFrag += vec4(lightContribution, 1) * albedo;

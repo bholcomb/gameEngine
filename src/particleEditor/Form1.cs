@@ -8,7 +8,7 @@ using OpenTK;
 using OpenTK.Input;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
-using Renderer;
+using Graphics;
 using Util;
 
 namespace ParticleEditor
@@ -169,7 +169,7 @@ namespace ParticleEditor
 
       private void glControl1_Paint(object sender, PaintEventArgs e)
       {
-         Renderer.Renderer.render();
+         Renderer.render();
 
          //render some text
          myFont.print(20, 20, "FPS: {0:0.00}", TimeSource.avgFps());

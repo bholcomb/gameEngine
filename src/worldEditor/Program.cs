@@ -128,7 +128,7 @@ namespace WorldEditor
 
          RenderCubemapSphere cmd = new RenderCubemapSphere(new Vector3(0, 0, -5), 2.0f, myGenerator.myBiomeMap, true);
          cmd.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-         cmd.pipelineState.shaderProgram = myDisplayBiomeShader;
+         cmd.pipelineState.shaderState.shaderProgram = myDisplayBiomeShader;
          cmd.renderState.setUniform(new UniformData(21, Uniform.UniformType.Bool, showElevation)); //show elevation
          cmd.renderState.setUniform(new UniformData(22, Uniform.UniformType.Bool, showWater)); //show water
          cmd.renderState.setUniform(new UniformData(23, Uniform.UniformType.Bool, showHeat)); //show heat

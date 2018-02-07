@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using OpenTK;
 
 using Util;
+using Lua;
 
 namespace Audio
 {

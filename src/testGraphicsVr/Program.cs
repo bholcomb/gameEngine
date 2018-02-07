@@ -15,234 +15,10 @@ using Util;
 using Graphics;
 using Terrain;
 using UI;
-
-using Valve.VR;
+using VR;
 
 namespace testRenderer
 {
-   public class HMD
-   {
-      public Vector3 position = Vector3.Zero;
-      public Quaternion orientation = Quaternion.Identity;
-
-      public RenderTarget[] myRenderTargets = new RenderTarget[2];
-      public Camera[] myCameras = new Camera[2];
-      Matrix4[] myEyeTransform = new Matrix4[2];
-
-      static CVRSystem vrSystem;
-
-      TrackedDevicePose_t[] renderPoseArray = new TrackedDevicePose_t[OpenVR.k_unMaxTrackedDeviceCount];
-      TrackedDevicePose_t[] gamePoseArray = new TrackedDevicePose_t[OpenVR.k_unMaxTrackedDeviceCount];
-
-      public HMD()
-      {
-         initEyes();
-      }
-
-      public static bool init()
-      {
-         EVRInitError error = EVRInitError.None;
-         vrSystem = OpenVR.Init(ref error, EVRApplicationType.VRApplication_Scene);
-
-         if(error != EVRInitError.None)
-         {
-            Warn.print("Error initializing OpenVR: {0}", error);
-            return false;
-         }
-
-         if(OpenVR.Compositor == null)
-         {
-            Warn.print("Failed to initialize OpenVR compositor");
-            return false;
-         }
-
-         //setup a seated environment
-         OpenVR.Compositor.SetTrackingSpace(ETrackingUniverseOrigin.TrackingUniverseSeated);
-
-         Info.print("OpenVR Manufacturer: {0}", getTrackedDeviceString(ETrackedDeviceProperty.Prop_ManufacturerName_String));
-         Info.print("OpenVR Model Number: {0}", getTrackedDeviceString(ETrackedDeviceProperty.Prop_ModelNumber_String));
-         Info.print("OpenVR Tracking System: {0}", getTrackedDeviceString(ETrackedDeviceProperty.Prop_TrackingSystemName_String));
-         Info.print("OpenVR Driver Version: {0}", getTrackedDeviceString(ETrackedDeviceProperty.Prop_DriverVersion_String));
-
-         return true;
-      }
-
-      static string getTrackedDeviceString(ETrackedDeviceProperty prop)
-      {
-         var error = ETrackedPropertyError.TrackedProp_Success;
-         uint bufferLength = vrSystem.GetStringTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, prop, null, 0, ref error);
-         if(bufferLength > 1)
-         {
-            var stringBuilder = new System.Text.StringBuilder((int)bufferLength);
-            vrSystem.GetStringTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, prop, stringBuilder, bufferLength, ref error);
-
-            return stringBuilder.ToString();
-         }
-
-         if(error != ETrackedPropertyError.TrackedProp_Success)
-         {
-            return error.ToString();
-         }
-
-         return "unkown";
-      }
-
-      public static bool shutdown()
-      {
-         OpenVR.Shutdown();
-         return true;
-      }
-
-      public void resetPose()
-      {
-         vrSystem.ResetSeatedZeroPose();
-      }
-
-      public static Matrix4 convertToMatrix4(HmdMatrix34_t m)
-      {
-         Matrix4 mat = new  Matrix4(
-            m.m0, m.m4, m.m8, 0.0f,
-            m.m1, m.m5, m.m9, 0.0f,
-            m.m2, m.m6, m.m10, 0.0f,
-            m.m3, m.m7, m.m11, 1.0f
-            );
-
-         return mat;
-      }
-
-      void initEyes()
-      {
-         List<RenderTargetDescriptor> rtdesc = new List<RenderTargetDescriptor>();
-         rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.ColorAttachment0, format = SizedInternalFormat.Rgba8 }); //creates a texture internally
-         rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.DepthAttachment, bpp = 32 });
-
-         uint w = 0;
-         uint h = 0;
-         vrSystem.GetRecommendedRenderTargetSize(ref w, ref h);
-
-         for (int i =0; i < 2; i++)
-         {
-            myRenderTargets[i] = new RenderTarget((int)w, (int)h, rtdesc);
-            myCameras[i] = new Camera(new Viewport(0, 0, (int)w, (int)h));
-            
-            float leftHalfTan = 0.0f;
-            float rightHalfTan = 0.0f;
-            float topHalfTan = 0.0f;
-            float bottomHalfTan = 0.0f;
-            //NOTE: top and bottom are still backwards
-            vrSystem.GetProjectionRaw((EVREye)i, ref leftHalfTan, ref rightHalfTan, ref bottomHalfTan, ref topHalfTan);
-
-            //convert to frustum edges to create projection matrix
-            float zNear = 0.01f;
-            float zFar = 1000.0f;
-            float left = leftHalfTan * zNear;
-            float right = rightHalfTan * zNear;
-            float bottom = bottomHalfTan * zNear;
-            float top = topHalfTan * zNear;
-
-            myCameras[i].setProjection(Matrix4.CreatePerspectiveOffCenter(left, right, bottom, top, 0.01f, 1000.0f));
-
-            //openVR uses a right-back-up system, just like our convention, so no conversion necessary
-            myEyeTransform[i] = convertToMatrix4(vrSystem.GetEyeToHeadTransform((EVREye)i));
-         }
-      }
-
-      public bool update()
-      {
-         var error = EVRCompositorError.None;
-         error = OpenVR.Compositor.WaitGetPoses(renderPoseArray, gamePoseArray);
-
-         if (error != EVRCompositorError.None)
-         {
-            Warn.print("Error in WaitGetPoses: {0}", error);
-            return false;
-         }
-
-         //get head position
-         TrackedDevicePose_t pose = renderPoseArray[OpenVR.k_unTrackedDeviceIndex_Hmd];
-         Matrix4 headPose = Matrix4.Identity;
-         if (pose.bDeviceIsConnected == true && pose.bPoseIsValid == true)
-         {
-             headPose = convertToMatrix4(pose.mDeviceToAbsoluteTracking);
-         }
-         else
-         {
-            Warn.print("Error getting pose information for the HMD");
-            return false;
-         }
-
-         //update camera matrix for each eye
-         for (int i = 0; i < 2; i++)
-         {
-            //TODO:  this doesn't look right, but seems to work.  Work through the math.
-            Matrix4 view = Matrix4.CreateTranslation(-position) * Matrix4.CreateFromQuaternion(orientation) * myEyeTransform[i].Inverted() * headPose.Inverted();
-            myCameras[i].setView(view);
-         }
-
-         return true;
-      }
-
-      public void present()
-      {
-         var error = EVRCompositorError.None;
-         VRTextureBounds_t bounds = new VRTextureBounds_t();
-         bounds.uMin = 0.0f;
-         bounds.uMax = 1.0f;
-         bounds.vMin = 0.0f;
-         bounds.vMax = 1.0f;
-
-         for (int i =0; i< 2; i++)
-         {
-            Texture_t tex = new Texture_t();
-            tex.handle = (IntPtr)(myRenderTargets[i].buffers[FramebufferAttachment.ColorAttachment0].id());
-            tex.eColorSpace = EColorSpace.Gamma;
-            tex.eType = ETextureType.OpenGL;
-
-            error = OpenVR.Compositor.Submit((EVREye)i, ref tex, ref bounds, EVRSubmitFlags.Submit_Default);
-
-            if(error != EVRCompositorError.None)
-            {
-               Warn.print("Error submtting texture to OpenVR: {0}", error);
-            }
-         }
-      }
-   }
-
-   public class HmdView : Graphics.View
-   {
-      HMD myHmd;
-      Graphics.View myLeftEyeView;
-      Graphics.View myRightEyeView;
-
-      public HmdView(string name, HMD hmd) : base(name, null, null)
-      {
-         myHmd = hmd;
-         myLeftEyeView = new Graphics.View("Left Eye", myHmd.myCameras[0], myHmd.myCameras[0].viewport());
-         myRightEyeView = new Graphics.View("Right Eye", myHmd.myCameras[1], myHmd.myCameras[1].viewport());
-         addSibling(myLeftEyeView);
-         addSibling(myRightEyeView);
-      }
-
-      public override void addPass(Pass p)
-      {
-         Pass lp = new Pass(p);
-         if (p.renderTarget == null)
-            lp.renderTarget = myHmd.myRenderTargets[0];
-         myLeftEyeView.addPass(lp);
-
-         Pass rp = new Pass(p);
-         if(p.renderTarget == null)
-            rp.renderTarget = myHmd.myRenderTargets[1];
-         myRightEyeView.addPass(rp);
-      }
-
-      public override void removePass(String passName)
-      {
-         myLeftEyeView.removePass(passName);
-         myRightEyeView.removePass(passName);
-      }
-   }
-
    public class TestRenderer : GameWindow
 	{
 		public static int theWidth = 1280;
@@ -254,6 +30,7 @@ namespace testRenderer
 		GameWindowCameraEventHandler myCameraEventHandler;
 		UI.GuiEventHandler myUiEventHandler;
 		RenderTarget myRenderTarget;
+      RenderTarget myUiRenderTarget;
 		SkinnedModelRenderable mySkinnedModel;
       LightRenderable mySun;
       LightRenderable myPoint1;
@@ -342,8 +119,8 @@ namespace testRenderer
             Environment.Exit(0);
 			}
 
-         bool runtimeFound = OpenVR.IsRuntimeInstalled();
-         bool hmdPresent = OpenVR.IsHmdPresent();
+         bool runtimeFound = VR.VR.vrAvailable();
+         bool hmdPresent = VR.VR.hmdAttached();
 
          if (runtimeFound == false)
          {
@@ -357,7 +134,7 @@ namespace testRenderer
             Environment.Exit(0);
          }
 
-         if(HMD.init() == false)
+         if(VR.VR.init() == false)
          {
             MessageBox.Show("Failed to initialize HMD", "Oooops", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             Environment.Exit(0);
@@ -388,6 +165,7 @@ namespace testRenderer
 		protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
 		{
 			base.OnClosing(e);
+         VR.VR.shutdown();
 			myWorld.shutdown();
 		}
 
@@ -497,10 +275,12 @@ namespace testRenderer
 			if (myRenderTarget == null)
 			{
 				myRenderTarget = new RenderTarget(x, y, rtdesc);
+            myUiRenderTarget = new RenderTarget(x, y, rtdesc);
 			}
 			else
 			{
 				myRenderTarget.update(x, y, rtdesc);
+            myUiRenderTarget.update(x, y, rtdesc);
 			}
 		}
 
@@ -543,6 +323,10 @@ namespace testRenderer
          p = new Pass("model", "forward-lighting");
          p.filter = new TypeFilter(new List<String>() { "light", "staticModel", "skinnedModel" });
          v.addPass(p);
+
+
+         Graphics.View uiView = new UI.GuiView("ui", myCamera, myViewport, myUiRenderTarget);
+
 
          //add the view
          Renderer.views[v.name] = v;

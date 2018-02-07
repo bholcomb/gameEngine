@@ -36,8 +36,6 @@ namespace Editor
          addMode(new MaterialMode(this));
          activateMode("Block Mode");
 
-			RenderStage rs = Renderer.scenes["main"].findStage("terrain");
-			rs.onPreExecute += new RenderStage.RenderStageFunction(injectEditorRenderCmds);
 			context.currentMaterial = "dirt";
 
          mySelectionManager = new SelectionManager(this);
@@ -63,10 +61,12 @@ namespace Editor
          }
       }
 
-      void injectEditorRenderCmds(RenderStage stage)
+      public void injectEditorRenderCmds(Pass pass)
       {
          if (myIsActive == true)
          {
+            mySelectionManager.injectRenderCmds(pass);
+            
 //             foreach (Chunk tc in myTerrainRenderer.visibleChunks)
 //             {
 //                stage.postStageCommands.AddRange(myTerrainRenderer.renderManager.renderChunkBounds(tc));

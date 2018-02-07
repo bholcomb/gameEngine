@@ -42,7 +42,7 @@ namespace testRenderer
 		Editor.Editor myTerrainEditor;
 
 		public TestRenderer()
-			: base(theWidth, theHeigth, new GraphicsMode(32, 24, 0, 0), "Haven Test", GameWindowFlags.Default, DisplayDevice.Default, 4, 4,
+			: base(theWidth, theHeigth, new GraphicsMode(32, 24, 0, 0), "Test Terrain Editing", GameWindowFlags.Default, DisplayDevice.Default, 4, 4,
 #if DEBUG
          GraphicsContextFlags.Debug)
 #else
@@ -116,19 +116,20 @@ namespace testRenderer
 			GL.ClearDepth(1.0f);
 
 			initRenderTarget();
-			initRenderer();
+
+         myWorld = new World(myInitializer);
+         myWorld.init();
+         myTerrainRenderManager = new TerrainRenderManager(myWorld);
+         myTerrainRenderManager.init();
+         myWorld.newWorld();
+
+         myTerrainEditor = new Editor.Editor(myWorld, myCamera);
+
+         initRenderer();
 
 			myCamera.position = new Vector3(0, 2, 10);
 
 			DebugRenderer.enabled = true;
-
-			myWorld = new World(myInitializer);
-			myWorld.init();
-			myTerrainRenderManager = new TerrainRenderManager(myWorld);
-			myTerrainRenderManager.init();
-			myWorld.newWorld();
-
-			myTerrainEditor = new Editor.Editor(myWorld, myCamera);
 		}
 
 		protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
@@ -167,30 +168,40 @@ namespace testRenderer
 			ImGui.beginFrame();
 			if (ImGui.beginWindow("Render Stats", ref myShowRenderStats))
 			{
-				ImGui.setWindowPosition(new Vector2(20, 100), SetCondition.FirstUseEver);
-				ImGui.setWindowSize(new Vector2(300, 700), SetCondition.FirstUseEver);
-				ImGui.label("FPS: {0:0.00}", avgFps);
-				ImGui.label("Cull Time: {0:0.00}ms", Renderer.stats.cullTime * 1000.0);
-				ImGui.label("Extract Time: {0:0.00}ms", Renderer.stats.extractTime * 1000.0);
-				ImGui.label("Prepare Time: {0:0.00}ms", Renderer.stats.prepareTime * 1000.0);
-				ImGui.label("Submit Time: {0:0.00}ms", Renderer.stats.submitTime * 1000.0);
-				ImGui.label("Execute Time: {0:0.00}ms", Renderer.stats.executeTime * 1000.0);
-				ImGui.separator();
-				ImGui.label("Camera Visible Renderables");
-				for (int i = 0; i < Renderer.stats.cameraVisibles.Count; i++)
-				{
-					ImGui.label("Camera {0}: {1} / {2}", i, Renderer.stats.cameraVisibles[i], Renderer.stats.renderableCount);
-				}
-				ImGui.separator();
-				ImGui.label("View Stats");
-				for (int i = 0; i < Renderer.stats.viewStats.Count; i++)
-				{
-					ImGui.label("{0} {1}", i, Renderer.stats.viewStats[i].viewName);
-					ImGui.label("   Queue count {0}", Renderer.stats.viewStats[i].queueCount);
-					ImGui.label("   Render Calls {0}", Renderer.stats.viewStats[i].renderCalls);
-				}
+            ImGui.setWindowPosition(new Vector2(20, 50), SetCondition.FirstUseEver);
+            ImGui.setWindowSize(new Vector2(500, 650), SetCondition.FirstUseEver);
+            ImGui.label("FPS: {0:0.00}", avgFps);
+            ImGui.label("Camera position: {0}", myCamera.position);
+            ImGui.label("Camera view vector: {0}", myCamera.viewVector);
+            ImGui.separator();
+            ImGui.label("Frame Time: {0:0.00}ms", (Renderer.stats.cullTime + Renderer.stats.prepareTime + Renderer.stats.generateTime + Renderer.stats.executeTime) * 1000.0);
+            ImGui.label("   Cull Time: {0:0.00}ms", Renderer.stats.cullTime * 1000.0);
+            ImGui.label("   Prepare Time: {0:0.00}ms", Renderer.stats.prepareTime * 1000.0);
+            ImGui.label("   Submit Time: {0:0.00}ms", Renderer.stats.generateTime * 1000.0);
+            ImGui.label("   Execute Time: {0:0.00}ms", Renderer.stats.executeTime * 1000.0);
+            ImGui.separator();
+            ImGui.label("Camera Visible Renderables");
+            for (int i = 0; i < Renderer.stats.cameraVisibles.Count; i++)
+            {
+               ImGui.label("Camera {0}: {1} / {2}", i, Renderer.stats.cameraVisibles[i], Renderer.stats.renderableCount);
+            }
+            ImGui.separator();
+            ImGui.label("View Stats");
+            for (int i = 0; i < Renderer.stats.viewStats.Count; i++)
+            {
+               ImGui.label("{0} {1}", i, Renderer.stats.viewStats[i].name);
+               ImGui.label("   Command List count {0}", Renderer.stats.viewStats[i].commandLists);
+               ImGui.label("   Passes {0}", Renderer.stats.viewStats[i].passStats.Count);
+               for (int j = 0; j < Renderer.stats.viewStats[i].passStats.Count; j++)
+               {
+                  PassStats ps = Renderer.stats.viewStats[i].passStats[j];
+                  ImGui.label("      {0} ({1})", ps.name, ps.technique);
+                  ImGui.label("         Queues: {0}", ps.queueCount);
+                  ImGui.label("         Render Commands: {0}", ps.renderCalls);
+               }
+            }
 
-				ImGui.endWindow();
+            ImGui.endWindow();
 			}
 
 			myTerrainEditor.onGui();
@@ -201,8 +212,8 @@ namespace testRenderer
 
 
 			//get any new chunks based on the camera position
-			//myWorld.setInterest(myCamera.position);
-			//myWorld.tick(e.Time);
+			myWorld.setInterest(myCamera.position);
+			myWorld.tick(e.Time);
 		}
 
 		protected override void OnRenderFrame(FrameEventArgs e)
@@ -225,7 +236,6 @@ namespace testRenderer
 			List<RenderTargetDescriptor> rtdesc = new List<RenderTargetDescriptor>();
 			rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.ColorAttachment0, format = SizedInternalFormat.Rgba32f }); //creates a texture internally
 			rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.DepthAttachment, tex = new Texture(x, y, PixelInternalFormat.DepthComponent32f) }); //uses an existing texture
-			//rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.DepthAttachment, bpp = 32 });
 
 			if (myRenderTarget == null)
 			{
@@ -258,57 +268,32 @@ namespace testRenderer
 			myRenderTarget = new RenderTarget();
 			initRenderTarget();
 
-			//setup the rendering scene
-			SceneGraph sg = new SceneGraph();
+         //setup the rendering scene
+         Graphics.View v = new Graphics.View("Main View", myCamera, myViewport);
 
-			//add the "environment" pass to draw the skybox
-			RenderStage rs = new RenderStage("environment", "skybox");
-			rs.isActive = true;
-			sg.renderStages.Add(rs);
-			Graphics.View view = new Graphics.View("skyboxView", myCamera, myViewport, myRenderTarget);
-			view.filter = new TypeFilter(new List<String>() { "skybox" });
-			view.clearTarget = false;
-			rs.registerView(view);
+         Pass p = new Pass("environment", "skybox");
+         p.renderTarget = myRenderTarget;
+         p.filter = new TypeFilter(new List<String>() { "skybox" });
+         p.clearTarget = true; //false is default setting
+         v.addPass(p);
 
-			//add the "terrain" pass to draw the terrain
-			rs = new RenderStage("terrain", "forward-lighting");
-			rs.isActive = true;
-			sg.renderStages.Add(rs);
-			view = new Graphics.View("terrain view", myCamera, myViewport, myRenderTarget, false);
-			view.filter = new TypeFilter(new List<String>() { "terrain" });
-			rs.registerView(view);
+         p = new Pass("terrain", "forward-lighting");
+         p.filter = new TypeFilter(new List<String>() { "terrain" });
+         p.PostGenerateCommands += myTerrainEditor.injectEditorRenderCmds; //add the editor rendering to the terrain pass
+         v.addPass(p);
 
-			//add the "model" pass to draw models
-			rs = new RenderStage("model", "forward-lighting");
-			rs.isActive = true;
-			sg.renderStages.Add(rs);
-			view = new Graphics.View("model view", myCamera, myViewport, myRenderTarget, false);
-			view.filter = new TypeFilter(new List<String>() { "light", "staticModel", "skinnedModel" });
-			rs.registerView(view);
+         p = new Pass("model", "forward-lighting");
+         p.filter = new TypeFilter(new List<String>() { "light", "staticModel", "skinnedModel" });
+         v.addPass(p);
 
-			//add the "debug" pass to draw the debug visualizers
-			rs = new RenderStage("debug", "debug");
-			rs.isActive = true;
-			sg.renderStages.Add(rs);
-			view = new Graphics.DebugView(myCamera, myViewport, myRenderTarget);
-			rs.registerView(view);
+         //add some sub-views for debug graphics and UI
+         v.addSibling(new Graphics.DebugView("Debug View", myCamera, myViewport, myRenderTarget));
+         v.addSibling(new UI.GuiView("UI View", myCamera, myViewport, myRenderTarget));
 
-			//add the "UI" pass to draw the UI
-			rs = new RenderStage("UI", "UI");
-			rs.isActive = true;
-			sg.renderStages.Add(rs);
-			view = new UI.GuiView(myCamera, myViewport, myRenderTarget);
-			rs.registerView(view);
+         //add the view
+         Renderer.views[v.name] = v;
 
-			Renderer.present = present;
-
-			//add the scene to the renderer
-			Renderer.scenes["main"] = sg;
-
-			//create the default font
-			//myFont = FontManager.findFont("DEFAULT");
-			//(myFont as SDFont).myEffects = SDFont.Effects.Outline;
-
+         Renderer.present = present;
 
 			//create the skybox renderable
 			SkyboxRenderable skyboxRenderable = new SkyboxRenderable();
@@ -325,7 +310,7 @@ namespace testRenderer
 				StaticModelRenderable smr = new StaticModelRenderable();
 				ObjModelDescriptor mdesc;
 				if (i % 2 == 0)
-					mdesc = new ObjModelDescriptor("../data/models/vegitation/fir/fir2.obj");
+					mdesc = new ObjModelDescriptor("../data/models/vegetation/fir/fir2.obj");
 				else
 					mdesc = new ObjModelDescriptor("../data/models/props/rocks_3_by_nobiax-d6s8l2b/rocks_03-blend.obj");
 

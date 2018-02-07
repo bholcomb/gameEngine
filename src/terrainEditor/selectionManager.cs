@@ -37,12 +37,9 @@ namespace Editor
 
          TextureDescriptor td = new TextureDescriptor("../data/textures/circle.png");
          mySelectTexture = Renderer.resourceManager.getResource(td) as Texture;
-
-         RenderStage rs = Renderer.scenes["main"].findStage("terrain");
-         rs.onPreExecute += new RenderStage.RenderStageFunction(injectRenderCmds);
       }
 
-      public void injectRenderCmds(RenderStage stage)
+      public void injectRenderCmds(Pass pass)
       {
          if (myEditor.active == true)
          {
@@ -56,7 +53,7 @@ namespace Editor
                   cmd.pipelineState.depthTest.depthFunc = DepthFunction.Lequal;
 						cmd.pipelineState.generateId();
 						cmd.renderState.setUniformBuffer(myEditor.camera.uniformBufferId(), 0);
-						stage.postStageCommands.Add(cmd);
+                  pass.postCommands.Add(cmd);
                }
             }
 
@@ -72,7 +69,7 @@ namespace Editor
 								cmd.pipelineState.depthTest.depthFunc = DepthFunction.Lequal;
 								cmd.pipelineState.generateId();
 								cmd.renderState.setUniformBuffer(myEditor.camera.uniformBufferId(), 0);
-								stage.postStageCommands.Add(cmd);
+                        pass.postCommands.Add(cmd);
 
                         if (myCurrentHit.face != Face.NONE)
                         {
@@ -85,7 +82,7 @@ namespace Editor
 									cmd.renderState.polygonOffset.units = 1.0f;
 									cmd.pipelineState.generateId();
 									cmd.renderState.setUniformBuffer(myEditor.camera.uniformBufferId(), 0);
-									stage.postStageCommands.Add(cmd);
+                           pass.postCommands.Add(cmd);
                         }
                         break;
                      }
@@ -99,24 +96,24 @@ namespace Editor
 									cmd.pipelineState.depthTest.enabled = false;
 									cmd.pipelineState.generateId();
 									cmd.renderState.setUniformBuffer(myEditor.camera.uniformBufferId(), 0);
-									stage.postStageCommands.Add(cmd);
-								}
+                           pass.postCommands.Add(cmd);
+                        }
                         if(myCurrentHit.edge != -1)
                         {
                            Vector3[] verts=getEdgeVerts(myClampedLocation, myCurrentHit.edge);
 									StatelessRenderCommand cmd =new RenderLineCommand(verts[0], verts[1], Color4.Aquamarine);
                            cmd.pipelineState.depthTest.enabled = false;
-                           cmd.pipelineState.depthWrite = false;
+                           cmd.pipelineState.depthWrite.enabled = false;
 									cmd.pipelineState.generateId();
 									cmd.renderState.setUniformBuffer(myEditor.camera.uniformBufferId(), 0);
-									stage.postStageCommands.Add(cmd);
+                           pass.postCommands.Add(cmd);
 
                         }
                         if(myCurrentHit.vert != -1)
                         {
                            Vector3 vert = getVert(myClampedLocation, myCurrentHit.vert);
                            RenderCommand cmd = new RenderSphereCommand(vert, myClampedLocation.node.size() / 12, Color4.Red);
-                           stage.postStageCommands.Add(cmd);
+                           pass.postCommands.Add(cmd);
                         }
                         break;
                      }
@@ -138,7 +135,7 @@ namespace Editor
                               cmd.renderState.polygonOffset.factor = -1.0f;
                               cmd.renderState.polygonOffset.units = 1.0f;
 										cmd.renderState.setUniformBuffer(myEditor.camera.uniformBufferId(), 0);
-										stage.postStageCommands.Add(cmd);
+                              pass.postCommands.Add(cmd);
                            }
 
                            Vector3[] mverts = getFaceVerts(myClampedLocation, myCurrentHit.face);
@@ -151,7 +148,7 @@ namespace Editor
                            mcmd.renderState.polygonOffset.factor = -1.0f;
                            mcmd.renderState.polygonOffset.units = 1.0f;
 									mcmd.renderState.setUniformBuffer(myEditor.camera.uniformBufferId(), 0);
-									stage.postStageCommands.Add(mcmd);
+                           pass.postCommands.Add(mcmd);
                         }
                         break;
                      }

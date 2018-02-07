@@ -67,7 +67,6 @@
     <Reference Include="System.Drawing" />
     <Reference Include="OpenTK" />
     <Reference Include="OpenTK.GLControl" />
-    <Reference Include="Renderer" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Form1.Designer.cs">
@@ -98,6 +97,14 @@
     <ProjectReference Include="..\..\build\util\Util.csproj">
       <Project>{23A78D7C-0FDE-8E0D-B8CA-7410A4E00A0F}</Project>
       <Name>Util</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\build\lua\Lua.csproj">
+      <Project>{A705880B-130F-887C-9C8A-9E7C0893937C}</Project>
+      <Name>Lua</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\build\graphics\Graphics.csproj">
+      <Project>{1653CE33-0220-293F-2B39-17E717655ECD}</Project>
+      <Name>Graphics</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
