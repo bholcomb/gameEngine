@@ -286,9 +286,16 @@ namespace testRenderer
          p.filter = new TypeFilter(new List<String>() { "light", "staticModel", "skinnedModel" });
          v.addPass(p);
 
+         p = new DebugPass();
+         v.addPass(p);
+
          //add some sub-views for debug graphics and UI
-         v.addSibling(new Graphics.DebugView("Debug View", myCamera, myViewport, myRenderTarget));
-         v.addSibling(new UI.GuiView("UI View", myCamera, myViewport, myRenderTarget));
+         //add some sub-views for debug graphics and UI
+         Graphics.View uiView = new Graphics.View("UI", myCamera, myViewport);
+         uiView.processRenderables = false;
+         GuiPass uiPass = new GuiPass(myRenderTarget);
+         uiView.addPass(uiPass);
+         v.addSibling(uiView);
 
          //add the view
          Renderer.views[v.name] = v;

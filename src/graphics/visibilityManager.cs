@@ -11,6 +11,7 @@ namespace Graphics
 	public class VisibilityManager
 	{
 		Dictionary<Camera, List<Renderable>> myCameraVisibles;
+      List<Renderable> myNullList = new List<Renderable>();
 
 		public VisibilityManager()
 		{
@@ -19,7 +20,12 @@ namespace Graphics
 
 		public List<Renderable> camaraVisibles(Camera c)
 		{
-			return myCameraVisibles[c];
+         if (myCameraVisibles.ContainsKey(c) == true)
+         {
+            return myCameraVisibles[c];
+         }
+
+         return myNullList;
 		}
 
 		public void initializeCamaraVisibleLists(List<View> activeViews)
@@ -28,6 +34,12 @@ namespace Graphics
 
 			foreach (View view in activeViews)
 			{
+            if(view.processRenderables == false)
+            {
+               //we don't want to process it
+               continue;
+            }
+
             List<Renderable> cameraVisibleList = null;
 				if (myCameraVisibles.TryGetValue(view.camera, out cameraVisibleList) == false)
 				{
@@ -39,7 +51,14 @@ namespace Graphics
 
 		public int renderableCount(Camera c)
 		{
-			return myCameraVisibles[c].Count;
+         if (myCameraVisibles.ContainsKey(c) == true)
+         {
+            return myCameraVisibles[c].Count;
+         }
+         else
+         {
+            return 0;
+         }
 		}
 
 		public void cullRenderablesPerCamera(List<Renderable> renderables, List<View> activeViews)

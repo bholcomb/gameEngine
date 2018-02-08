@@ -285,8 +285,11 @@ namespace Graphics
 		{
 			Parallel.ForEach(activeViews, (view) =>
 			{
-				IEnumerable<Renderable> cameraVisibles = visiblityManager.camaraVisibles(view.camera);
-				view.updateVisableRenderables(cameraVisibles);
+            if (view.processRenderables == true)
+            {
+               IEnumerable<Renderable> cameraVisibles = visiblityManager.camaraVisibles(view.camera);
+               view.updateVisableRenderables(cameraVisibles);
+            }
 			});
 		}
 

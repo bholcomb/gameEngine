@@ -194,17 +194,7 @@ namespace Graphics
          if (format == 0)
             throw new Exception("Texture buffer needs an internal format");
 
-         int tex;
-         tex = GL.GenTexture();
-         GL.BindTexture(TextureTarget.Texture2D, tex);
-         GL.TexStorage2D(TextureTarget2d.Texture2D, 1, format, width, height);
-         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
-         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
-
-
-         Texture t = new Texture(tex);
+         Texture t = new Texture(width, height, (PixelInternalFormat)format);
          return t;
       }
 

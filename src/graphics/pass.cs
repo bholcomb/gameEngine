@@ -60,6 +60,7 @@ namespace Graphics
          myVisibleRenderablesByType = new Dictionary<string, List<Renderable>>();
          preCommands = new RenderCommandList();
          postCommands = new RenderCommandList();
+         filter = new NullFilter();
 
          clearTarget = false;
          clearColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -161,15 +162,19 @@ namespace Graphics
          foreach (BaseRenderQueue rq in myRenderQueues.Values)
          {
             rq.commands.Clear();
-            
             rq.generateRenderCommands();
-
-            stats.renderCalls += rq.commands.Count;
          }
 
          onPostGenerateCommands();
 
          postCommands.Add(new PopDebugMarkerCommand());
+
+         stats.renderCalls += preCommands.Count;
+         stats.renderCalls += postCommands.Count;
+         foreach (BaseRenderQueue rq in myRenderQueues.Values)
+         {
+            stats.renderCalls += rq.commands.Count;
+         }
       }
 
       public virtual void getRenderCommands(List<RenderCommandList> renderCmdLists)

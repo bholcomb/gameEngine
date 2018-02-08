@@ -29,11 +29,6 @@ namespace UI
          registerQueue(myRenderQueue);
       }
 
-      public override void updateVisibleRenderables(IEnumerable<Renderable> cameraVisibles)
-      {
-         //noop since the renderables are all contained in IMGUI
-      }
-
       public override void generateRenderCommandLists()
       {
          preCommands.Clear();
@@ -59,7 +54,6 @@ namespace UI
          stats.renderCalls = 0;
          stats.name = name;
          stats.technique = technique;
-
 
          //process all the IMGUI commands
          myRenderQueue.addCommand(new SetPipelineCommand(myRenderQueue.myPipeline));
@@ -88,6 +82,13 @@ namespace UI
          onPostGenerateCommands();
 
          postCommands.Add(new PopDebugMarkerCommand());
+
+         stats.renderCalls += preCommands.Count;
+         stats.renderCalls += postCommands.Count;
+         foreach (BaseRenderQueue rq in myRenderQueues.Values)
+         {
+            stats.renderCalls += rq.commands.Count;
+         }
       }
    }
 }

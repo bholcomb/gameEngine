@@ -38,7 +38,7 @@ namespace testRenderer
 
       Overlay myUiOverlay;
 
-		bool myShowRenderStats = true;
+		bool myRenderStatsWindowClosed = true;
 
 		World myWorld;
 		TerrainRenderManager myTerrainRenderManager;
@@ -83,7 +83,7 @@ namespace testRenderer
 
 			if (e.Key == Key.F1)
 			{
-				myShowRenderStats = !myShowRenderStats;
+				myRenderStatsWindowClosed = !myRenderStatsWindowClosed;
 			}
 
 			if (e.Key == Key.F5)
@@ -146,11 +146,11 @@ namespace testRenderer
 			GL.ClearDepth(1.0f);
 
          myHmd = new HMD();
+
+         myUiOverlay = new Overlay("UI", "UI", null); //texture set later
          
 			initRenderTarget();
 			initRenderer();
-
-         myUiOverlay = new Overlay("UI", "UI", myUiRenderTarget.buffers[FramebufferAttachment.ColorAttachment0]);
 
          myCamera.position = new Vector3(0, 2, 10);
          myHmd.position = myCamera.position;
@@ -204,12 +204,10 @@ namespace testRenderer
          //high frequency filter on avg fps
          avgFps = (0.99f * avgFps) + (0.01f * (float)TimeSource.fps());
 
-         //myUiOverlay.setOffsetMatrix(Matrix4.CreateTranslation(new Vector3(0f, 0f, -1f)));
+         myUiOverlay.visible = !myRenderStatsWindowClosed;
 
-         myUiOverlay.visible = myShowRenderStats;
-
-			ImGui.beginFrame();
-			if(ImGui.beginWindow("Render Stats", ref myShowRenderStats, Window.Flags.Borders))
+         ImGui.beginFrame();
+			if(ImGui.beginWindow("Render Stats", ref myRenderStatsWindowClosed, Window.Flags.DefaultWindow))
 			{
             ImGui.setWindowPosition(new Vector2(20, 50), SetCondition.FirstUseEver);
             ImGui.setWindowSize(new Vector2(500, 650), SetCondition.FirstUseEver);
@@ -296,6 +294,7 @@ namespace testRenderer
             myUiRenderTarget.update(x, y, uidesc);
 			}
 
+         myUiOverlay.texture = myUiRenderTarget.buffers[FramebufferAttachment.ColorAttachment0];
       }
 
       void handleViewportChanged(int x, int y, int w, int h)
@@ -334,20 +333,20 @@ namespace testRenderer
 
          p = new Pass("terrain", "forward-lighting");
          p.filter = new TypeFilter(new List<String>() { "terrain" });
-         //v.addPass(p);
+         v.addPass(p);
 
          p = new Pass("model", "forward-lighting");
          p.filter = new TypeFilter(new List<String>() { "light", "staticModel", "skinnedModel" });
-         //v.addPass(p);
+         v.addPass(p);
 
          //setup UI 
          Graphics.View uiView = new Graphics.View("ui", myCamera, myViewport);
+         uiView.processRenderables = false; //GUI pass will generate all the renderables we need
          GuiPass uiPass = new GuiPass(myUiRenderTarget);
          uiPass.clearTarget = true;
-         uiPass.clearColor = new Color4(0.2f, 0.2f, 0.2f, 1.0f);
+         uiPass.clearColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
          uiView.addPass(uiPass);
          v.addSibling(uiView);
-
 
          //add the view
          Renderer.views[v.name] = v;
@@ -363,7 +362,7 @@ namespace testRenderer
 
 			//create a tree instance
 			Random rand = new Random(230877);
-			for (int i = 0; i < 1000; i++)
+			for (int i = 0; i < 10000; i++)
 			{
 				int size = 500;
 				int halfSize = size / 2;

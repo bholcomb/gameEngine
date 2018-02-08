@@ -35,6 +35,7 @@ namespace Graphics
 
 		public bool isActive { get; set; }
       public String name { get; set; }
+      public bool processRenderables { get; set; } //used by UI and debug views so they don't process renderables since they generate their own
 
       public Camera camera { get; set; }
       public Viewport viewport { get; set; }
@@ -67,6 +68,7 @@ namespace Graphics
          myPasses = new List<Pass>();
          myRenderCommandLists = new List<RenderCommandList>();
          myVisibleRenderablesByType = new Dictionary<string, List<Renderable>>();
+         processRenderables = true;
 
          preCommands = new RenderCommandList();
          postCommands = new RenderCommandList();

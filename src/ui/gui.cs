@@ -204,7 +204,7 @@ namespace UI
          setNextWindowSize(displaySize, SetCondition.Always);
          setNextWindowPosition(Vector2.Zero, SetCondition.Always);
          bool closed = false;
-         ImGui.beginWindow("root", ref closed, Window.Flags.Root | Window.Flags.MenuBar);
+         ImGui.beginWindow("root", ref closed, Window.Flags.Root);
          myRootWindow = findWindow("root");
          myRootWindow.myBackgroundAlpha = 0.0f;
       }

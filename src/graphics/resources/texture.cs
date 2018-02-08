@@ -194,7 +194,7 @@ namespace Graphics
 				setMinMagFilters(TextureMinFilter.Nearest, TextureMagFilter.Nearest);
 			}
 
-			setWrapping(TextureWrapMode.ClampToEdge, TextureWrapMode.ClampToEdge);
+			setWrapping(TextureWrapMode.Repeat, TextureWrapMode.Repeat);
          
          if(myData==null)
             Info.print("Created empty texture with id: " + myId);
