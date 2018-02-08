@@ -31,7 +31,9 @@ layout(std140, binding = 1) uniform LightBlock{
    LightData lights[255];
 };
 
-layout(std140, binding = 2) uniform material{
+//uniform block 2 is used in vertex shader for terrain block model instances
+
+layout(std140, binding = 3) uniform material{
    vec4 matAmbientReflectivity;
    vec4 matDiffuseReflectivity;
    vec4 matSpecularReflectivity;
@@ -44,7 +46,7 @@ layout(std140, binding = 2) uniform material{
    float parallaxScale;
 };
 
-layout(std140, binding = 3) uniform environment {
+layout(std140, binding = 4) uniform environment {
    int isUnderWater;
 };
 
@@ -176,10 +178,10 @@ void main()
          lightContribution += directionalLight(light, dirToEye, n);
       }
       else if (light.lightType == 1) {
-        // lightContribution += pointLight(light, dirToEye, n);
+         lightContribution += pointLight(light, dirToEye, n);
       }
       else if (light.lightType == 2) {
-        // lightContribution += spotLight(light, dirToEye, n);
+         lightContribution += spotLight(light, dirToEye, n);
       }
 
       outputFrag += vec4(lightContribution, 1) * albedo;

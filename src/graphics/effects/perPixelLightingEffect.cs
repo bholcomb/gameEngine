@@ -96,17 +96,19 @@ namespace Graphics
 				myLightVisualizer = Renderer.visualizers["light"] as LightVisualizer;
 			}
 
-			//material properties
-			PerPixelUniformData matData = new PerPixelUniformData();
-			matData.ambientReflectivity = m.ambient;
-			matData.diffuseReflectivity = m.diffuse;
-			matData.specularReflectivity = m.spec;
-			matData.emmission = m.emission;
-			matData.shininess = m.shininess;
-			matData.alpha = m.alpha;
+         //material properties
+         PerPixelUniformData matData = new PerPixelUniformData
+         {
+            ambientReflectivity = m.ambient,
+            diffuseReflectivity = m.diffuse,
+            specularReflectivity = m.spec,
+            emmission = m.emission,
+            shininess = m.shininess,
+            alpha = m.alpha
+         };
 
-			//setup diffuse map, it should exists
-			Texture tex = m.myTextures[(int)Material.TextureId.Diffuse].value();
+         //setup diffuse map, it should exists
+         Texture tex = m.myTextures[(int)Material.TextureId.Diffuse].value();
 			state.setTexture((int)tex.id(), 0, TextureTarget.Texture2D);
 			state.setUniform(new UniformData(20, Uniform.UniformType.Int, 0));
 

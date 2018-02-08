@@ -97,7 +97,6 @@ namespace Graphics
 			      p.registerQueue(rq);
 				}
 
-
 				SkinnedModelInfo info = rq.nextInfo();
 
 				effect.updateRenderState(mesh.material, info.renderState);

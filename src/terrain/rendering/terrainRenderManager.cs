@@ -77,7 +77,7 @@ namespace Terrain
 			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Terrain\\rendering\\shaders\\terrainTri-vs.glsl", ShaderDescriptor.Source.File));
 			desc.Add(new ShaderDescriptor(ShaderType.GeometryShader, "..\\src\\Terrain\\rendering\\shaders\\terrainTri-gs.glsl", ShaderDescriptor.Source.File));
 			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Terrain\\rendering\\shaders\\terrainTri-ps.glsl", ShaderDescriptor.Source.File));
-			sd = new ShaderProgramDescriptor(desc);
+			sd = new ShaderProgramDescriptor(desc, null,"terrain:perpixel");
 			sp = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 			vis.registerEffect("forward-lighting", new PerPixelSolidEffect(sp));
 
@@ -87,7 +87,9 @@ namespace Terrain
 			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Terrain\\rendering\\shaders\\terrainTri-vs.glsl", ShaderDescriptor.Source.File));
 			desc.Add(new ShaderDescriptor(ShaderType.GeometryShader, "..\\src\\Terrain\\rendering\\shaders\\terrainTri-gs.glsl", ShaderDescriptor.Source.File));
 			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Terrain\\rendering\\shaders\\water-ps.glsl", ShaderDescriptor.Source.File));
-			vis.registerEffect("forward-lighting", new PerPixelWaterEffect(sp));
+         sd = new ShaderProgramDescriptor(desc, null, "terrain:water");
+         sp = Renderer.resourceManager.getResource(sd) as ShaderProgram;
+         vis.registerEffect("forward-lighting", new PerPixelWaterEffect(sp));
 		}
 
       public World world { get; set; }
