@@ -53,7 +53,6 @@ layout(std140, binding = 4) uniform environment {
 
 layout(location = 20) uniform sampler2DArray diffuseTexture;
 
-vec4 specularReflectivity;
 vec4 normal;
 //flat in vec4 activeLights;
 
@@ -91,7 +90,7 @@ vec3 directionalLight(LightData light, vec3 pos, vec3 norm)
 
    vec3 amb = light.color.rgb *  matAmbientReflectivity.rgb;
    vec3 diff = light.color.rgb * matDiffuseReflectivity.rgb * max(dot(lightDir, norm), 0.0);
-   vec3 spec = light.color.rgb * specularReflectivity.rgb * pow(max(dot(norm, halfVec), 0.0001), shininess);
+   vec3 spec = light.color.rgb * matSpecularReflectivity.rgb * pow(max(dot(norm, halfVec), 0.0001), shininess);
 
    return amb + diff + spec;
 }
@@ -107,7 +106,7 @@ vec3 pointLight(LightData light, vec3 pos, vec3 norm)
 
    vec3 amb = intensity *  matAmbientReflectivity.rgb;
    vec3 diff = intensity * matDiffuseReflectivity.rgb * max(dot(lightDir, norm), 0.0);
-   vec3 spec = intensity * specularReflectivity.rgb * pow(max(dot(norm, halfVec), 0.0001), shininess);
+   vec3 spec = intensity * matSpecularReflectivity.rgb * pow(max(dot(norm, halfVec), 0.0001), shininess);
 
    return amb + diff + spec;
 }
@@ -129,7 +128,7 @@ vec3 spotLight(LightData light, vec3 pos, vec3 norm)
 
       return ambient + spotFactor * intensity * (
          matDiffuseReflectivity.rgb * max(dot(lightDir, norm), 0.0) +
-         specularReflectivity.rgb * pow(max(dot(norm, halfVec), 0.0001), shininess)
+         matSpecularReflectivity.rgb * pow(max(dot(norm, halfVec), 0.0001), shininess)
          );
    }
    else
@@ -175,13 +174,13 @@ void main()
          continue;
       }
       else if (light.lightType == 0) {
-         lightContribution += directionalLight(light, dirToEye, n);
+         lightContribution += directionalLight(light, ps_in.worldVert, n);
       }
       else if (light.lightType == 1) {
-         lightContribution += pointLight(light, dirToEye, n);
+         lightContribution += pointLight(light, ps_in.worldVert, n);
       }
       else if (light.lightType == 2) {
-         lightContribution += spotLight(light, dirToEye, n);
+         lightContribution += spotLight(light, ps_in.worldVert, n);
       }
 
       outputFrag += vec4(lightContribution, 1) * albedo;

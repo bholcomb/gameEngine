@@ -5,8 +5,8 @@ uniform sampler2DArray diffuseTexture;
 in GeometryStage
 {
    smooth vec2 texCoord;
-   smooth vec3 normal;
-   smooth vec3 eyevert;
+   smooth vec3 worldNormal;
+   smooth vec3 worldVert;
    flat mat3 normalMatrix;
    flat int texLayer;
 } ps_in;
