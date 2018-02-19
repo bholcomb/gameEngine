@@ -38,10 +38,11 @@ layout(std140, binding = 2) uniform material{
 	vec4 emmission;
 	float shininess;
 	float alpha;
+   float alphaTest;
+   float parallaxScale;
 	bool hasSpecularMap;
 	bool hasNormalMap;
    bool hasParallaxMap;
-   float parallaxScale;
 };
 
 layout(location = 20) uniform sampler2D diffuseMap;
@@ -178,7 +179,7 @@ vec4 diffuseColor(in vec4 color, vec2 T)
 {
 	color = texture(diffuseMap, T);
 
-	if (color.a < 0.05)
+	if (color.a < alphaTest)
 		discard;
 
 	return color;

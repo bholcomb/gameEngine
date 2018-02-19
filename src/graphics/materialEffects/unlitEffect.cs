@@ -11,7 +11,7 @@ using Util;
 
 namespace Graphics
 {
-	public class UnlitEffect : Effect
+	public class UnlitEffect : MaterialEffect
 	{
 		public UnlitEffect(ShaderProgram sp) : base(sp)
 		{

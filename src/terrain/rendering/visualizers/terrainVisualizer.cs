@@ -27,7 +27,6 @@ namespace Terrain
       }
    }
 
-
    public abstract class TerrainVisualizer : Visualizer
    {
       protected TerrainRenderManager myRenderManager;
@@ -38,7 +37,8 @@ namespace Terrain
       UniformBufferObject myInstanceMatrixBuffer = new UniformBufferObject(BufferUsageHint.DynamicDraw);
       int myDrawCount;
 
-      public TerrainVisualizer(TerrainRenderManager mgr) : base()
+      public TerrainVisualizer(TerrainRenderManager mgr) 
+         : base("terrain")
       {
          myRenderManager = mgr;
       }
@@ -104,7 +104,7 @@ namespace Terrain
             //add solid render info
             if (dc.solidCount > 0)
             {
-               Effect effect = getEffect(p.technique, 1);
+               MaterialEffect effect = getEffect(p.technique, 1);
                PipelineState pipeline = effect.createPipeline(MaterialManager.visualMaterial);
                RenderQueue<TerrainRenderInfo> rq = p.findRenderQueue(pipeline.id) as RenderQueue<TerrainRenderInfo>;
                if (rq == null)
@@ -130,13 +130,14 @@ namespace Terrain
             //add transparent render info
             if (dc.transCount > 0)
             {
-               Effect effect = getEffect(p.technique, 2);
+               MaterialEffect effect = getEffect(p.technique, 2);
                PipelineState pipeline = effect.createPipeline(MaterialManager.visualMaterial);
                RenderQueue<TerrainRenderInfo> rq = p.findRenderQueue(pipeline.id) as RenderQueue<TerrainRenderInfo>;
                if (rq == null)
                {
                   rq = Renderer.device.createRenderQueue<TerrainRenderInfo>(effect.createPipeline(MaterialManager.visualMaterial));
                   rq.name = rq.myPipeline.shaderState.shaderProgram.name + "-" + "transparent";
+                  rq.visualizer = this;
                   p.registerQueue(rq);
                }
 
@@ -144,8 +145,8 @@ namespace Terrain
                info.distToCamera = (p.view.camera.position - c.myLocation).Length;
                info.model = m;
                info.myType = TerrainRenderInfo.Type.TRANS;
-               info.count = dc.solidCount;
-               info.offset = dc.solidOffset;
+               info.count = dc.transCount;
+               info.offset = dc.transOffset;
                info.sortId = getSortId(info);
                effect.updateRenderState(MaterialManager.visualMaterial, info.renderState);
 
@@ -155,13 +156,14 @@ namespace Terrain
             //add water renderinfo
             if (dc.waterCount > 0)
             {
-               Effect effect = getEffect(p.technique, 3);
+               MaterialEffect effect = getEffect(p.technique, 3);
                PipelineState pipeline = effect.createPipeline(MaterialManager.visualMaterial);
                RenderQueue<TerrainRenderInfo> rq = p.findRenderQueue(pipeline.id) as RenderQueue<TerrainRenderInfo>;
                if (rq == null)
                {
                   rq = Renderer.device.createRenderQueue<TerrainRenderInfo>(effect.createPipeline(MaterialManager.visualMaterial));
                   rq.name = rq.myPipeline.shaderState.shaderProgram.name + "-" + "water";
+                  rq.visualizer = this;
                   p.registerQueue(rq);
                }
 
@@ -169,8 +171,8 @@ namespace Terrain
                info.distToCamera = (p.view.camera.position - c.myLocation).Length;
                info.model = m;
                info.myType = TerrainRenderInfo.Type.WATER;
-               info.count = dc.solidCount;
-               info.offset = dc.solidOffset;
+               info.count = dc.waterCount;
+               info.offset = dc.waterOffset;
                info.sortId = getSortId(info);
                effect.updateRenderState(MaterialManager.visualMaterial, info.renderState);
 

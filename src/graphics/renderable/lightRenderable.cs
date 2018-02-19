@@ -26,9 +26,8 @@ namespace Graphics
 		public bool isShadowCasting;
 
 		public LightRenderable()
-		 : base()
+		 : base("light")
 		{
-			myType = "light";
 		}
 
 		public override bool isVisible(Camera c)

@@ -12,7 +12,7 @@ using Util;
 
 namespace Terrain
 {
-	public class PerPixelTransparentEffect : Effect
+	public class PerPixelTransparentEffect : MaterialEffect
 	{
 		LightVisualizer myLightVisualizer;
 
@@ -45,7 +45,7 @@ namespace Terrain
 			state.depthWrite.enabled = false;
 
 			state.shaderState.shaderProgram = myShader;
-			state.generateId();
+			state.id = 2; //transparent effect
 			return state;
 		}
 	}

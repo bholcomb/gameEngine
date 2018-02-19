@@ -128,6 +128,8 @@ namespace Graphics
       public Color4 emission { get; set; }
       public float shininess { get; set; }
       public float alpha { get { return myAlpha; } set { if (value < 1.0f) hasTransparency = true; myAlpha = value;  } }
+
+      public float alphaTest { get; set; }
       public bool hasTransparency { get; set; }
 
       public Material(String n ="")
@@ -141,6 +143,7 @@ namespace Graphics
          emission = new Color4(0.0f, 0.0f, 0.0f, 1.0f);
          shininess = 128.0f;
          alpha = 1.0f;
+         alphaTest = 0.0f;
          hasTransparency = false;
       }
       
@@ -172,7 +175,8 @@ namespace Graphics
             {
                case "diffuseMap":
                   myTextures[(int)TextureId.Diffuse] = tex;
-                  hasTransparency = tex.hasTransparency();
+                  //hasTransparency = tex.hasTransparency();
+                  alphaTest = tex.hasTransparency() ? 0.1f : 0.0f;
                   break;
                case "specularMap":
                   myTextures[(int)TextureId.Specular] = tex;

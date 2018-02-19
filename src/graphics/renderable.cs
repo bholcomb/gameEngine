@@ -26,8 +26,9 @@ namespace Graphics
 
       public List<Controller> controllers = new List<Controller>();
 
-      public Renderable()
+      public Renderable(string type)
       {
+         myType = type;
          myTransform = Matrix4.CreateTranslation(Vector3.Zero);
          myScale = Matrix4.CreateScale(Vector3.One);
          myOrientation = Matrix4.Identity;

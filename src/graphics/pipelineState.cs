@@ -309,13 +309,15 @@ namespace Graphics
 			byte blendBits = blending.enabled ? (byte)1 : (byte)0;
 			id |= (UInt64)blendBits << 56;
 			
-			id |= (UInt64)shaderState.shaderProgram.id << 24;
-						
-			byte depthWriteBits = depthWrite.enabled == true ? (byte)0x80 : (byte)0x00;
-			id |= (UInt64)depthWriteBits << 16;
+         //things that depth write should be after things that are not depth writing.
+			byte depthWriteBits = depthWrite.enabled == true ? (byte)0x00 : (byte)0x80;
+			id |= (UInt64)depthWriteBits << 48;
 
+         //things that depth test are before things that don't depth test
 			byte depthTestBits = depthTest.enabled == true ? (byte)0x80 : (byte)0x00;
-			id |= (UInt64)depthTestBits << 8;
+			id |= (UInt64)depthTestBits << 40;
+
+			id |= (UInt64)shaderState.shaderProgram.id;
 		}
 
 

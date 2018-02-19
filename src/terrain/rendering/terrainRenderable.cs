@@ -9,9 +9,9 @@ namespace Terrain
 	{
 		public Chunk myChunk;
 
-		public TerrainRenderable() : base()
+		public TerrainRenderable() 
+         : base("terrain")
 		{
-			myType = "terrain";
 		}
 
 		public override bool isVisible(Camera c)

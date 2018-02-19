@@ -306,7 +306,9 @@ namespace Graphics
 
          //filter out noise messages
          disabledIds = new uint[4] { 131185, 131186, 131204, 1282 };
-         GL.DebugMessageControl(DebugSourceControl.DebugSourceApi, DebugTypeControl.DontCare, DebugSeverityControl.DontCare, disabledIds.Length, disabledIds, false);
+         //GL.DebugMessageControl(DebugSourceControl.DebugSourceApi, DebugTypeControl.DontCare, DebugSeverityControl.DontCare, disabledIds.Length, disabledIds, false);
+         GL.DebugMessageControl(DebugSourceControl.DebugSourceApi, DebugTypeControl.DebugTypeOther, DebugSeverityControl.DebugSeverityNotification, 0, (uint[])null, false);
+
          //filter out debug push/pop messages (too much console spew)
          GL.DebugMessageControl(DebugSourceControl.DebugSourceApplication, DebugTypeControl.DebugTypePushGroup, DebugSeverityControl.DebugSeverityNotification, 0, (uint[])null, false);
          GL.DebugMessageControl(DebugSourceControl.DebugSourceApplication, DebugTypeControl.DebugTypePopGroup, DebugSeverityControl.DebugSeverityNotification, 0, (uint[])null, false);

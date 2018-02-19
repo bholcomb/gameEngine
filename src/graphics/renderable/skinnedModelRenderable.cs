@@ -15,9 +15,9 @@ namespace Graphics
    {
       public SkinnedModel model;
 
-      public SkinnedModelRenderable() : base()
+      public SkinnedModelRenderable()
+         : base("skinnedModel")
       {
-         myType = "skinnedModel";
       }
 
       public override bool isVisible(Camera c)

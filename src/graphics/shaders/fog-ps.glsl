@@ -1,12 +1,13 @@
-#version 330
+#version 430
 
-uniform sampler2D input;
-uniform sampler2D depth;
-uniform vec3 fogColor;
-uniform float maxDistance;
-uniform float time;
-uniform float width;
-uniform float height;
+layout(location = 0) uniform float time;
+layout(location = 1) uniform float width;
+layout(location = 2) uniform float height;
+
+layout(location = 20) uniform sampler2D input;
+layout(location = 21) uniform sampler2D depth;
+layout(location = 22) uniform vec3 fogColor;
+layout(location = 23) uniform float maxDistance;
 
 layout(std140) uniform camera {
    mat4 view; //aligned 4N

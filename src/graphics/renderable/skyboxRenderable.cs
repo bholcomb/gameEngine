@@ -15,9 +15,9 @@ namespace Graphics
    {
       public SkyBox model;
 
-      public SkyboxRenderable() : base()
+      public SkyboxRenderable() 
+         : base("skybox")
       {
-         myType = "skybox";
       }
 
       public override bool isVisible(Camera c)

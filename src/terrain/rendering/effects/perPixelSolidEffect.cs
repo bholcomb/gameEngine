@@ -12,7 +12,7 @@ using Util;
 
 namespace Terrain
 {
-	public class PerPixelSolidEffect : Effect
+	public class PerPixelSolidEffect : MaterialEffect
 	{
       UniformBufferObject myMaterialUniform = new UniformBufferObject(BufferUsageHint.DynamicDraw);
 		LightVisualizer myLightVisualizer;
@@ -60,7 +60,7 @@ namespace Terrain
 			state.depthWrite.enabled = true;
 
 			state.shaderState.shaderProgram = myShader;
-			state.generateId();
+			state.id = 1; //solid effect
 			return state;
 		}
 	}

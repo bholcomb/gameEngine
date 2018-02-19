@@ -1,14 +1,17 @@
-#version 330
+#version 430
 
-uniform sampler2D input;
-uniform sampler2D depth;
-uniform float time;
+layout(location = 0) uniform float time;
+layout(location = 1) uniform float width;
+layout(location = 2) uniform float height;
+
+
+layout(location = 20) uniform sampler2D input;
+layout(location = 21)uniform float aperture;
 
 smooth in vec2 texCoord;
 
 out vec4 FragColor;
 
-uniform float aperture;
 
 const float PI = 3.1415926535;
 

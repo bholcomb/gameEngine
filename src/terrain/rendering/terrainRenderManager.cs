@@ -40,7 +40,7 @@ namespace Terrain
 		protected HashSet<UInt64> myRequestedIds = new HashSet<UInt64>();
 		Object myLock = new Object();
 
-		RenderTarget myWaterRenderTarget;
+		public RenderTarget myWaterRenderTarget;
 		Texture myWaterDepthBuffer;
 		Texture myWaterColorBuffer;
 
@@ -80,7 +80,6 @@ namespace Terrain
 			sd = new ShaderProgramDescriptor(desc, null,"terrain:perpixel");
 			sp = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 			vis.registerEffect("forward-lighting", new PerPixelSolidEffect(sp));
-
 			vis.registerEffect("forward-lighting", new PerPixelTransparentEffect(sp));
 
 			desc.Clear();

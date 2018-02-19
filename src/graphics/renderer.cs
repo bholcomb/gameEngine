@@ -316,7 +316,7 @@ namespace Graphics
 			registerVisualizer("light", new LightVisualizer());
 			registerVisualizer("staticModel", new StaticModelVisualizer());
 			registerVisualizer("skinnedModel", new SkinnedModelVisualizer());
-			//          visualizers["particle"] = new ParticleVisualizer();
+			registerVisualizer("particle", new ParticleVisualizer());
 		}
 
 		static void installDefaultShaders()

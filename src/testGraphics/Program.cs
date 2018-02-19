@@ -33,6 +33,7 @@ namespace testRenderer
       LightRenderable mySun;
       LightRenderable myPoint1;
       LightRenderable myPoint2;
+      ParticleSystem myParticleSystem;
 
 		bool myShowRenderStats = true;
 
@@ -113,9 +114,6 @@ namespace testRenderer
 			GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 			GL.ClearDepth(1.0f);
 
-			initRenderTarget();
-			initRenderer();
-
 			myCamera.position = new Vector3(0, 2, 10);
 
 			DebugRenderer.enabled = true;
@@ -125,7 +123,10 @@ namespace testRenderer
 			myTerrainRenderManager = new TerrainRenderManager(myWorld);
 			myTerrainRenderManager.init();
 			myWorld.newWorld();
-		}
+
+         initRenderTarget();
+         initRenderer();
+      }
 
 		protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
 		{
@@ -273,7 +274,18 @@ namespace testRenderer
          v.addPass(p);
          
          p = new Pass("model", "forward-lighting");
-         p.filter = new TypeFilter(new List<String>() { "light", "staticModel", "skinnedModel"});
+         p.filter = new TypeFilter(new List<String>() { "light", "staticModel", "skinnedModel", "particle"});
+         p.renderTarget = myRenderTarget; //go back to normal render target
+         v.addPass(p);
+
+         //post effect fog/blur/underwater 
+         p = new PostEffectPass(myRenderTarget, v);
+         (p as PostEffectPass).addEffect("fog");
+         ((p as PostEffectPass).findEffect("fog") as FogEffect).fogColor = new Vector3(0.2f, 0.2f, 0.8f);
+         ((p as PostEffectPass).findEffect("fog") as FogEffect).maxDistance = 50.0f;
+         (p as PostEffectPass).addEffect("blur");
+         (p as PostEffectPass).addEffect("underwater");
+         p.renderTarget = myRenderTarget;
          v.addPass(p);
 
          p = new DebugPass();
@@ -343,8 +355,12 @@ namespace testRenderer
 			mySkinnedModel.setPosition(new Vector3(5, 0, 0));
 			(mySkinnedModel.findController("animation") as AnimationController).startAnimation("idle");
 
-			//add a sun for light
-			mySun = new LightRenderable();
+         //create a particle system
+         myParticleSystem = ParticleManager.loadDefinition("../data/particleSystems/ringOfFire.json");
+         Renderer.renderables.Add(myParticleSystem);
+
+         //add a sun for light
+         mySun = new LightRenderable();
          mySun.myLightType = LightRenderable.Type.DIRECTIONAL;
          mySun.color = Color4.White;
          mySun.position = new Vector3(5, 5, 5);

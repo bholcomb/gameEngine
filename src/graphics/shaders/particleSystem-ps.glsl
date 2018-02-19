@@ -1,6 +1,6 @@
-#version 330
+#version 430
 
-uniform sampler2D diffuseTexture;
+layout(location = 20) uniform sampler2D diffuseTexture;
 
 smooth in vec2 uv;
 smooth in vec4 color;

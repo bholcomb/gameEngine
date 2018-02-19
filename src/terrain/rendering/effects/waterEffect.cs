@@ -12,8 +12,8 @@ using Util;
 
 namespace Terrain
 {
-	public class PerPixelWaterEffect : Effect
-	{
+	public class PerPixelWaterEffect : MaterialEffect
+   {
 		LightVisualizer myLightVisualizer;
 
 		public PerPixelWaterEffect(ShaderProgram sp) : base(sp)
@@ -45,7 +45,7 @@ namespace Terrain
 			state.depthWrite.enabled = true;
 
 			state.shaderState.shaderProgram = myShader;
-			state.generateId();
+         state.id = 3; //water effect
 			return state;
 		}
 	}

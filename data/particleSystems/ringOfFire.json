@@ -9,9 +9,9 @@
 		"emitter": {
 			"emitterType": "circle",
 			"continuous": true,
-			"emissionRate": 800,
-			"p1": {"x": 5, "y": 5, "z": 0},
-			"p1Variance": {"x": 0, "y": 0, "z": 0},
+			"emissionRate": 200,
+			"p1": {"x": 2, "y": 2, "z": 0},
+			"p1Variance": {"x": 1, "y": 1, "z": 0},
 			"p2": {"x": 0, "y": 0, "z": 0},
 			"p2Variance": {"x": 0, "y": 0, "z": 0},
 			"velocity": {"x": 0, "y": 1, "z": 0},

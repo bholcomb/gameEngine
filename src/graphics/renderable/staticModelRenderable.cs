@@ -15,9 +15,9 @@ namespace Graphics
    {
       public StaticModel model;
 
-      public StaticModelRenderable() : base()
+      public StaticModelRenderable() 
+         : base("staticModel")
       {
-         myType = "staticModel";
       }
 
       public override bool isVisible(Camera c)

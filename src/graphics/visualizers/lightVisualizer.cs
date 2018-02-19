@@ -61,10 +61,9 @@ namespace Graphics
 		LightUniformData[] myLightData = new LightUniformData[255];
 		int myCurrentLightIndex = 0;
 	
-		public LightVisualizer() : base()
+		public LightVisualizer()
+         : base("light")
       {
-         myType = "light";
-
 			// room for 255 lights, light 0 is the sun
 			for (int i = 0; i < 255; i++)
 				myLightData[i] =new LightUniformData();

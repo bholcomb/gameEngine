@@ -20,9 +20,9 @@ namespace Graphics
    {    
 		SkyboxEffect myCurrentEffect;
 
-      public SkyboxVisualizer() : base()
+      public SkyboxVisualizer() 
+         : base("skybox")
       {
-         myType = "skybox";
       }
 
       #region prepare phase
@@ -36,7 +36,7 @@ namespace Graphics
       public override void preparePerPass(Renderable r, Pass p)
 		{
 			SkyboxRenderable skyboxModel = r as SkyboxRenderable;
-			Effect effect= getEffect(p.technique, (UInt32)Material.Feature.Skybox);
+			MaterialEffect effect= getEffect(p.technique, (UInt32)Material.Feature.Skybox);
          PipelineState pipeline = effect.createPipeline(skyboxModel.model.mesh.material);
 
          RenderQueue<SkyboxRenderInfo> rq = p.findRenderQueue(pipeline.id) as RenderQueue<SkyboxRenderInfo>;

@@ -1,4 +1,8 @@
-#version 330
+#version 430
+
+layout(location = 0) uniform float time;
+layout(location = 1) uniform float width;
+layout(location = 2) uniform float height;
 
 smooth out vec2 texCoord;
 smooth out vec3 fragVec;
@@ -43,9 +47,6 @@ layout(std140) uniform camera {
    int frame;
    float dt;
 };
-
-uniform float width;
-uniform float height;
  
 void main()
 {

@@ -12,5 +12,7 @@ out vec4 FragColor;
 
 void main()
 {   
-   FragColor = texture2D(input, texCoord);
+   vec2 tex = texCoord;
+   tex.x += sin(tex.y * 4 * 2 * 3.14159 + time) /  100;
+   FragColor = texture2D(input, tex);
 }

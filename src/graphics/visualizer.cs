@@ -14,11 +14,12 @@ namespace Graphics
 	public abstract class Visualizer
 	{
 		protected String myType;
-		protected Dictionary<String, Dictionary<UInt32, Effect>> myTechniqueEffects = new Dictionary<string, Dictionary<UInt32, Effect>>();
+		protected Dictionary<String, Dictionary<UInt32, MaterialEffect>> myTechniqueEffects = new Dictionary<string, Dictionary<UInt32, MaterialEffect>>();
 
 		public string type { get { return myType; } }
-		public Visualizer()
+		public Visualizer(string visType)
 		{
+         myType = visType;
 		}
 
 		public virtual UInt64 getSortId(RenderInfo info)
@@ -47,20 +48,20 @@ namespace Graphics
 			return sortId;
 		}
 
-		public void registerEffect(String technique, Effect effect)
+		public void registerEffect(String technique, MaterialEffect effect)
 		{
-			Dictionary<UInt32, Effect> effectMap = null;
+			Dictionary<UInt32, MaterialEffect> effectMap = null;
 			if (myTechniqueEffects.TryGetValue(technique, out effectMap) == false)
 			{
-				myTechniqueEffects[technique] = new Dictionary<UInt32, Effect>();
+				myTechniqueEffects[technique] = new Dictionary<UInt32, MaterialEffect>();
 			}
 
 			myTechniqueEffects[technique][effect.effectType] = effect;
 		}
 
-		public Effect getEffect(String technique, UInt32 effectType)
+		public MaterialEffect getEffect(String technique, UInt32 effectType)
 		{
-			Dictionary<UInt32, Effect> effectMap = null;
+			Dictionary<UInt32, MaterialEffect> effectMap = null;
 			if (myTechniqueEffects.TryGetValue(technique, out effectMap) == false)
 			{
 				String err = String.Format("Cannot find effect map for technique {0} in visualizer {1}", technique, myType);
@@ -68,12 +69,12 @@ namespace Graphics
 				throw new Exception(err);
 			}
 
-			Effect effect = null;
+			MaterialEffect effect = null;
 			if (effectMap.TryGetValue(effectType, out effect) == false)
 			{
 				//search for best match
 				UInt32 bestType = 0;
-				foreach (Effect e in effectMap.Values)
+				foreach (MaterialEffect e in effectMap.Values)
 				{
 					UInt32 match = e.effectType & effectType;
 					if (match > bestType)

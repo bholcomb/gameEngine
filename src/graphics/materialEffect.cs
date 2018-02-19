@@ -11,12 +11,12 @@ using Util;
 
 namespace Graphics
 {
-	public abstract class Effect
+	public abstract class MaterialEffect
 	{
 		public ShaderProgram myShader;
 		public Material.Feature myFeatures;
 		
-		public Effect(ShaderProgram sp)
+		public MaterialEffect(ShaderProgram sp)
 		{
 			myShader = sp;
 		}

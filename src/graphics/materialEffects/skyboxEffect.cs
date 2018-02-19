@@ -11,7 +11,7 @@ using Util;
 
 namespace Graphics
 {
-	public class SkyboxEffect : Effect
+	public class SkyboxEffect : MaterialEffect
 	{
 		public SkyboxEffect(ShaderProgram sp) : base(sp)
 		{

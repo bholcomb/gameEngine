@@ -50,9 +50,9 @@ namespace Graphics
 		ShaderStorageBufferObject myModelBuffer = new ShaderStorageBufferObject(BufferUsageHint.DynamicDraw);
 		List<SkinnedModelUniformData> myModelData = new List<SkinnedModelUniformData>();
 
-		public SkinnedModelVisualizer() : base()
+		public SkinnedModelVisualizer() 
+         : base("skinnedModel")
       {
-         myType = "skinnedModel";
 		}
 
       #region prepare phase
@@ -84,7 +84,7 @@ namespace Graphics
 
 			foreach (Mesh mesh in smr.model.myMeshes)
 			{
-				Effect effect = getEffect(p.technique, (UInt32)mesh.material.myFeatures);
+				MaterialEffect effect = getEffect(p.technique, (UInt32)mesh.material.myFeatures);
             PipelineState pipeline = effect.createPipeline(mesh.material);
             RenderQueue<SkinnedModelInfo> rq = p.findRenderQueue(pipeline.id) as RenderQueue<SkinnedModelInfo>;
 				if (rq == null)

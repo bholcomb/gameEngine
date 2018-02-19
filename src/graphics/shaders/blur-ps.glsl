@@ -1,8 +1,12 @@
-#version 330
+#version 430
 
-uniform sampler2D input;
-uniform sampler2D depth;
-uniform float time;
+layout(location = 0) uniform float time;
+layout(location = 1) uniform float width;
+layout(location = 2) uniform float height;
+
+layout(location = 20) uniform sampler2D input;
+layout(location = 21) uniform sampler2D depth;
+layout(location = 22) uniform int blurDirection;
 
 layout(std140) uniform camera {
    mat4 view; //aligned 4N
@@ -21,7 +25,7 @@ smooth in vec2 texCoord;
 
 out vec4 FragColor;
 
-uniform int blurDirection;
+
 
 float linearDepth()
 {
@@ -68,12 +72,12 @@ vec4 verticalBlur(float blurSize)
 void main()
 {  
    vec4 color;
-   float depth=1.0/512.0;
+   float depth = 1.0 / zFar;
 
-   if(blurDirection==0)
-	   color=horizontalBlur(depth);
+   if(blurDirection == 0)
+	   color = horizontalBlur(depth);
    else
-      color=verticalBlur(depth);
+      color = verticalBlur(depth);
 
-   FragColor=vec4(color.rgb, 1);
+   FragColor = vec4(color.rgb, 1);
 }
