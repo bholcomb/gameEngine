@@ -41,16 +41,16 @@
          this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
          this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
          this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-         this.featureFlowLayout = new System.Windows.Forms.FlowLayoutPanel();
-         this.featureCollection = new System.Windows.Forms.GroupBox();
-         this.button1 = new System.Windows.Forms.Button();
-         this.particleSystemPropGrid = new System.Windows.Forms.PropertyGrid();
          this.glControl1 = new OpenTK.GLControl();
+         this.featureCollection = new System.Windows.Forms.GroupBox();
+         this.featureFlowLayout = new System.Windows.Forms.FlowLayoutPanel();
+         this.particleSystemPropGrid = new System.Windows.Forms.PropertyGrid();
          this.menuStrip1.SuspendLayout();
          ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
          this.splitContainer1.Panel1.SuspendLayout();
          this.splitContainer1.Panel2.SuspendLayout();
          this.splitContainer1.SuspendLayout();
+         this.featureCollection.SuspendLayout();
          this.SuspendLayout();
          // 
          // menuStrip1
@@ -61,7 +61,7 @@
             this.helpToolStripMenuItem});
          this.menuStrip1.Location = new System.Drawing.Point(0, 0);
          this.menuStrip1.Name = "menuStrip1";
-         this.menuStrip1.Size = new System.Drawing.Size(1264, 24);
+         this.menuStrip1.Size = new System.Drawing.Size(1356, 24);
          this.menuStrip1.TabIndex = 0;
          this.menuStrip1.Text = "menuStrip1";
          // 
@@ -156,48 +156,11 @@
          // 
          // splitContainer1.Panel2
          // 
-         this.splitContainer1.Panel2.Controls.Add(this.featureFlowLayout);
          this.splitContainer1.Panel2.Controls.Add(this.featureCollection);
-         this.splitContainer1.Panel2.Controls.Add(this.button1);
          this.splitContainer1.Panel2.Controls.Add(this.particleSystemPropGrid);
-         this.splitContainer1.Size = new System.Drawing.Size(1264, 706);
-         this.splitContainer1.SplitterDistance = 1026;
+         this.splitContainer1.Size = new System.Drawing.Size(1356, 714);
+         this.splitContainer1.SplitterDistance = 1100;
          this.splitContainer1.TabIndex = 1;
-         // 
-         // featureFlowLayout
-         // 
-         this.featureFlowLayout.AutoScroll = true;
-         this.featureFlowLayout.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-         this.featureFlowLayout.Location = new System.Drawing.Point(9, 303);
-         this.featureFlowLayout.Name = "featureFlowLayout";
-         this.featureFlowLayout.Size = new System.Drawing.Size(216, 400);
-         this.featureFlowLayout.TabIndex = 0;
-         this.featureFlowLayout.WrapContents = false;
-         // 
-         // featureCollection
-         // 
-         this.featureCollection.Location = new System.Drawing.Point(3, 284);
-         this.featureCollection.Name = "featureCollection";
-         this.featureCollection.Size = new System.Drawing.Size(228, 419);
-         this.featureCollection.TabIndex = 2;
-         this.featureCollection.TabStop = false;
-         this.featureCollection.Text = "Features";
-         // 
-         // button1
-         // 
-         this.button1.Location = new System.Drawing.Point(78, 3);
-         this.button1.Name = "button1";
-         this.button1.Size = new System.Drawing.Size(25, 23);
-         this.button1.TabIndex = 1;
-         this.button1.Text = "+";
-         this.button1.UseVisualStyleBackColor = true;
-         // 
-         // particleSystemPropGrid
-         // 
-         this.particleSystemPropGrid.Location = new System.Drawing.Point(2, 3);
-         this.particleSystemPropGrid.Name = "particleSystemPropGrid";
-         this.particleSystemPropGrid.Size = new System.Drawing.Size(232, 275);
-         this.particleSystemPropGrid.TabIndex = 0;
          // 
          // glControl1
          // 
@@ -206,7 +169,7 @@
          this.glControl1.Dock = System.Windows.Forms.DockStyle.Fill;
          this.glControl1.Location = new System.Drawing.Point(0, 0);
          this.glControl1.Name = "glControl1";
-         this.glControl1.Size = new System.Drawing.Size(1026, 706);
+         this.glControl1.Size = new System.Drawing.Size(1100, 714);
          this.glControl1.TabIndex = 0;
          this.glControl1.VSync = false;
          this.glControl1.Load += new System.EventHandler(this.glControl1_Load);
@@ -218,11 +181,45 @@
          this.glControl1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.glControl1_MouseUp);
          this.glControl1.Resize += new System.EventHandler(this.glControl1_Resize);
          // 
+         // featureCollection
+         // 
+         this.featureCollection.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+         this.featureCollection.Controls.Add(this.featureFlowLayout);
+         this.featureCollection.Location = new System.Drawing.Point(3, 284);
+         this.featureCollection.Name = "featureCollection";
+         this.featureCollection.Size = new System.Drawing.Size(249, 427);
+         this.featureCollection.TabIndex = 2;
+         this.featureCollection.TabStop = false;
+         this.featureCollection.Text = "Features";
+         // 
+         // featureFlowLayout
+         // 
+         this.featureFlowLayout.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+         this.featureFlowLayout.AutoScroll = true;
+         this.featureFlowLayout.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
+         this.featureFlowLayout.Location = new System.Drawing.Point(3, 16);
+         this.featureFlowLayout.Name = "featureFlowLayout";
+         this.featureFlowLayout.Size = new System.Drawing.Size(243, 408);
+         this.featureFlowLayout.TabIndex = 0;
+         this.featureFlowLayout.WrapContents = false;
+         // 
+         // particleSystemPropGrid
+         // 
+         this.particleSystemPropGrid.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+         this.particleSystemPropGrid.Location = new System.Drawing.Point(2, 3);
+         this.particleSystemPropGrid.Name = "particleSystemPropGrid";
+         this.particleSystemPropGrid.Size = new System.Drawing.Size(247, 275);
+         this.particleSystemPropGrid.TabIndex = 0;
+         // 
          // Form1
          // 
          this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
          this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-         this.ClientSize = new System.Drawing.Size(1264, 730);
+         this.ClientSize = new System.Drawing.Size(1356, 738);
          this.Controls.Add(this.splitContainer1);
          this.Controls.Add(this.menuStrip1);
          this.MainMenuStrip = this.menuStrip1;
@@ -234,6 +231,7 @@
          this.splitContainer1.Panel2.ResumeLayout(false);
          ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
          this.splitContainer1.ResumeLayout(false);
+         this.featureCollection.ResumeLayout(false);
          this.ResumeLayout(false);
          this.PerformLayout();
 
@@ -255,7 +253,6 @@
       private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem1;
       private System.Windows.Forms.SplitContainer splitContainer1;
       private System.Windows.Forms.PropertyGrid particleSystemPropGrid;
-      private System.Windows.Forms.Button button1;
       private System.Windows.Forms.GroupBox featureCollection;
       private System.Windows.Forms.FlowLayoutPanel featureFlowLayout;
       private OpenTK.GLControl glControl1;

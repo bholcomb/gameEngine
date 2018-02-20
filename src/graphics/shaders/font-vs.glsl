@@ -16,8 +16,8 @@ layout(std140, binding = 0) uniform camera {
    float dt;
 };
 
-layout(location = 0)uniform mat4 model;
-layout(location = 1)uniform bool is3d;
+layout(location = 0) uniform mat4 model;
+layout(location = 1) uniform bool is3d;
 
 smooth out vec2 texCoord;
 

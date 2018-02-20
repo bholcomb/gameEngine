@@ -62,6 +62,7 @@ namespace Graphics
 			//setup the pipeline
 			rc.pipelineState.shaderState.shaderProgram = myShader;
 			rc.pipelineState.vaoState.vao = myVao;
+         rc.pipelineState.generateId();
 
 			//set renderstate
 			rc.renderState.setVertexBuffer(myVbo.id, 0, 0, V3T2.stride);
@@ -70,7 +71,7 @@ namespace Graphics
 			rc.renderState.setUniform(new UniformData(20, Uniform.UniformType.Int, 0));
 		}
 
-      public override void drawText(String txt)
+      public override void updateText(String txt)
       {
          int counter = 0;
          int indexCount = 0;
@@ -119,11 +120,13 @@ namespace Graphics
          //update the VBO
          myVbo.setData(myVerts, 0, (counter * 4 * V3T2.stride));
          myIbo.setData(myIndexes, 0, (indexCount * 2));
+      }
 
-			//draw
-			Renderer.device.bindVertexBuffer(myVbo.id, 0, 0, V3T2.stride);
-			Renderer.device.bindIndexBuffer(myIbo.id);
-			Renderer.device.drawIndexed(PrimitiveType.TriangleStrip, myIbo.count, 0, DrawElementsType.UnsignedShort);
+      public override void drawText()
+      {
+         Renderer.device.bindVertexBuffer(myVbo.id, 0, 0, V3T2.stride);
+         Renderer.device.bindIndexBuffer(myIbo.id);
+         Renderer.device.drawIndexed(PrimitiveType.TriangleStrip, myIbo.count, 0, DrawElementsType.UnsignedShort);
       }
 
       public override int width(String txt)

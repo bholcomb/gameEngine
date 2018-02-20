@@ -40,6 +40,8 @@ namespace testRenderer
 		World myWorld;
 		TerrainRenderManager myTerrainRenderManager;
 
+      Graphics.Font myFont;
+
 		public TestRenderer()
 			: base(theWidth, theHeigth, new GraphicsMode(32, 24, 0, 0), "Haven Test", GameWindowFlags.Default, DisplayDevice.Default, 4, 4,
 #if DEBUG
@@ -123,6 +125,8 @@ namespace testRenderer
 			myTerrainRenderManager = new TerrainRenderManager(myWorld);
 			myTerrainRenderManager.init();
 			myWorld.newWorld();
+
+         myFont = FontManager.findFont("DEFAULT");
 
          initRenderTarget();
          initRenderer();
@@ -249,7 +253,9 @@ namespace testRenderer
 			RenderCommand cmd = new BlitFrameBufferCommand(myRenderTarget);
 			cmd.execute();
 
-			SwapBuffers();
+         myFont.print(20, 20, "FPS: {0:0.00}", TimeSource.avgFps());
+
+         SwapBuffers();
 		}
 
 		public void initRenderer()

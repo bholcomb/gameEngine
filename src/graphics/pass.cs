@@ -63,7 +63,7 @@ namespace Graphics
          filter = new NullFilter();
 
          clearTarget = false;
-         clearColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
+         clearColor = new Color4(0.2f, 0.2f, 0.2f, 1.0f);
          clearMask = ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit;
       }
 
@@ -143,11 +143,12 @@ namespace Graphics
          if (renderTarget != null)
          {
             preCommands.Add(new SetRenderTargetCommand(renderTarget));
-            if (clearTarget == true)
-            {
-               preCommands.Add(new ClearColorCommand(clearColor));
-               preCommands.Add(new ClearCommand(clearMask));
-            }
+         }
+
+         if (clearTarget == true)
+         {
+            preCommands.Add(new ClearColorCommand(clearColor));
+            preCommands.Add(new ClearCommand(clearMask));
          }
 
          //called after setting render target so that any user commands inserted will affect (or change) the render target

@@ -45,19 +45,18 @@ namespace Graphics
 
 			myFont.setupRenderCommand(this);
 
-
 			Matrix4 model = Matrix4.CreateTranslation(myPosition);
 
 			//add the model view projection matrix
 			renderState.setUniform(new UniformData(0, Uniform.UniformType.Mat4, model));
-			renderState.setUniform(new UniformData(1, Uniform.UniformType.Bool, true));
+			renderState.setUniform(new UniformData(1, Uniform.UniformType.Bool, false));
 		}
 
       public override void execute()
       {
+         myFont.updateText(myString);
 			base.execute();
-
-         myFont.drawText(myString);
+         myFont.drawText();
       }
    }
 }

@@ -56,7 +56,8 @@ namespace Graphics
       }
 
       public abstract void setupRenderCommand(StatelessRenderCommand rc);
-      public abstract void drawText(String str);
+      public abstract void updateText(String str);
+      public abstract void drawText();
 
       public virtual void print(int x, int y, String txt, params Object[] objs)
       {

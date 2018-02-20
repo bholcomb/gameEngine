@@ -42,7 +42,7 @@ include("lua.lua")
 include("vr.lua")
 
 group "Tools"
---include("particleEditor.lua")
+include("particleEditor.lua")
 include("messageCodeGen.lua")
 include("worldEditor.lua")
 
