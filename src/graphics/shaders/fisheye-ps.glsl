@@ -5,7 +5,7 @@ layout(location = 1) uniform float width;
 layout(location = 2) uniform float height;
 
 
-layout(location = 20) uniform sampler2D input;
+layout(location = 20) uniform sampler2D source;
 layout(location = 21)uniform float aperture;
 
 smooth in vec2 texCoord;
@@ -47,6 +47,6 @@ void main(void)
       float u = r * cos(phi) + 0.5;
       float v = r * sin(phi) + 0.5;
 
-      FragColor = texture2D(input, vec2(u, v));
+      FragColor = texture(source, vec2(u, v));
    }
 }

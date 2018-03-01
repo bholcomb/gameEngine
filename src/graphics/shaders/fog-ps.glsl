@@ -4,7 +4,7 @@ layout(location = 0) uniform float time;
 layout(location = 1) uniform float width;
 layout(location = 2) uniform float height;
 
-layout(location = 20) uniform sampler2D input;
+layout(location = 20) uniform sampler2D source;
 layout(location = 21) uniform sampler2D depth;
 layout(location = 22) uniform vec3 fogColor;
 layout(location = 23) uniform float maxDistance;
@@ -32,7 +32,7 @@ out vec4 FragColor;
 
 float depthReconstruction()
 {
-  float z = texture2D(depth, texCoord).x;
+  float z = texture(depth, texCoord).x;
   z = p34 / (z + p33);
   return z;
 }
@@ -44,7 +44,7 @@ vec3 eyeFragReconstruction2()
 
 vec3 eyeFragReconstruction()
 {
-   float zpix = texture2D(depth, texCoord).x;
+   float zpix = texture(depth, texCoord).x;
    float zndc = zpix * 2.0 - 1.0;
    float zeye = 2 * zFar * zNear / (zndc * (zFar - zNear) - (zFar + zNear));
 
@@ -59,7 +59,7 @@ vec3 eyeFragReconstruction()
 
 void main()
 {
-  vec4 color = texture2D(input, texCoord);
+  vec4 color = texture(source, texCoord);
 
   float d = depthReconstruction();
   float fogAmount = 1.0 - exp( -depthReconstruction() * (1/maxDistance));

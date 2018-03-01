@@ -21,7 +21,7 @@ namespace testRenderer
 	public class TestRenderer : GameWindow
 	{
 		public static int theWidth = 1280;
-		public static int theHeigth = 800;
+		public static int theHeigth = 720;
 
 		Initializer myInitializer;
 		Viewport myViewport;
@@ -42,6 +42,8 @@ namespace testRenderer
 
       Graphics.Font myFont;
 
+      float windowScale;
+
 		public TestRenderer()
 			: base(theWidth, theHeigth, new GraphicsMode(32, 24, 0, 0), "Haven Test", GameWindowFlags.Default, DisplayDevice.Default, 4, 4,
 #if DEBUG
@@ -53,13 +55,15 @@ namespace testRenderer
 			myInitializer = new Initializer(new String[] { "testRenderer.lua" });
 			Renderer.init();
 			myViewport = new Viewport(this);
-			myCamera = new Camera(myViewport, 60.0f, 0.1f, 1000.0f);
+			myCamera = new Camera(myViewport, 60.0f, 0.1f, 100.0f);
 
 			myCameraEventHandler = new GameWindowCameraEventHandler(myCamera, this);
 
 			Keyboard.KeyUp += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardUp);
 
 			this.VSync = VSyncMode.Off;
+
+         this.Location = new Point(0, 0);
 		}
 
 		public void handleKeyboardUp(object sender, KeyboardKeyEventArgs e)
@@ -128,6 +132,8 @@ namespace testRenderer
 
          myFont = FontManager.findFont("DEFAULT");
 
+         windowScale = this.Width / (float)theWidth; // derive current DPI scale factor
+
          initRenderTarget();
          initRenderer();
       }
@@ -168,6 +174,7 @@ namespace testRenderer
 			ImGui.beginFrame();
 			if(ImGui.beginWindow("Render Stats", ref myShowRenderStats, Window.Flags.DefaultWindow))
 			{
+            //ImGui.currentWindow.canvas.setScale(windowScale);
 				ImGui.setWindowPosition(new Vector2(20, 50), SetCondition.FirstUseEver);
 				ImGui.setWindowSize(new Vector2(500, 650), SetCondition.FirstUseEver);
 				ImGui.label("FPS: {0:0.00}", avgFps);
@@ -226,8 +233,8 @@ namespace testRenderer
 		{
 			//init render target
 			int x, y;
-			x = myCamera.viewport().width;
-			y = myCamera.viewport().height;
+         x = theWidth; // myCamera.viewport().width;
+         y = theHeigth; // myCamera.viewport().height;
 
 			List<RenderTargetDescriptor> rtdesc = new List<RenderTargetDescriptor>();
 			rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.ColorAttachment0, format = SizedInternalFormat.Rgba32f }); //creates a texture internally
@@ -250,7 +257,8 @@ namespace testRenderer
 
 		void present()
 		{
-			RenderCommand cmd = new BlitFrameBufferCommand(myRenderTarget);
+			RenderCommand cmd = new BlitFrameBufferCommand(myRenderTarget, new Rect(0, 0, myRenderTarget.buffers[FramebufferAttachment.ColorAttachment0].width, 
+            myRenderTarget.buffers[FramebufferAttachment.ColorAttachment0].height), new Rect(0, 0, myCamera.viewport().width, myCamera.viewport().height));
 			cmd.execute();
 
          myFont.print(20, 20, "FPS: {0:0.00}", TimeSource.avgFps());
@@ -292,7 +300,7 @@ namespace testRenderer
          (p as PostEffectPass).addEffect("blur");
          (p as PostEffectPass).addEffect("underwater");
          p.renderTarget = myRenderTarget;
-         v.addPass(p);
+         //v.addPass(p);
 
          p = new DebugPass();
          v.addPass(p);
@@ -320,9 +328,9 @@ namespace testRenderer
 
 			//create a tree instance
 			Random rand = new Random(230877);
-			for (int i = 0; i < 10000; i++)
+			for (int i = 0; i < 1000; i++)
 			{
-				int size = 500;
+				int size = 100;
 				int halfSize = size / 2;
 				StaticModelRenderable smr = new StaticModelRenderable();
 				ObjModelDescriptor mdesc;

@@ -765,10 +765,10 @@ namespace UI
       public void pushClipRect(Rect r)
       {
          Vector4 c;
-         c.X = r.left;
-         c.Y = myScreenSize.Y - r.top; //convert to pixel coords from UI Screen coords
-         c.Z = r.width;
-         c.W = r.height;
+         c.X = r.left * myScale;
+         c.Y = (myScreenSize.Y - (r.top * myScale)); //convert to pixel coords from UI Screen coords
+         c.Z = r.width * myScale;
+         c.W = r.height * myScale;
          pushClipRect(c);
       }
       public void pushClipRect(Vector4 r)

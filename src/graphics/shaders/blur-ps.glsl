@@ -4,7 +4,7 @@ layout(location = 0) uniform float time;
 layout(location = 1) uniform float width;
 layout(location = 2) uniform float height;
 
-layout(location = 20) uniform sampler2D input;
+layout(location = 20) uniform sampler2D source;
 layout(location = 21) uniform sampler2D depth;
 layout(location = 22) uniform int blurDirection;
 
@@ -31,7 +31,7 @@ float linearDepth()
 {
   float n = zNear; // camera z near
   float f = zFar; // camera z far
-  float z = texture2D(depth, texCoord).x;
+  float z = texture(depth, texCoord).x;
   return (2.0 * n) / (f + n - z * (f - n));	
 }
 
@@ -40,15 +40,15 @@ vec4 horizontalBlur(float blurSize)
    // blur in x (horizontal)
    // take nine samples, with the distance blurSize between them
    vec4 sum = vec4(0.0);
-   sum += texture2D(input, vec2(texCoord.x - 4.0*blurSize, texCoord.y)) * 0.05;
-   sum += texture2D(input, vec2(texCoord.x - 3.0*blurSize, texCoord.y)) * 0.09;
-   sum += texture2D(input, vec2(texCoord.x - 2.0*blurSize, texCoord.y)) * 0.12;
-   sum += texture2D(input, vec2(texCoord.x - blurSize, texCoord.y)) * 0.15;
-   sum += texture2D(input, vec2(texCoord.x, texCoord.y)) * 0.16;
-   sum += texture2D(input, vec2(texCoord.x + blurSize, texCoord.y)) * 0.15;
-   sum += texture2D(input, vec2(texCoord.x + 2.0*blurSize, texCoord.y)) * 0.12;
-   sum += texture2D(input, vec2(texCoord.x + 3.0*blurSize, texCoord.y)) * 0.09;
-   sum += texture2D(input, vec2(texCoord.x + 4.0*blurSize, texCoord.y)) * 0.05;
+   sum += texture(source, vec2(texCoord.x - 4.0*blurSize, texCoord.y)) * 0.05;
+   sum += texture(source, vec2(texCoord.x - 3.0*blurSize, texCoord.y)) * 0.09;
+   sum += texture(source, vec2(texCoord.x - 2.0*blurSize, texCoord.y)) * 0.12;
+   sum += texture(source, vec2(texCoord.x - blurSize, texCoord.y)) * 0.15;
+   sum += texture(source, vec2(texCoord.x, texCoord.y)) * 0.16;
+   sum += texture(source, vec2(texCoord.x + blurSize, texCoord.y)) * 0.15;
+   sum += texture(source, vec2(texCoord.x + 2.0*blurSize, texCoord.y)) * 0.12;
+   sum += texture(source, vec2(texCoord.x + 3.0*blurSize, texCoord.y)) * 0.09;
+   sum += texture(source, vec2(texCoord.x + 4.0*blurSize, texCoord.y)) * 0.05;
    return sum;
 }
 
@@ -57,15 +57,15 @@ vec4 verticalBlur(float blurSize)
    // blur in x (horizontal)
    // take nine samples, with the distance blurSize between them
    vec4 sum = vec4(0.0);
-   sum += texture2D(input, vec2(texCoord.x, texCoord.y - 4.0*blurSize)) * 0.05;
-   sum += texture2D(input, vec2(texCoord.x, texCoord.y - 3.0*blurSize)) * 0.09;
-   sum += texture2D(input, vec2(texCoord.x, texCoord.y - 2.0*blurSize)) * 0.12;
-   sum += texture2D(input, vec2(texCoord.x, texCoord.y - blurSize)) * 0.15;
-   sum += texture2D(input, vec2(texCoord.x, texCoord.y)) * 0.16;
-   sum += texture2D(input, vec2(texCoord.x, texCoord.y + blurSize)) * 0.15;
-   sum += texture2D(input, vec2(texCoord.x, texCoord.y + 2.0*blurSize)) * 0.12;
-   sum += texture2D(input, vec2(texCoord.x, texCoord.y + 3.0*blurSize)) * 0.09;
-   sum += texture2D(input, vec2(texCoord.x, texCoord.y + 4.0*blurSize)) * 0.05;
+   sum += texture(source, vec2(texCoord.x, texCoord.y + 4.0*blurSize)) * 0.05;
+   sum += texture(source, vec2(texCoord.x, texCoord.y - 4.0*blurSize)) * 0.05;
+   sum += texture(source, vec2(texCoord.x, texCoord.y - 3.0*blurSize)) * 0.09;
+   sum += texture(source, vec2(texCoord.x, texCoord.y - 2.0*blurSize)) * 0.12;
+   sum += texture(source, vec2(texCoord.x, texCoord.y - blurSize)) * 0.15;
+   sum += texture(source, vec2(texCoord.x, texCoord.y)) * 0.16;
+   sum += texture(source, vec2(texCoord.x, texCoord.y + blurSize)) * 0.15;
+   sum += texture(source, vec2(texCoord.x, texCoord.y + 2.0*blurSize)) * 0.12;
+   sum += texture(source, vec2(texCoord.x, texCoord.y + 3.0*blurSize)) * 0.09;
    return sum;
 }
 

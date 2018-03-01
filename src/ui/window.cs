@@ -376,7 +376,7 @@ namespace UI
       {
          canvas.reset();
          canvas.setScreenResolution(ImGui.displaySize);
-         canvas.setScale(1.0f);
+         //canvas.setScale(1.0f);
 
          float alpha = ImGui.style.alpha;
 
