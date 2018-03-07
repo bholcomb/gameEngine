@@ -54,9 +54,9 @@ namespace GpuNoise
          mySSbo.Dispose();
       }
 
-      public override bool update()
+      public override bool update(bool force = false)
       {
-         if (source.update() == true)
+         if (source.update(force) == true)
          {
             findMinMax(source.output);
             correct(source.output);

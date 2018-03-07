@@ -105,15 +105,16 @@ void main()
    uint bitfield = floatBitsToUint(data.a);
    uint heightType = heightType(bitfield);
 
+   float elv = data.r;
    float moist = imageLoad(moisturemap, heatPos).r;
 
    // Adjust Heat Map based on Height - Higher == colder
    switch (heightType)
    {
-      case DeepWater: moist += 8.0 * data.r;  break;
-      case ShallowWater: moist += 3.0 * data.r; break;
-      case Shore: moist += 1.0 * data.r; break;
-      case Sand: moist += 0.25f * data.r; break;
+      case DeepWater: moist +=    (8.0 * elv);  break;
+      case ShallowWater: moist += (3.0 * elv); break;
+      case Shore: moist +=        (1.0 * elv); break;
+      case Sand: moist +=         (0.25f * elv); break;
    }
 
    bitfield = setMoistureType(bitfield, getMoistureType(moist));

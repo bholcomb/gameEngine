@@ -96,20 +96,20 @@ void main()
 
    vec4 color = vec4(1,1,1,1);
 
-   if(showElevation)
-      color *= vec4(elevation,elevation, elevation, 1);
-
-   if(showWater && group == 0)
-      color = vec4(0,0,1,1);
+   if(showBiome)
+      color = biomeColors[biome];
 
    if(showHeat)
-      color *= vec4(heat, heat, heat, 1);
+      color = vec4(heat, heat, heat, 1);
 
    if(showMoisture)
-      color *= vec4(moisture, moisture, moisture, 1);
+      color = vec4(moisture, moisture, moisture, 1);
 
-   if(showBiome)
-      color *= biomeColors[biome];
+   if(showElevation)
+      color = vec4(elevation,elevation, elevation, 1);
+
+   if(showWater && group == Water)
+      color = vec4(0,0,1,1);
 
    color.a = 1;
    FragColor = color;

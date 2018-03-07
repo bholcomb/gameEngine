@@ -29,7 +29,7 @@ namespace GpuNoise
       }
 
 		//returns true if its data changed, allows connected modules to not have to rerun
-		public abstract bool update();
+		public abstract bool update(bool force = false);
 
 		public virtual void Dispose()
 		{

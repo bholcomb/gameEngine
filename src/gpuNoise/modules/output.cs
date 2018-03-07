@@ -20,9 +20,9 @@ namespace GpuNoise
       {
       }
 
-		public override bool update()
+		public override bool update(bool force = false)
 		{
-			if(source.update() == true)
+         if (source.update(force) == true || force == true)
 			{
 				output = source.output;
 				return true;

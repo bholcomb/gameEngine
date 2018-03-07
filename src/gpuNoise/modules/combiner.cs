@@ -39,12 +39,12 @@ namespace GpuNoise
          myShaderProgram = Renderer.resourceManager.getResource(sd) as ShaderProgram;
       }
 
-		public override bool update()
+		public override bool update(bool force = false)
 		{
-			bool needsUpdate = false;
+         bool needsUpdate = false;
 			foreach (Module m in inputs)
 			{
-				if (m != null && m.update() == true)
+				if (m != null && m.update(force) == true)
 				{
 					needsUpdate = true;
 				}

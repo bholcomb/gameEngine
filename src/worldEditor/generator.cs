@@ -55,10 +55,15 @@ namespace WorldEditor
          public float H = 1.0f;
          public Fractal.Function function = Fractal.Function.multiFractal;
 
-         public float x0 = 0;
-         public float x1 = 0;
-         public float y0 = 0;
-         public float y1 = 1;
+         public float sx0 = 0;
+         public float sx1 = 0;
+         public float sy0 = 0;
+         public float sy1 = 1;
+
+         public float nx0 = 0;
+         public float nx1 = 0;
+         public float ny0 = 1;
+         public float ny1 = 0;
       }
       public HeatInput heat = new HeatInput();
 
@@ -149,19 +154,24 @@ namespace WorldEditor
          ac.output.setName("Heat Autocorrect");
          ac.source = f;
 
-         Gradient g = generator.addModule(Module.Type.Gradient, "gradient") as Gradient;
-         g.output.setName("Heat gradient");
-         g.x0 = 0; g.x1 = 1; g.y0 = 0; g.y1 = 1;
+         Gradient sg = generator.addModule(Module.Type.Gradient, "south gradient") as Gradient;
+         sg.output.setName("Heat South gradient");
+         sg.x0 = 0; sg.x1 = 1; sg.y0 = 0; sg.y1 = 1;
 
-         ScaleDomain s = generator.addModule(Module.Type.ScaleDomain, "scaleDomain") as ScaleDomain;
-         s.x = 1.0f;
-         s.y = 0.0f;
-         s.input = g;
+         Gradient ng = generator.addModule(Module.Type.Gradient, "north gradient") as Gradient;
+         ng.output.setName("Heat North gradient");
+         ng.x0 = 0; ng.x1 = 1; ng.y0 = 1; ng.y1 = 0;
+
+         //          ScaleDomain s = generator.addModule(Module.Type.ScaleDomain, "scaleDomain") as ScaleDomain;
+         //          s.x = 1.0f;
+         //          s.y = 0.1f;
+         //          s.input = g;
 
          Combiner comb = generator.addModule(Module.Type.Combiner, "combiner") as Combiner;
          comb.output.setName("Heat Combiner");
          comb.inputs[0] = ac;
-         comb.inputs[1] = s;
+         comb.inputs[1] = sg;
+         comb.inputs[2] = ng;
          comb.action = Combiner.CombinerType.Multiply;
 
          generator.final.source = comb;
@@ -178,6 +188,7 @@ namespace WorldEditor
          f.frequency = WorldParameters.theMoistureFrequency;
 
          AutoCorrect ac = generated.addModule(Module.Type.AutoCorect, "autocorrect") as AutoCorrect;
+         ac.output.setName("Moisture Autocorrect");
          ac.source = f;
 
          generated.final.source = ac;
@@ -187,8 +198,8 @@ namespace WorldEditor
 
       void updateElevation()
       {
-         string marker = "Update Elevation";
-         GL.PushDebugGroup(DebugSourceExternal.DebugSourceApplication, 0, marker.Length, marker);
+         Renderer.device.pushDebugMarker("Update Elevation");
+
          AutoCorrect ac = myElevationGenerator.findModule("autocorrect") as AutoCorrect;
 
          ac.reset();
@@ -221,13 +232,12 @@ namespace WorldEditor
 
          //update the elevation height map
          myElevationMap.updateFaces(myElevationTex);
-         GL.PopDebugGroup();
+         Renderer.device.popDebugMarker();
       }
 
       void updateTemperature()
       {
-         string marker = "Update Heat";
-         GL.PushDebugGroup(DebugSourceExternal.DebugSourceApplication, 0, marker.Length, marker);
+         Renderer.device.pushDebugMarker("Update Heat");
 
          Fractal f = myHeatGenerator.findModule("fractal") as Fractal;
          f.seed = heat.seed;
@@ -238,22 +248,26 @@ namespace WorldEditor
          f.gain = heat.gain;
          f.H = heat.H;
 
-         Gradient g = myHeatGenerator.findModule("gradient") as Gradient;
-         g.x0 = heat.x0;
-         g.x1 = heat.x1;
-         g.y0 = heat.y0;
-         g.y1 = heat.y1;
+         Gradient g = myHeatGenerator.findModule("south gradient") as Gradient;
+         g.x0 = heat.sx0;
+         g.x1 = heat.sx1;
+         g.y0 = heat.sy0;
+         g.y1 = heat.sy1;
 
-         myHeatGenerator.update();
-         GL.PopDebugGroup();
+         g = myHeatGenerator.findModule("north gradient") as Gradient;
+         g.x0 = heat.nx0;
+         g.x1 = heat.nx1;
+         g.y0 = heat.ny0;
+         g.y1 = heat.ny1;
+
+         myHeatGenerator.update(true);
+         Renderer.device.popDebugMarker();
       }
 
       void updateMoisture()
       {
-         string marker = "Update Moisture";
-         GL.PushDebugGroup(DebugSourceExternal.DebugSourceApplication, 0, marker.Length, marker);
-
-
+         Renderer.device.pushDebugMarker("Update Moisture");
+         
          Fractal f = myMoistureGenerator.findModule("fractal") as Fractal;
          f.seed = moisture.seed;
          f.octaves = moisture.octaves;
@@ -264,14 +278,13 @@ namespace WorldEditor
          f.H = moisture.H;
 
          myMoistureGenerator.update();
-         GL.PopDebugGroup();
+         Renderer.device.popDebugMarker();
       }
 
       void updateBiomes()
       {
-         String marker = "Update Biomes";
-         GL.PushDebugGroup(DebugSourceExternal.DebugSourceApplication, 0, marker.Length, marker);
-
+         Renderer.device.pushDebugMarker("Update Biomes");
+         
          for (int i = 0; i < 6; i++)
          {
             string m1 = "face " + i.ToString();
@@ -321,7 +334,7 @@ namespace WorldEditor
          }
 
          myBiomeMap.updateFaces(myBiomeTex);
-         GL.PopDebugGroup();
+         Renderer.device.popDebugMarker();
       }
 
       public void update()

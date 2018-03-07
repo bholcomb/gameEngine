@@ -31,9 +31,9 @@ namespace GpuNoise
 			myShaderProgram = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 		}
 
-		public override bool update()
+		public override bool update(bool force = false)
 		{
-			if (didChange() == true)
+         if (didChange() == true || force == true)
 			{
 				ComputeCommand cmd = new ComputeCommand(myShaderProgram, source.output.width / 32, source.output.height / 32);
 

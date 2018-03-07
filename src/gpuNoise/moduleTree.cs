@@ -32,9 +32,9 @@ namespace GpuNoise
 			}
 		}
 
-		public bool update()
+		public bool update(bool force = false)
 		{
-			return myModules["output"].update();
+			return myModules["output"].update(force);
 		}
 
 		public Module addModule(Module.Type moduleType, string name="")

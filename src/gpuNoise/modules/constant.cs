@@ -27,9 +27,9 @@ namespace GpuNoise
 			this.val = val;
 		}
 
-		public override bool update()
+		public override bool update(bool force = false)
 		{
-			if(didChange())
+         if (didChange() == true || force == true)
 			{
 				float[] data = new float[] { val };
 

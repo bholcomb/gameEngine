@@ -111,10 +111,10 @@ void main()
    // Adjust Heat Map based on Height - Higher == colder
    switch (heightType)
    {
-      case Grass: heat -= 0.1f * elv;  break;
-      case Forest: heat -= 0.2f * elv; break;
-      case Rock: heat -= 0.3f * elv; break;
-      case Snow: heat -= 0.4f * elv; break;
+      case Grass: heat -=  (0.1f * elv);  break;
+      case Forest: heat -= (0.2f * elv); break;
+      case Rock: heat -=   (0.3f * elv); break;
+      case Snow: heat -=   (0.4f * elv); break;
    }
 
    bitfield = setHeatType(bitfield, getHeatType(heat));

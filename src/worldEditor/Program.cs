@@ -210,10 +210,18 @@ namespace WorldEditor
             ImGui.slider("H", ref myGenerator.heat.H, 0.1f, 2.0f);
 
             ImGui.separator();
-            ImGui.slider("x0", ref myGenerator.heat.x0, 0.0f, 1.0f);
-            ImGui.slider("x1", ref myGenerator.heat.x1, 0.0f, 1.0f);
-            ImGui.slider("y0", ref myGenerator.heat.y0, 0.0f, 1.0f);
-            ImGui.slider("y1", ref myGenerator.heat.y1, 0.0f, 1.0f);
+            ImGui.label("South Gradient");
+            ImGui.slider("sx0", ref myGenerator.heat.sx0, 0.0f, 1.0f);
+            ImGui.slider("sx1", ref myGenerator.heat.sx1, 0.0f, 1.0f);
+            ImGui.slider("sy0", ref myGenerator.heat.sy0, 0.0f, 1.0f);
+            ImGui.slider("sy1", ref myGenerator.heat.sy1, 0.0f, 1.0f);
+
+            ImGui.separator();
+            ImGui.label("North Gradient");
+            ImGui.slider("nx0", ref myGenerator.heat.nx0, 0.0f, 1.0f);
+            ImGui.slider("nx1", ref myGenerator.heat.nx1, 0.0f, 1.0f);
+            ImGui.slider("ny0", ref myGenerator.heat.ny0, 0.0f, 1.0f);
+            ImGui.slider("ny1", ref myGenerator.heat.ny1, 0.0f, 1.0f);
 
             ImGui.endWindow();
          }
