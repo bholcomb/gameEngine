@@ -97,9 +97,10 @@ namespace Graphics
          ParallaxMap       = 0x0020,
 			DetailMap			= 0x0040,
 			DisplacementMap	= 0x0080,
-			GlowMap				= 0x0100,
-			ReflectionMap		= 0x0200,
-			Skybox				= 0x0400,
+			EmmissiveMap		= 0x0100,
+         AlphaMap          = 0x0200,
+			ReflectionMap		= 0x0400,
+			Skybox				= 0x0800,
 		}
 
 		public enum TextureId
@@ -109,7 +110,8 @@ namespace Graphics
 			Normal,
 			Detail,
 			Displacement,
-			Glow,
+			Emissive,
+         Alpha,
 			Reflection,
          Skybox
 		}
@@ -190,8 +192,8 @@ namespace Graphics
                case "displaceMap":
                   myTextures[(int)TextureId.Displacement] = tex;
                   break;
-               case "glowMap":
-                  myTextures[(int)TextureId.Glow] = tex;
+               case "emissiveMap":
+                  myTextures[(int)TextureId.Emissive] = tex;
                   break;
                case "reflectionMap":
                   myTextures[(int)TextureId.Reflection] = tex;

@@ -55,7 +55,7 @@ namespace testRenderer
 			myInitializer = new Initializer(new String[] { "testRenderer.lua" });
 			Renderer.init();
 			myViewport = new Viewport(this);
-			myCamera = new Camera(myViewport, 60.0f, 0.1f, 100.0f);
+			myCamera = new Camera(myViewport, 60.0f, 0.1f, 1000.0f);
 
 			myCameraEventHandler = new GameWindowCameraEventHandler(myCamera, this);
 
@@ -333,17 +333,17 @@ namespace testRenderer
 				int size = 100;
 				int halfSize = size / 2;
 				StaticModelRenderable smr = new StaticModelRenderable();
-				ObjModelDescriptor mdesc;
-            if (i % 2 == 0)
-            {
-               mdesc = new ObjModelDescriptor("../data/models/vegetation/birch/birch_01_a.obj");
-               //mdesc = new ObjModelDescriptor("../data/models/vegetation/fir/fir2.obj");
-            }
-            else
-            {
-               mdesc = new ObjModelDescriptor("../data/models/props/rocks_3_by_nobiax-d6s8l2b/rocks_03-blend.obj");
-            }
-
+				AssimpModelDescriptor mdesc;
+             if (i % 2 == 0)
+             {
+                mdesc = new AssimpModelDescriptor("../data/models/vegetation/birch/birch_01_a.obj");
+                //mdesc = new ObjModelDescriptor("../data/models/vegetation/fir/fir2.obj");
+             }
+             else
+             {
+               mdesc = new AssimpModelDescriptor("../data/models/props/rocks_3_by_nobiax-d6s8l2b/rocks_3.blend");
+             }
+  
 				smr.model = Renderer.resourceManager.getResource(mdesc) as StaticModel;
 				smr.setPosition(new Vector3((rand.Next() % size) - halfSize, 0, (rand.Next() % size) - halfSize));
             //for(int j=0; j< smr.model.myMeshes.Count; j++)
