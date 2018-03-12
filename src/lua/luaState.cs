@@ -69,7 +69,13 @@ namespace Lua
 
       public bool doFile(String s)
       {
-         return LuaDLL.luaL_dofile(myStatePtr, s)==0;
+         int ret = LuaDLL.luaL_dofile(myStatePtr, s);
+         if (ret != 0)
+         {
+            printCallback(getValue<string>(-1));
+         }
+
+         return ret == 0;
       }
 
       public LuaObject findObject(String name)

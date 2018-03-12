@@ -219,7 +219,7 @@ namespace Graphics
                                  c.R = System.Convert.ToSingle(matTokens[1]);
                                  c.G = System.Convert.ToSingle(matTokens[2]);
                                  c.B = System.Convert.ToSingle(matTokens[3]);
-                                 m.addAttribute(new ColorAttribute("ambientColor", c));
+                                 m.ambient = c;
                                  break;
                               }
                            case "kd":
@@ -228,7 +228,7 @@ namespace Graphics
                                  c.R = System.Convert.ToSingle(matTokens[1]);
                                  c.G = System.Convert.ToSingle(matTokens[2]);
                                  c.B = System.Convert.ToSingle(matTokens[3]);
-                                 m.addAttribute(new ColorAttribute("diffuseColor", c));
+                                 m.diffuse = c;
                                  break;
                               }
                            case "ks":
@@ -237,19 +237,19 @@ namespace Graphics
                                  c.R = System.Convert.ToSingle(matTokens[1]);
                                  c.G = System.Convert.ToSingle(matTokens[2]);
                                  c.B = System.Convert.ToSingle(matTokens[3]);
-                                 m.addAttribute(new ColorAttribute("specularColor", c));
+                                 m.spec = c;
                                  break;
                               }
                            case "ns":
                               {
                                  float val = System.Convert.ToSingle(matTokens[1]);
-                                 m.addAttribute(new ValueAttribute("shininess", val));
+                                 m.shininess = val;
                                  break;
                               }
                            case "d":
                               {
                                  float val = System.Convert.ToSingle(matTokens[1]);
-                                 m.addAttribute(new ValueAttribute("alpha", val));
+                                 m.alpha = val;
                                  break;
                               }
 
