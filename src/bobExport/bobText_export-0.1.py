@@ -117,7 +117,7 @@ class Vertex:
       if(bidx == None): 
          self.layout = "V3N3T2"
       else: 
-         self.layout = "V3N3T2B4B4"
+         self.layout = "V3N3T2B4W4"
       self.pos = pos
       self.nor = nor
       self.uv = uv
@@ -126,7 +126,7 @@ class Vertex:
 
    def __repr__(self):
       if(self.boneIndexes != None):
-         return "{:6f}, {:6f}, {:6f},      {:6f}, {:6f}, {:6f},      {:6f}, {:6f},      {}, {}, {}, {},      {:6f}, {:6f}, {:6f}, {:6f}".format(
+         return "{:6f}, {:6f}, {:6f},      {:6f}, {:6f}, {:6f},      {:6f}, {:6f},      {}, {}, {}, {},      {:6f}, {:6f}, {:6f}, {:6f},".format(
          self.pos[0], self.pos[1], self.pos[2], 
          self.nor[0], self.nor[1], self.nor[2], 
          self.uv[0], self.uv[1],
@@ -478,7 +478,7 @@ class BOBSkeleton(BOBChunk):
       for b in bonesInOrder:
          bone = Bone()
          bone.parse(b['bone'])
-         bone.matrix = arm.matrix_world * b.matrix_local
+         bone.matrix = b['bone'].matrix_local
          self.bones.append(bone)
          
       #cleanup our copy
@@ -487,7 +487,7 @@ class BOBSkeleton(BOBChunk):
    def write(self, file):
       file.write(indent(2, "{"))
       BOBChunk.write(self, file) #call base class
-      file.write(indent(3, "id = \"{};".format(self.id)))
+      file.write(indent(3, "id = \"{}\";".format(self.id)))
       file.write(indent(3, "bones = {"))
       for b in self.bones:
          b.write(file)

@@ -362,12 +362,13 @@ namespace testRenderer
          //create a skinned model instance
          mySkinnedModel = new SkinnedModelRenderable();
          //MS3DModelDescriptor skmd = new MS3DModelDescriptor("../data/models/characters/zombie/zombie.json");
-         IQModelDescriptor skmd = new IQModelDescriptor("../data/models/characters/mrFixIt/mrFixIt.json");
+         //IQModelDescriptor skmd = new IQModelDescriptor("../data/models/characters/mrFixIt/mrFixIt.json");
+         BobSkinnedModelDescriptor skmd = new BobSkinnedModelDescriptor("../data/models/characters/boxKnight/mini_knight.bob");
          mySkinnedModel.model = Renderer.resourceManager.getResource(skmd) as SkinnedModel;
          mySkinnedModel.controllers.Add(new AnimationController(mySkinnedModel));
          Renderer.renderables.Add(mySkinnedModel);
          mySkinnedModel.setPosition(new Vector3(5, 0, 0));
-         (mySkinnedModel.findController("animation") as AnimationController).startAnimation("idle");
+         //(mySkinnedModel.findController("animation") as AnimationController).startAnimation("idle");
 
          //create a particle system
          myParticleSystem = ParticleManager.loadDefinition("../data/particleSystems/ringOfFire.json");

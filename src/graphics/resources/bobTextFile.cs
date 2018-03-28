@@ -296,6 +296,24 @@ namespace Graphics
                      model.parse(chunk);
                      myChunks.Add(model);
                      break;
+                  case "skeleton":
+                     Warn.print("Skipping .BOB skeleton");
+                     break;
+                  case "animation":
+                     Warn.print("Skipping .BOB animation");
+                     break;
+                  case "texture":
+                     Warn.print("Skipping .BOB texture");
+                     break;
+                  case "particle":
+                     Warn.print("Skipping .BOB particle system");
+                     break;
+                  case "audio":
+                     Warn.print("Skipping .BOB audio");
+                     break;
+                  default:
+                     Warn.print("Unknown type: {0}", chunk.get<String>("type"));
+                     break;
                }
             }
          }
