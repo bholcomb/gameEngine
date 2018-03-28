@@ -42,32 +42,52 @@ def r2d(v):
 def grouper(seq, size):
     return (seq[pos:pos + size] for pos in range(0, len(seq), size))
 
-def getBonesInOrder(skel)
+def getBonesInOrder(skel):
    if(skel == None):
       return {}
       
    ret = []
    idx = 0
    rootBones = []
-   for( b in skel.bones):
+   for b in skel.bones:
       if(b.parent == None):
          rootBones.append(b)
-         ret.append({index: idx++, bone: b})
+         ret.append({'index': idx, 'bone': b})
+         idx += 1
+         #print("Adding root bone {}".format(b.name))
          
-   for( b in rootBones):
-      childBones = b.child_recursive()
-      for(cb in childBones):
-         ret.append({index: idx++, bone: b})
+   for b in rootBones:
+      print("Root bone {}".format(b.name))
+      childBones = b.children_recursive
+      for cb in childBones:
+         ret.append({'index': idx, 'bone': cb})
+         idx += 1
+         #print("   Adding child bone {}".format(cb.name))
          
+   #for b in ret:
+      #print("index: {} bone: {}".format(b['index'], b['bone'].name))
+      
    return ret;
       
 def findBoneIndex(boneName, bonesInOrder):
-   for(b in bonesInOrder):
-      if(b.bone.name == boneName):
-         return b.index
-   
+   for b in bonesInOrder:
+      if(b['bone'].name == boneName):
+         return b['index']
+
    print("Failed to find bone {} in bone ordered list".format(boneName))
-      
+   raise
+
+def matrixToString(mat):
+   ret = ""
+   for i in range(0, 4):
+      for j in range(0, 4):
+         ret += str(mat[i][j])
+         if(i != 4 and j != 4):
+            ret += ", "
+
+   return ret
+
+
 class Settings:
     __slots__ = (
         "global_matrix",
@@ -105,15 +125,15 @@ class Vertex:
       self.boneWeights = bweights
 
    def __repr__(self):
-      if(self.bidx != None):
-         return "{:6f}, {:6f}, {:6f},     {:6f}, {:6f}, {:6f},      {:6f}, {:6f},   {}, {}, {}, {}, {:6f}, {:6f}, {:6f}, {:6f}".format(
+      if(self.boneIndexes != None):
+         return "{:6f}, {:6f}, {:6f},      {:6f}, {:6f}, {:6f},      {:6f}, {:6f},      {}, {}, {}, {},      {:6f}, {:6f}, {:6f}, {:6f}".format(
          self.pos[0], self.pos[1], self.pos[2], 
          self.nor[0], self.nor[1], self.nor[2], 
          self.uv[0], self.uv[1],
-         self.boneIndexes[0] or 0, boneIndexes[1] or 0, boneIndexes[2] or 0, boneIndexes[3] or 0,
-         self.boneWeights[0] or 0.0, self.boneWeights[1] or 0.0, self.boneWeights[2] or 0.0, self.boneWeights[3] or 0.0)
+         self.boneIndexes[0], self.boneIndexes[1], self.boneIndexes[2], self.boneIndexes[3],
+         self.boneWeights[0], self.boneWeights[1], self.boneWeights[2], self.boneWeights[3])
       else:
-         return "{:6f}, {:6f}, {:6f},     {:6f}, {:6f}, {:6f},      {:6f}, {:6f},".format(
+         return "{:6f}, {:6f}, {:6f},      {:6f}, {:6f}, {:6f},      {:6f}, {:6f},".format(
          self.pos[0], self.pos[1], self.pos[2], 
          self.nor[0], self.nor[1], self.nor[2], 
          self.uv[0], self.uv[1])
@@ -254,7 +274,7 @@ class BOBModel(BOBChunk):
       "materials",
       "verts",
       "indexes",
-	  "skeleton"
+      "skeleton"
    )
    
    def __init__(self):
@@ -269,7 +289,7 @@ class BOBModel(BOBChunk):
       self.materials = []
       self.verts = []
       self.indexes = []
-	  self.skeleton = ""
+      self.skeleton = ""
       
    def addVertex(self, vert):
       index = [n for n,x in enumerate(self.verts) if vert == x]
@@ -281,25 +301,36 @@ class BOBModel(BOBChunk):
       return index[0]
 
    def parse(self, obj, settings):
+      #does the model have an armature parent
+      skeleton = obj.find_armature()
+      
       #create a temp copy to work on
-      mesh = obj.to_mesh(scene ,True, "PREVIEW") # prepare MESH
+      # We don't apply modifiers for a skinned mesh because we need the vertex positions
+      # before they are deformed by the armature modifier in order to export the proper
+      # bind pose. This does mean that modifiers preceding the armature modifier are ignored,
+      # but the Blender API does not provide a reasonable way to retrieve the mesh at an
+      # arbitrary stage in the modifier stack.
+      
+      mesh = obj.to_mesh(settings.context.scene ,skeleton == None, "PREVIEW")
          
       #rotate to our selected space
       mesh.transform(settings.global_matrix)
 
-      #does the model have an armature parent
-      skeleton = obj.find_armature()
-         
       self.name = obj.name
       matIndexes=[]
-      bones = getBonesInOrder(skeleton)
+      bones = None
       
+      #get the bones for this model
+      if(skeleton != None):
+         self.skeleton = skeleton.name
+         bones = getBonesInOrder(skeleton.data)
+
       #get the mesh data structs
       modUV = mesh.uv_layers.active.data
       modVert = mesh.vertices
       modFaces = mesh.polygons
       modLoops = mesh.loops
-      groups = obj.vertex_groups
+      modGroups = obj.vertex_groups
       
       #parse the materials
       for mat in mesh.materials:
@@ -309,7 +340,7 @@ class BOBModel(BOBChunk):
          matIndexes.append([]) #add an empty array for faces of this material
          #print("Added material: " + m.name)
       
-      #break model into meshes my material
+      #break model into meshes by material
       for face in modFaces:
          #error if it's not a triangle face
          if(face.loop_total != 3):
@@ -333,15 +364,20 @@ class BOBModel(BOBChunk):
                bweights = []
                for vgroup in modVert[vert_index].groups:
                   if(vgroup.weight > 0 and len(bids) < 4):
-                     bids.append(findBoneIndex(groups[vgroup.index].name, bones))
+                     bids.append(findBoneIndex(modGroups[vgroup.group].name, bones))
                      bweights.append(vgroup.weight)
+               
+               #add zero weight bone ids to fill out data struct
+               while(len(bids) < 4):
+                  bids.append(0)
+                  bweights.append(0)
                      
                idx = self.addVertex(Vertex(pos, nor, uv, bids, bweights))
-            else
+            else:
                idx = self.addVertex(Vertex(pos, nor, uv)) #should return index of vert in the vert list even if its already added
             indexList.append(idx)
-               #create the mesh data structures based on the material indexes
-
+            
+      #create the mesh data structures based on the material indexes
       for idx, val in enumerate(matIndexes):
          mesh = BOBMesh()
          mesh.material = self.materials[idx].name
@@ -369,6 +405,8 @@ class BOBModel(BOBChunk):
       file.write(indent(3, "indexFormat = \"UInt16\";"))
       file.write(indent(3, "vertexCount = {};".format(self.vertexCount)))
       file.write(indent(3, "indexCount = {};".format(self.indexCount)))
+      if(self.verts[0].layout == "V3N3T2B4B4"):
+         file.write(indent(3, "skeleton = \"{}\";".format(self.skeleton)))
       
       file.write(indent(3, "meshes={"))
       for m in self.meshes:
@@ -408,15 +446,15 @@ class Bone:
       self.name = bone.name
       if(bone.parent != None):
          self.parent = bone.parent.name
-      else
+      else:
          self.parent = ""
-      self.matrix = bone.matrix
    
    def write(self, file):
-      file.write(indent(4, "{name = \"{}\", parent = \"{}\", matrix = {{ {} }}".format(
-         self.name,
-         self.parent, 
-         self.matrix)))
+      file.write(indent(4, "{"))
+      file.write(indent(5, "name = \"{}\";".format(self.name)))
+      file.write(indent(5, "parent = \"{}\";".format(self.parent)))
+      file.write(indent(5, "matrix = {{ {} }};".format(matrixToString(self.matrix))))
+      file.write(indent(4, "};"))
   
 class BOBSkeleton(BOBChunk):
    __slots__ = (
@@ -424,19 +462,23 @@ class BOBSkeleton(BOBChunk):
       "bones"
    )
 
-   def __init__(self)
+   def __init__(self):
+      BOBChunk.__init__(self)
+      self.type="skeleton"
       self.id = ""
       self.bones = []
 
    def parse(self, obj, settings):
-      arm = o.data.copy()
+      arm = obj.data.copy()
       arm.transform(settings.global_matrix)
 
-      self.name = arm.name
+      self.name = obj.name
+      self.id = obj.name
       bonesInOrder = getBonesInOrder(arm)
-      for(b in bonesInOrder):
+      for b in bonesInOrder:
          bone = Bone()
-         bone.parse(b.bone)
+         bone.parse(b['bone'])
+         bone.matrix = arm.matrix_world * b.matrix_local
          self.bones.append(bone)
          
       #cleanup our copy
@@ -445,12 +487,13 @@ class BOBSkeleton(BOBChunk):
    def write(self, file):
       file.write(indent(2, "{"))
       BOBChunk.write(self, file) #call base class
-      file.write(indent(3, "id = {}".format(self.id))
-      file.write(indent(3, "bones = {")
-      file (b in self.bones):
+      file.write(indent(3, "id = \"{};".format(self.id)))
+      file.write(indent(3, "bones = {"))
+      for b in self.bones:
          b.write(file)
-      file.write(indent(3, "}")
-      file.write(indent(2, "}")
+
+      file.write(indent(3, "};"))
+      file.write(indent(2, "};"))
 
 class BOBFile:
    __slots__ = (
@@ -495,13 +538,13 @@ def exportBOB(settings):
    for o in scene.objects:
       if(o.type == "MESH"):
          model = BOBModel()
-         model.parse(o, settings) #parse the blender structure filling in the BOB structure         
+         model.parse(o, settings)
          bob.addChunk(model)
 
-   if(o.type == "ARMATURE"):      
-      skeleton = BOBSkeleton()
-      skeleton.parse(o, settings)
-      bob.addChunk(skeleton)
+      if(o.type == "ARMATURE"):
+         skeleton = BOBSkeleton()
+         skeleton.parse(o, settings)
+         bob.addChunk(skeleton)
 
    #open the output file
    file = open(settings.filepath, "w", newline="\n")
