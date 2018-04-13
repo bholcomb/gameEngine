@@ -328,22 +328,22 @@ namespace testRenderer
 
          //create a tree instance
          Random rand = new Random(230877);
-         for (int i = 0; i < 1000; i++)
+         for (int i = 0; i < 5000; i++)
          {
-            int size = 100;
+            int size = 500;
             int halfSize = size / 2;
             StaticModelRenderable smr = new StaticModelRenderable();
-            //             if (i % 2 == 0)
-            //             {
-            //                ObjModelDescriptor mdesc = new ObjModelDescriptor("../data/models/vegetation/birch/birch_01_a.obj");
-            //                smr.model = Renderer.resourceManager.getResource(mdesc) as StaticModel;
-            //             }
-            //             else
-            //             {
-            BobStaticModelDescriptor mdesc = new BobStaticModelDescriptor("../data/models/props/rocks_3_by_nobiax-d6s8l2b/rocks_03.bob");
-            //ObjModelDescriptor mdesc = new ObjModelDescriptor("../data/models/props/rocks_3_by_nobiax-d6s8l2b/rocks_03-blend.obj");
+            if (i % 2 == 0)
+            {
+               ObjModelDescriptor mdesc = new ObjModelDescriptor("../data/models/vegetation/birch/birch_01_a.obj");
                smr.model = Renderer.resourceManager.getResource(mdesc) as StaticModel;
-//            }
+            }
+            else
+            {
+               BobStaticModelDescriptor mdesc = new BobStaticModelDescriptor("../data/models/props/rocks_3_by_nobiax-d6s8l2b/rocks_03.bob");
+               //ObjModelDescriptor mdesc = new ObjModelDescriptor("../data/models/props/rocks_3_by_nobiax-d6s8l2b/rocks_03-blend.obj");
+               smr.model = Renderer.resourceManager.getResource(mdesc) as StaticModel;
+            }
 
             smr.setPosition(new Vector3((rand.Next() % size) - halfSize, 0, (rand.Next() % size) - halfSize));
             //for(int j=0; j< smr.model.myMeshes.Count; j++)

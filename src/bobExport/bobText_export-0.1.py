@@ -57,7 +57,7 @@ def getBonesInOrder(skel):
          #print("Adding root bone {}".format(b.name))
          
    for b in rootBones:
-      print("Root bone {}".format(b.name))
+      #print("Root bone {}".format(b.name))
       childBones = b.children_recursive
       for cb in childBones:
          ret.append({'index': idx, 'bone': cb})
@@ -92,13 +92,19 @@ class Settings:
     __slots__ = (
         "global_matrix",
         "filepath",
-        "context"
+        "context",
+        "exportAnimations",
+        "armObj",
+        "skeleton"
     )
     
     def __init__(self):
-        filepath = ""
-        context = bpy.context
-        global_matrix = mathutils.Matrix.Identity(4)
+        self.filepath = ""
+        self.context = bpy.context
+        self.global_matrix = mathutils.Matrix.Identity(4)
+        self.exportAnimations = False
+        self.armObj = None
+        self.skeleton = None
 
 ###########################################################
 #BOB chunk definitions
@@ -495,6 +501,116 @@ class BOBSkeleton(BOBChunk):
       file.write(indent(3, "};"))
       file.write(indent(2, "};"))
 
+class Pose():
+   __slots__ = (
+      "pos",
+      "ori",
+      "scale"
+   )
+
+   def __init__(self, pos, ori, scale):
+      self.pos = pos
+      self.ori = ori
+      self.scale = scale
+   
+   def __repr__(self):
+      return "{:6f}, {:6f}, {:6f},      {:6f}, {:6f}, {:6f}, {:6f}      {:6f}, {:6f}, {:6f}".format(
+      self.pos[0], self.pos[1], self.pos[2], 
+      self.ori[0], self.ori[1], self.ori[2], self.ori[3],
+      self.scale[0], self.scale[1], self.scale[2])
+      
+class BOBAnimation(BOBChunk):
+   __slots__ = (
+      "framerate",
+      "numFrames",
+      "skeleton",
+      "events",
+      "poses",
+      "numBones"
+      
+   )
+   
+   def __init__(self):
+      BOBChunk.__init__(self)
+      self.type="animation"
+      self.framerate = 24
+      self.numFrames = 0
+      self.skeleton = ""
+      self.events = []
+      self.poses = []
+      self.numBones = 0
+      
+   def parse(self, action, settings):
+      self.name = action.name
+      scene = settings.context.scene
+      self.framerate = scene.render.fps
+      self.skeleton = settings.skeleton.id
+      self.numBones = len(settings.skeleton.bones)
+      
+      arm = settings.armObj
+      #arm = settings.armObj.copy()
+      #arm.animation_data_create()
+      #arm.transform(settings.global_matrix)
+      
+      #so we can restore stuff later
+      oldStartFrame = scene.frame_start
+      oldEndFrame = scene.frame_end
+      oldCurrentFrame = scene.frame_current
+      oldAction = arm.animation_data.action
+      
+      #setup the armature with the current action and then step over the frames getting the pose data
+      arm.animation_data.action = action
+      startframe, endframe = action.frame_range
+      startframe = int(startframe)
+      endframe = int(endframe)
+      self.numFrames = endframe - startframe
+      print('Exporting action "%s" frames %d-%d' % (action.name, startframe, endframe))
+      
+      for frame in range(startframe, endframe):
+         scene.frame_set(frame)
+         for bone in settings.skeleton.bones:
+            bName = bone.name
+            poseBone = arm.pose.bones[bName]
+            poseMatrix = poseBone.matrix
+            if poseBone.parent:
+               poseMatrix = poseBone.parent.bone.matrix_local.inverted() * poseMatrix
+            
+            p = Pose(poseMatrix.to_translation(), poseMatrix.to_quaternion(), poseMatrix.to_scale())
+            self.poses.append(p)
+
+      #export markers (or events)
+      for m in action.pose_markers:
+         self.events.append({'frame':m.frame, 'name':m.name})
+      #cleanup
+      scene.frame_set(oldCurrentFrame)
+      arm.animation_data.action = oldAction
+      
+   def write(self, file):
+      file.write(indent(2, "{"))
+      BOBChunk.write(self, file) #call base class
+      file.write(indent(3, "framerate = {};".format(self.framerate)))
+      file.write(indent(3, "numFrames = {};".format(self.numFrames)))
+      file.write(indent(3, "skeleton = \"{}\";".format(self.skeleton)))
+      file.write(indent(3, "events = {"))
+      for e in self.events:
+         file.write(indent(4, "[{}] = \"{}\";".format(e["frame"], e["name"])))
+      file.write(indent(3, "};"))
+      
+      file.write(indent(3, "poses = {"))
+      poseLine = 0
+      frameCounter = 0
+      for p in self.poses:
+         if(poseLine == 0):
+            file.write(indent(4, "--frame {}".format(frameCounter)))
+            frameCounter += 1
+         file.write(indent(4, "{}, ".format(str(p))))
+         poseLine += 1
+         if(poseLine == self.numBones):
+            poseLine = 0
+      file.write(indent(3, "};"))
+      
+      file.write(indent(2, "};"))
+   
 class BOBFile:
    __slots__ = (
       "version",
@@ -509,7 +625,7 @@ class BOBFile:
       
    def addChunk(self, chunk):
       self.chunks.append(chunk)
-      self.registry[chunk.name] = len(self.chunks) - 1 #use a 0 based array index
+      self.registry[len(self.chunks) -1] = {"name": chunk.name, "type": chunk.type} #use a 0 based array index
       
    def write(self, file):
       file.write(indent(0, "--Binary OBject file export from Blender"))
@@ -517,7 +633,7 @@ class BOBFile:
       file.write(indent(1, "version = 1;"))
       file.write(indent(1, "registry = {"))
       for k,v in self.registry.items():
-         file.write(indent(2, "--{} = \"{}\";".format(v, k)))
+         file.write(indent(2, "[{}] = {{name = \"{}\"; type=\"{}\"}}".format(k, v["name"], v["type"])))
       file.write(indent(1, "};"))
       file.write(indent(1, "chunks = {"))
       
@@ -534,7 +650,8 @@ class BOBFile:
 def exportBOB(settings):
    scene = settings.context.scene
    bob = BOBFile()
-   
+   armObj = None
+
    for o in scene.objects:
       if(o.type == "MESH"):
          model = BOBModel()
@@ -545,13 +662,21 @@ def exportBOB(settings):
          skeleton = BOBSkeleton()
          skeleton.parse(o, settings)
          bob.addChunk(skeleton)
+         settings.armObj = o  #save for animations
+         settings.skeleton = skeleton #save for animations
+
+   if(settings.exportAnimations == True and settings.armObj != None and settings.skeleton != None):
+      for a in bpy.data.actions:
+         animation = BOBAnimation()
+         animation.parse(a, settings)
+         bob.addChunk(animation)
 
    #open the output file
    file = open(settings.filepath, "w", newline="\n")
    
    #write the file
    bob.write(file)
-   
+
    #close the file
    file.close()
 
@@ -566,6 +691,7 @@ class ExportBOB(bpy.types.Operator, ExportHelper, BOBOrientationHelper):
     filename_ext = ".bob"
     filter_glob = StringProperty(default="*.bob", options={'HIDDEN'})
     entire_scene = BoolProperty(name="Entire Scene", description="Export all MESH object (Entire scene)", default=True)
+    export_animations = BoolProperty(name="Export Animations", description="Export Animations", default=True)
 
     @classmethod
     def poll(cls, context):
@@ -578,6 +704,7 @@ class ExportBOB(bpy.types.Operator, ExportHelper, BOBOrientationHelper):
         filepath = self.filepath
         filepath = bpy.path.ensure_ext(filepath, self.filename_ext)
         settings.filepath = filepath
+        settings.exportAnimations = self.export_animations
         
         #rotate everything so that it is -Z forward and Y up (my game engine format)
         settings.global_matrix = bpy_extras.io_utils.axis_conversion(
@@ -597,6 +724,8 @@ class ExportBOB(bpy.types.Operator, ExportHelper, BOBOrientationHelper):
         col.label('Axis Conversion:', icon='MANIPUL')
         col.prop(self, 'axis_up')
         col.prop(self, 'axis_forward')
+        
+        row.prop(self, "export_animations")
 
 ###########################################################
 #add-on registration/unregistration functions
