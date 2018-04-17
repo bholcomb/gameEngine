@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 
+using Graphics;
+
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -10,11 +12,12 @@ namespace Graphics
 {
    public class StatelessDrawElementsCommand : StatelessRenderCommand
    {
-      PrimitiveType myDrawMode;
-      int myBase;
-      int myCount;
+      public PrimitiveType myDrawMode;
+      public int myBase;
+      public int myCount;
+      public IndexBufferObject.IndexBufferDatatype myIboType = IndexBufferObject.IndexBufferDatatype.UnsignedShort;
 
-		public StatelessDrawElementsCommand(Mesh m)
+      public StatelessDrawElementsCommand(Mesh m)
 			: base()
 		{
 			myDrawMode = m.primativeType;
@@ -22,12 +25,13 @@ namespace Graphics
 			myCount = m.indexCount;
 		}
 
-		public StatelessDrawElementsCommand(PrimitiveType drawMode, int count, int offset=0)
+		public StatelessDrawElementsCommand(PrimitiveType drawMode, int count, int offset=0, IndexBufferObject.IndexBufferDatatype iboType = IndexBufferObject.IndexBufferDatatype.UnsignedShort)
          : base()
       {
          myDrawMode = drawMode;
          myBase = offset;
          myCount = count;
+         myIboType = iboType;
       }
 
       public override void execute()
@@ -36,7 +40,11 @@ namespace Graphics
 			base.execute();
 
          //draw the mesh
-         GL.DrawElements(myDrawMode, myCount, DrawElementsType.UnsignedShort, myBase * 2);
+         if(myIboType == IndexBufferObject.IndexBufferDatatype.UnsignedShort)
+            GL.DrawElements(myDrawMode, myCount, DrawElementsType.UnsignedShort, myBase * 2);
+
+         if (myIboType == IndexBufferObject.IndexBufferDatatype.UnsignedInt)
+            GL.DrawElements(myDrawMode, myCount, DrawElementsType.UnsignedInt, myBase * 4);
       }
    }
 }
