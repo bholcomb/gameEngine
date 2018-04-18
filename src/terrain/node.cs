@@ -561,12 +561,20 @@ namespace Terrain
             return true;
          }
 
-         if ((myMaterial.property & Material.Property.SOLID) != 0)
+         //I'm not solid, so I don't obscure
+         if ((myMaterial.property & Material.Property.SOLID) == 0)
          {
-            return true;
+            return false;
          }
 
-         return false;
+         //I'm not a solid cube, so it's possible to see part of the edge
+         if(isSolidCube() == false)
+         {
+            return false;
+         }
+
+         //I'm a solid cube thats not transparent
+         return true;
       }
 
       public bool isFaceVisible(Face f)
@@ -576,20 +584,37 @@ namespace Terrain
          if (neighbor == null)
          {
             //unknown neighbor, could be visible, might not.  We should do something here
-            return false;
+            return true;
          }
 
          if (neighbor.isLeaf == true)
          {
             //just use the neighbor's material property if we can see through it
+            //not solid, so we're visibile
             if ((neighbor.property() & Material.Property.SOLID) == 0)
             {
                return true;
             }
          }
-         else //gotta ask all the children on that side of the neighbor touching this face
+
+         bool flatFace = true;
+         int[] attachedEdges = Node.attachedEdges(f);
+         for(int i =0; i< 4; i++)
          {
-            return !neighbor.obscures(oppositeFace(f));
+            if (myEdgeSpans[i] != 0)
+               flatFace = false;
+         }
+
+         //gotta be able to see a face that isn't perfectly flat
+         if (!flatFace)
+         {
+            return true;
+         }
+
+         //gotta ask all the children on that side of the neighbor touching this face
+         if (flatFace && neighbor.obscures(oppositeFace(f)) == false)
+         {
+            return true;
          }
 
          //default to invisible
@@ -1473,22 +1498,22 @@ namespace Terrain
             case 0:  //+X
             case 1:  //-X
                {
-                  uv.X = vert.Z / myChunk.mySize;
-                  uv.Y = vert.Y / myChunk.mySize;
+                  uv.X = vert.Z;
+                  uv.Y = vert.Y;
                   break;
                }
             case 2:  //+Y
             case 3:  //-Y
                {
-                  uv.X = vert.X / myChunk.mySize;
-                  uv.Y = vert.Z / myChunk.mySize;
+                  uv.X = vert.X;
+                  uv.Y = vert.Z;
                   break;
                }
             case 4:  //+Z
             case 5:  //-Z
                {
-                  uv.X = vert.X / myChunk.mySize;
-                  uv.Y = vert.Y / myChunk.mySize;
+                  uv.X = vert.X;
+                  uv.Y = vert.Y;
                   break;
                }
          }

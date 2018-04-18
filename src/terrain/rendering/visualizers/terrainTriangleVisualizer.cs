@@ -16,8 +16,8 @@ namespace Terrain
 	{
 		static int theStride = Marshal.SizeOf(typeof(TerrainVertex));
 		public UInt32 pos;
-		public Byte uvx;
-		public Byte uvy;
+		public UInt16 uvx;
+		public UInt16 uvy;
 		public UInt16 texIndex;
 
 		public UInt32 X { get { return pos & 0x3ff; } }
@@ -93,10 +93,10 @@ namespace Terrain
 					GL.VertexAttribFormat(id, 4, VertexAttribType.UnsignedInt2101010Rev, false, 0);
 					break;
 				case "uv":
-					GL.VertexAttribFormat(id, 2, VertexAttribType.UnsignedByte, true, 4);
+					GL.VertexAttribFormat(id, 2, VertexAttribType.UnsignedShort, false, 4);
 					break;
 				case "texIndex":
-					GL.VertexAttribIFormat(id, 1, VertexAttribIntegerType.UnsignedShort, 6);
+					GL.VertexAttribIFormat(id, 1, VertexAttribIntegerType.UnsignedShort, 8);
 					break;
 				default:
 					throw new Exception(String.Format("Unknown attribute field: {0}", fieldName));
@@ -186,39 +186,45 @@ namespace Terrain
 						v = n.localVertex(i, 0, ref verts);
 						uv = n.localUv(i, 0, ref verts);
 						vertBuffer[idx].pos = TerrainVertex.encode(v);
-						vertBuffer[idx].uvx = (Byte)(uv.X * 255); vertBuffer[idx].uvy = (Byte)(uv.Y * 255);
+						vertBuffer[idx].uvx = (UInt16)(uv.X * 100);
+                  vertBuffer[idx].uvy = (UInt16)(uv.Y * 100);
 						vertBuffer[idx].texIndex = (UInt16)n.localMaterial(i); idx++;
 
 						v = n.localVertex(i, 1, ref verts);
 						uv = n.localUv(i, 1, ref verts);
 						vertBuffer[idx].pos = TerrainVertex.encode(v);
-						vertBuffer[idx].uvx = (Byte)(uv.X * 255); vertBuffer[idx].uvy = (Byte)(uv.Y * 255);
-						vertBuffer[idx].texIndex = (UInt16)n.localMaterial(i); idx++;
+                  vertBuffer[idx].uvx = (UInt16)(uv.X * 100);
+                  vertBuffer[idx].uvy = (UInt16)(uv.Y * 100);
+                  vertBuffer[idx].texIndex = (UInt16)n.localMaterial(i); idx++;
 
 						v = n.localVertex(i, 2, ref verts);
 						uv = n.localUv(i, 2, ref verts);
 						vertBuffer[idx].pos = TerrainVertex.encode(v);
-						vertBuffer[idx].uvx = (Byte)(uv.X * 255); vertBuffer[idx].uvy = (Byte)(uv.Y * 255);
-						vertBuffer[idx].texIndex = (UInt16)n.localMaterial(i); idx++;
+                  vertBuffer[idx].uvx = (UInt16)(uv.X * 100);
+                  vertBuffer[idx].uvy = (UInt16)(uv.Y * 100);
+                  vertBuffer[idx].texIndex = (UInt16)n.localMaterial(i); idx++;
 
 						//second triangle
 						v = n.localVertex(i, 0, ref verts);
 						uv = n.localUv(i, 0, ref verts);
 						vertBuffer[idx].pos = TerrainVertex.encode(v);
-						vertBuffer[idx].uvx = (Byte)(uv.X * 255); vertBuffer[idx].uvy = (Byte)(uv.Y * 255);
-						vertBuffer[idx].texIndex = (UInt16)n.localMaterial(i); idx++;
+                  vertBuffer[idx].uvx = (UInt16)(uv.X * 100);
+                  vertBuffer[idx].uvy = (UInt16)(uv.Y * 100);
+                  vertBuffer[idx].texIndex = (UInt16)n.localMaterial(i); idx++;
 
 						v = n.localVertex(i, 2, ref verts);
 						uv = n.localUv(i, 2, ref verts);
 						vertBuffer[idx].pos = TerrainVertex.encode(v);
-						vertBuffer[idx].uvx = (Byte)(uv.X * 255); vertBuffer[idx].uvy = (Byte)(uv.Y * 255);
-						vertBuffer[idx].texIndex = (UInt16)n.localMaterial(i); idx++;
+                  vertBuffer[idx].uvx = (UInt16)(uv.X * 100);
+                  vertBuffer[idx].uvy = (UInt16)(uv.Y * 100);
+                  vertBuffer[idx].texIndex = (UInt16)n.localMaterial(i); idx++;
 
 						v = n.localVertex(i, 3, ref verts);
 						uv = n.localUv(i, 3, ref verts);
 						vertBuffer[idx].pos = TerrainVertex.encode(v);
-						vertBuffer[idx].uvx = (Byte)(uv.X * 255); vertBuffer[idx].uvy = (Byte)(uv.Y * 255);
-						vertBuffer[idx].texIndex = (UInt16)n.localMaterial(i); idx++;
+                  vertBuffer[idx].uvx = (UInt16)(uv.X * 100);
+                  vertBuffer[idx].uvy = (UInt16)(uv.Y * 100);
+                  vertBuffer[idx].texIndex = (UInt16)n.localMaterial(i); idx++;
 					}
 				}
 

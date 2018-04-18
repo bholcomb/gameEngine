@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 
 using OpenTK;
 using OpenTK.Graphics;
@@ -174,6 +175,37 @@ namespace Graphics
          {
             updateFace(i, textures[i]);
          }
+      }
+
+      public override bool saveData(string filename)
+      {
+         bind();
+         int depth = 3;
+
+         for(int i=0; i< 6; i++)
+         {
+            byte[] data = new byte[width * height * depth];
+            GL.PixelStore(PixelStoreParameter.PackAlignment, 1);
+            GL.GetTexImage(TextureTarget.TextureCubeMapPositiveX + i, 0, OGL.PixelFormat.Rgb, PixelType.Byte, data);
+
+            Bitmap bmp = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            int pos = 0;
+            for (int y = 0; y < height; y++)
+            {
+               for (int x = 0; x < width; x++)
+               {
+                  bmp.SetPixel(x, y, Color.FromArgb(data[pos], data[pos + 1], data[pos + 2]));
+                  pos += 3;
+               }
+            }
+
+            String fn = String.Format("{0}-{1}.png", filename, i);
+            bmp.Save(fn);
+         }
+
+         unbind();
+
+         return true;
       }
    }
 }

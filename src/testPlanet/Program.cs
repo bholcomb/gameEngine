@@ -192,7 +192,10 @@ namespace testNoise
          ImGui.slider("Gain", ref myNoise.gain, 0.01f, 2.0f);
          ImGui.slider("Offset", ref myNoise.offset, 0.0f, 10.0f);
          ImGui.slider("H", ref myNoise.H, 0.1f, 2.0f);
-
+         if (ImGui.button("Capture Cubemap", new Vector2(75, 25)))
+         { 
+            myNoise.myCubemap.saveData("heightMap");
+         }
          ImGui.endWindow();
 
 //          ImGui.beginWindow("Planet Preview");

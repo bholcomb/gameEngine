@@ -559,5 +559,31 @@ namespace Graphics
 
          paste(data, Vector2.Zero, size, OGL.PixelFormat.Rgba);
       }
+
+      public virtual bool saveData(string filename)
+      {
+         bind();
+         int depth = 3;
+         byte[] data = new byte[width * height * depth];
+         GL.PixelStore(PixelStoreParameter.PackAlignment, 1);
+
+         GL.GetTexImage(target, 0, OGL.PixelFormat.Rgb, PixelType.Byte, data);
+
+         Bitmap bmp = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+         int pos = 0;
+         for (int y = 0; y < height; y++)
+         {
+            for (int x = 0; x < width; x++)
+            {
+               bmp.SetPixel(x, y, Color.FromArgb(data[pos], data[pos + 1], data[pos + 2]));
+               pos += 3;
+            }
+         }
+
+         bmp.Save(filename);
+         unbind();
+
+         return true;
+      }
    }
 }
