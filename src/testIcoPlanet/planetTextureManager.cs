@@ -125,13 +125,13 @@ namespace Planet
          System.Console.WriteLine("Done Generating Planet Texture");
       }
 
-      public float heightAt(Vector3 v)
+      public double heightAt(Vector3d v)
       {
          v.Normalize();
          return heightAt(v.X, v.Y, v.Z);
       }
 
-      public float heightAt(float x, float y, float z)
+      public double heightAt(double x, double y, double z)
       {
          float value = 1.0f;
 

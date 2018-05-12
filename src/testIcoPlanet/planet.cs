@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 
 using Graphics;
 using Util;
+using GpuNoise;
 
 using OpenTK;
 using OpenTK.Graphics;
@@ -13,8 +14,9 @@ namespace Planet
 {
    public struct TriId
    {
-      public UInt64 myId;
+      public UInt64 myId; //all aspects of the triangle are stored in this 64 bit number
 
+      //top 5 bits define which root triangle this triangle is derived from
       public Byte root
       {
          get
@@ -33,7 +35,7 @@ namespace Planet
          }
       }
 
-      //should never be a depth 0, thats a root
+      //should never be a depth 0, thats a root.  depth gives a sense of the size of the triangle
       //2nd 5 bits
       public Byte depth
       {
@@ -91,7 +93,7 @@ namespace Planet
    {
       static int theStride = Marshal.SizeOf(default(V3F1));
 
-      public Vector3 Position;
+      public Vector3d Position;
       public float Depth;
 
       public static int stride { get { return theStride; } }
@@ -101,10 +103,10 @@ namespace Planet
          switch (fieldName)
          {
             case "position":
-               GL.VertexAttribFormat(id, 3, VertexAttribType.Float, false, 0);
+               GL.VertexAttribLFormat(id, 3, VertexAttribDoubleType.Double, 0);
                break;
             case "depth":
-               GL.VertexAttribFormat(id, 1, VertexAttribType.Float, false, 12);
+               GL.VertexAttribFormat(id, 1, VertexAttribType.Float, false, 24);
                break;
             default:
                throw new Exception(String.Format("Unknown attribute field: {0}", fieldName));
@@ -115,21 +117,17 @@ namespace Planet
    public class Tri
    {
       public TriId id;
-      public uint i1, i2, i3;
+      public uint i1, i2, i3; //indexes into the vertex array
       public float priority;
-      public Tri n1, n2, n3;
-      public Tri c1, c2, c3, c4;
+      public Tri n1, n2, n3; //neighbors
+      public Tri c1, c2, c3, c4; //children
       public Tri parent;
       public bool backfacing;
    }
 
    public class Planet
    {
-      // Icosahedron (20 sided die) generation code
-      static float X = 0.525731112119133606f;
-      static float Z = 0.850650808352039932f;
-
-      static int MAX_VERTEX = 100000; 
+      static int MAX_VERTEX = 200000; 
       static int MAX_INDEX = MAX_VERTEX * 3;
       static int MAX_TRI = 1000000;
 
@@ -146,11 +144,14 @@ namespace Planet
 
       VertexBufferObject<V3F1> myVBO = new VertexBufferObject<V3F1>(BufferUsageHint.StreamDraw);
       IndexBufferObject myIBO = new IndexBufferObject(BufferUsageHint.StreamDraw);
-      StatelessDrawElementsCommand myRenderCommand;
+      StatelessDrawElementsCommand myRenderPlanetCommand;
+      StatelessDrawElementsCommand myRenderWaterCommand;
 
       Camera myCamera;
       Vector3 myLastCameraPosition;
       Quaternion myLastCameraOrientation;
+
+      CubemapTexture myNoiseTexture;
 
       public float myFov;
       public float mySinFov;
@@ -160,16 +161,19 @@ namespace Planet
 
       public bool myRenderWireframe = true;
 
-      public float myMinEdgesize = 0.5f;
+      public float myMinEdgesize = 0.02f;
+
+      public float myMaxHeight = 5000.0f;
 
       public PlanetTextureManager myTextureManager = new PlanetTextureManager();
       public Texture myHeightTexture;
 
-      public float myScale = 10000.0f;
+      public float myScale = 60000.0f;
 
-      public Planet(Camera c)
+      public Planet(Camera c, CubemapTexture elevationMap)
       {
          myCamera = c;
+         myNoiseTexture = elevationMap;
          for (int i = 0; i < MAX_TRI; i++)
          {
             myTris.Add(new Tri());
@@ -186,17 +190,30 @@ namespace Planet
          //setup the shader
          List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
          desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "Test IcoPlanet.shaders.draw-planet-vs.glsl"));
-         desc.Add(new ShaderDescriptor(ShaderType.GeometryShader, "Test IcoPlanet.shaders.draw-planet-gs.glsl"));
+         //desc.Add(new ShaderDescriptor(ShaderType.GeometryShader, "Test IcoPlanet.shaders.draw-planet-gs.glsl"));
          desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "Test IcoPlanet.shaders.draw-planet-ps.glsl"));
          ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
          ShaderProgram shader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
-         myRenderCommand = new StatelessDrawElementsCommand(PrimitiveType.Triangles, (int)myIndexCount, 0, IndexBufferObject.IndexBufferDatatype.UnsignedInt);
+         myRenderPlanetCommand = new StatelessDrawElementsCommand(PrimitiveType.Triangles, (int)myIndexCount, 0, IndexBufferObject.IndexBufferDatatype.UnsignedInt);
+         myRenderPlanetCommand.pipelineState.shaderState.shaderProgram = shader;
+         myRenderPlanetCommand.pipelineState.vaoState.vao = new VertexArrayObject();
+         myRenderPlanetCommand.pipelineState.vaoState.vao.bindVertexFormat<V3F1>(shader);
+         myRenderPlanetCommand.pipelineState.generateId();
 
-         myRenderCommand.pipelineState.shaderState.shaderProgram = shader;
-         myRenderCommand.pipelineState.vaoState.vao = new VertexArrayObject();
-         myRenderCommand.pipelineState.vaoState.vao.bindVertexFormat<V3F1>(shader);
-         myRenderCommand.pipelineState.generateId();
+         desc.Clear();
+         desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "Test IcoPlanet.shaders.planet-water-vs.glsl"));
+         desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "Test IcoPlanet.shaders.planet-water-ps.glsl"));
+         sd = new ShaderProgramDescriptor(desc);
+         shader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
+
+         myRenderWaterCommand = new StatelessDrawElementsCommand(PrimitiveType.Triangles, (int)myIndexCount, 0, IndexBufferObject.IndexBufferDatatype.UnsignedInt);
+         myRenderWaterCommand.pipelineState.shaderState.shaderProgram = shader;
+         myRenderWaterCommand.pipelineState.vaoState.vao = new VertexArrayObject();
+         myRenderWaterCommand.pipelineState.vaoState.vao.bindVertexFormat<V3F1>(shader);
+         myRenderWaterCommand.pipelineState.blending.enabled = true;
+         myRenderWaterCommand.pipelineState.generateId();
+
 
          myHeightTexture = new Texture("../data/textures/EarthLookupTable.png");
       }
@@ -217,27 +234,27 @@ namespace Planet
 
          //6 verts for the octahedron (8 sided dice)
          myVertCount = 0;
-         myVerts[myVertCount].Position = new Vector3(0.0f, 1.0f, 0.0f) * myScale; //0-top
+         myVerts[myVertCount].Position = new Vector3d(0.0, 1.0, 0.0) * myScale; //0-top
          myVerts[myVertCount].Depth = 0;
          myVertCount++;
 
-         myVerts[myVertCount].Position = new Vector3(0.0f, 0.0f, -1.0f) * myScale; //1-front
+         myVerts[myVertCount].Position = new Vector3d(0.0, 0.0, -1.0) * myScale; //1-front
          myVerts[myVertCount].Depth = 0;
          myVertCount++;
 
-         myVerts[myVertCount].Position = new Vector3(1.0f, 0.0f, 0.0f) * myScale; //2-right
+         myVerts[myVertCount].Position = new Vector3d(1.0, 0.0, 0.0) * myScale; //2-right
          myVerts[myVertCount].Depth = 0;
          myVertCount++;
 
-         myVerts[myVertCount].Position = new Vector3(0.0f, 0.0f, 1.0f) * myScale; //3-back
+         myVerts[myVertCount].Position = new Vector3d(0.0, 0.0, 1.0) * myScale; //3-back
          myVerts[myVertCount].Depth = 0;
          myVertCount++;
 
-         myVerts[myVertCount].Position = new Vector3(-1.0f, 0.0f, 0.0f) * myScale; //4-left
+         myVerts[myVertCount].Position = new Vector3d(-1.0, 0.0, 0.0) * myScale; //4-left
          myVerts[myVertCount].Depth = 0;
          myVertCount++;
 
-         myVerts[myVertCount].Position = new Vector3(0.0f, -1.0f, 0.0f) * myScale; //5-bottom
+         myVerts[myVertCount].Position = new Vector3d(0.0, -1.0, 0.0) * myScale; //5-bottom
          myVerts[myVertCount].Depth = 0;
          myVertCount++;
 
@@ -270,100 +287,6 @@ namespace Planet
             mySplitQueue.Enqueue(t);
          }
       }
-
-      /*
-      public void init()
-      {
-         //12 verts for the icosahedron
-         myVertCount = 0;
-         myVerts[myVertCount].Position = new Vector3(-X, 0.0f, Z);
-         myVerts[myVertCount].Height = myTextureManager.heightAt(myVerts[myVertCount].Position);
-         myVertCount++;
-
-         myVerts[myVertCount].Position = new Vector3(X, 0.0f, Z);
-         myVerts[myVertCount].Height = myTextureManager.heightAt(myVerts[myVertCount].Position);
-         myVertCount++;
-
-         myVerts[myVertCount].Position = new Vector3(-X, 0.0f, -Z);
-         myVerts[myVertCount].Height = myTextureManager.heightAt(myVerts[myVertCount].Position);
-         myVertCount++;
-
-         myVerts[myVertCount].Position = new Vector3(X, 0.0f, -Z);
-         myVerts[myVertCount].Height = myTextureManager.heightAt(myVerts[myVertCount].Position);
-         myVertCount++;
-
-         myVerts[myVertCount].Position = new Vector3(.0f, Z, X);
-         myVerts[myVertCount].Height = myTextureManager.heightAt(myVerts[myVertCount].Position);
-         myVertCount++;
-
-         myVerts[myVertCount].Position = new Vector3(.0f, Z, -X);
-         myVerts[myVertCount].Height = myTextureManager.heightAt(myVerts[myVertCount].Position);
-         myVertCount++;
-
-         myVerts[myVertCount].Position = new Vector3(.0f, -Z, X);
-         myVerts[myVertCount].Height = myTextureManager.heightAt(myVerts[myVertCount].Position);
-         myVertCount++;
-
-         myVerts[myVertCount].Position = new Vector3(.0f, -Z, -X);
-         myVerts[myVertCount].Height = myTextureManager.heightAt(myVerts[myVertCount].Position);
-         myVertCount++;
-
-         myVerts[myVertCount].Position = new Vector3(Z, X, 0.0f);
-         myVerts[myVertCount].Height = myTextureManager.heightAt(myVerts[myVertCount].Position);
-         myVertCount++;
-
-         myVerts[myVertCount].Position = new Vector3(-Z, X, 0.0f);
-         myVerts[myVertCount].Height = myTextureManager.heightAt(myVerts[myVertCount].Position);
-         myVertCount++;
-
-         myVerts[myVertCount].Position = new Vector3(Z, -X, 0.0f);
-         myVerts[myVertCount].Height = myTextureManager.heightAt(myVerts[myVertCount].Position);
-         myVertCount++;
-
-         myVerts[myVertCount].Position = new Vector3(-Z, -X, 0.0f);
-         myVerts[myVertCount].Height = myTextureManager.heightAt(myVerts[myVertCount].Position);
-         myVertCount++;
-
-         int myIndexCount = 0;
-         myIndex[myIndexCount++] = 0; myIndex[myIndexCount++] = 4; myIndex[myIndexCount++] = 1;
-         myIndex[myIndexCount++] = 0; myIndex[myIndexCount++] = 9; myIndex[myIndexCount++] = 4;
-         myIndex[myIndexCount++] = 9; myIndex[myIndexCount++] = 5; myIndex[myIndexCount++] = 4;
-         myIndex[myIndexCount++] = 4; myIndex[myIndexCount++] = 5; myIndex[myIndexCount++] = 8;
-         myIndex[myIndexCount++] = 4; myIndex[myIndexCount++] = 8; myIndex[myIndexCount++] = 1;
-         myIndex[myIndexCount++] = 8; myIndex[myIndexCount++] = 10; myIndex[myIndexCount++] = 1;
-         myIndex[myIndexCount++] = 8; myIndex[myIndexCount++] = 3; myIndex[myIndexCount++] = 10;
-         myIndex[myIndexCount++] = 5; myIndex[myIndexCount++] = 3; myIndex[myIndexCount++] = 8;
-         myIndex[myIndexCount++] = 5; myIndex[myIndexCount++] = 2; myIndex[myIndexCount++] = 3;
-         myIndex[myIndexCount++] = 2; myIndex[myIndexCount++] = 7; myIndex[myIndexCount++] = 3;
-         myIndex[myIndexCount++] = 7; myIndex[myIndexCount++] = 10; myIndex[myIndexCount++] = 3;
-         myIndex[myIndexCount++] = 7; myIndex[myIndexCount++] = 6; myIndex[myIndexCount++] = 10;
-         myIndex[myIndexCount++] = 7; myIndex[myIndexCount++] = 11; myIndex[myIndexCount++] = 6;
-         myIndex[myIndexCount++] = 11; myIndex[myIndexCount++] = 0; myIndex[myIndexCount++] = 6;
-         myIndex[myIndexCount++] = 0; myIndex[myIndexCount++] = 1; myIndex[myIndexCount++] = 6;
-         myIndex[myIndexCount++] = 6; myIndex[myIndexCount++] = 1; myIndex[myIndexCount++] = 10;
-         myIndex[myIndexCount++] = 9; myIndex[myIndexCount++] = 0; myIndex[myIndexCount++] = 11;
-         myIndex[myIndexCount++] = 9; myIndex[myIndexCount++] = 11; myIndex[myIndexCount++] = 2;
-         myIndex[myIndexCount++] = 9; myIndex[myIndexCount++] = 2; myIndex[myIndexCount++] = 5;
-         myIndex[myIndexCount++] = 7; myIndex[myIndexCount++] = 2; myIndex[myIndexCount++] = 11;
-
-         //create the triangles 
-         ushort vi = 0;
-         for (int i = 0; i < 20; i++)
-         {
-            Tri t = myTris[myNextTri++];
-            t.id.root = (Byte)i;
-            t.i1 = myIndex[vi++];
-            t.i2 = myIndex[vi++];
-            t.i3 = myIndex[vi++];
-            t.c1 = t.c2 = t.c3 = t.c4 = null;
-            t.priority = 1.0f;
-            t.backfacing = false;
-            mySplitQueue.addTri(t);
-         }
-      }
-
-      */
-
       Tri createTriangle(Tri p, Byte childIndex, uint i1, uint i2, uint i3)
       {
          Tri t = myTris[myNextTri++];
@@ -378,7 +301,7 @@ namespace Planet
 
          t.c1 = t.c2 = t.c3 = t.c4 = null;
 
-         t.priority = distancePriority(t);
+         t.priority = (float)distancePriority(t);
 
          backfacing(t);
 
@@ -389,8 +312,8 @@ namespace Planet
       {
          if (shouldSplit(t) == false) return;
 
-         Vector3 v1, v2, v3;
-         Vector3 t1, t2, t3;
+         Vector3d v1, v2, v3;
+         Vector3d t1, t2, t3;
          uint i12, i23, i31;
 
          V3F1 v12 = new V3F1();
@@ -485,16 +408,16 @@ namespace Planet
          t.backfacing = false;
 
          //is rear facing
-         Vector3 v1, v2, v3;
+         Vector3d v1, v2, v3;
          v1 = myVerts[t.i1].Position;
          v2 = myVerts[t.i2].Position;
          v3 = myVerts[t.i3].Position;
 
-         Vector3 edge1 = v2 - v1;
-         Vector3 edge2 = v3 - v1;
-         Vector3 faceNormal = Vector3.Cross(edge1, edge2);
-
-         float angle = Vector3.Dot((v1 - myCamera.position), faceNormal);
+         Vector3d edge1 = v2 - v1;
+         Vector3d edge2 = v3 - v1;
+         Vector3d faceNormal = Vector3d.Cross(edge1, edge2);
+                
+         double angle = Vector3d.Dot((v1 - (Vector3d)myCamera.position), faceNormal);
 
          if (angle >= 0)
          {
@@ -516,21 +439,23 @@ namespace Planet
 
       bool triInsideViewCone(Tri t)
       {
-         Vector3 v1, v2, v3;
+         Vector3d v1, v2, v3;
          v1 = myVerts[t.i1].Position;
          v2 = myVerts[t.i2].Position;
          v3 = myVerts[t.i3].Position;
 
-         Vector3 sphereCenter = (v1 + v2 + v3) / 3;
-         float sphereRadius = (v1 - sphereCenter).Length;
+         Vector3d sphereCenter = (v1 + v2 + v3) / 3;
+         double sphereRadius = (v1 - sphereCenter).Length;
 
-         Vector3 U = myCamera.position - (sphereRadius / mySinFov) * myCamera.viewVector;
-         Vector3 D = sphereCenter - U;
-         if (Vector3.Dot(myCamera.viewVector, D) >= D.Length * myCosFov)
+         //get the camera position on the sphere surface
+         Vector3d camPos = ((Vector3d)myCamera.position).Normalized() * myScale;
+         Vector3d U = camPos - (sphereRadius / mySinFov) * (Vector3d)myCamera.viewVector;
+         Vector3d D = sphereCenter - U;
+         if (Vector3d.Dot((Vector3d)myCamera.viewVector, D) >= D.Length * myCosFov)
          {
             // center is inside K’’
-            D = sphereCenter - myCamera.position;
-            if (-Vector3.Dot(myCamera.viewVector, D) >= D.Length * mySinFov)
+            D = sphereCenter - camPos;
+            if (-Vector3d.Dot((Vector3d)myCamera.viewVector, D) >= D.Length * mySinFov)
             {
                // center is inside K’’ and inside K’
                return D.Length <= sphereRadius;
@@ -550,16 +475,16 @@ namespace Planet
 
       bool triangleTooSmall(Tri t)
       {
-         Vector3 v1, v2, v3;
+         Vector3d v1, v2, v3;
          v1 = myVerts[t.i1].Position;
          v2 = myVerts[t.i2].Position;
          v3 = myVerts[t.i3].Position;
 
-         float dist = (((v1 + v2 + v3) / 3.0f) - myCamera.position).Length;
+         double dist = (((v1 + v2 + v3) / 3.0f) - (Vector3d)myCamera.position).Length;
 
-         float e1 = (v2 - v1).Length;
-         float e2 = (v2 - v3).Length;
-         float e3 = (v3 - v1).Length;
+         double e1 = (v2 - v1).Length;
+         double e2 = (v2 - v3).Length;
+         double e3 = (v3 - v1).Length;
 
          return (((e1 + e2 + e3) / 3.0f) / dist) < myMinEdgesize; //avg edge length
       }
@@ -576,9 +501,9 @@ namespace Planet
          return false;
       }
 
-      float elevationError(Tri t)
+      double elevationError(Tri t)
       {
-         Vector3 v1, v2, v3, v12, v23, v31;
+         Vector3d v1, v2, v3, v12, v23, v31;
          v1 = myVerts[t.i1].Position;
          v2 = myVerts[t.i2].Position;
          v3 = myVerts[t.i3].Position;
@@ -589,19 +514,19 @@ namespace Planet
          v31 = (v3 + v1) / 2.0f;
 
          //heights at those points
-         float h12, h23, h31;
+         double h12, h23, h31;
          h12 = 1.0f + myTextureManager.heightAt(v12);
          h23 = 1.0f + myTextureManager.heightAt(v23);
          h31 = 1.0f + myTextureManager.heightAt(v31);
 
          //distance to those points
-         float d12, d23, d31;
-         d12 = (v12 - myCamera.position).Length;
-         d23 = (v23 - myCamera.position).Length;
-         d31 = (v31 - myCamera.position).Length;
+         double d12, d23, d31;
+         d12 = (v12 - (Vector3d)myCamera.position).Length;
+         d23 = (v23 - (Vector3d)myCamera.position).Length;
+         d31 = (v31 - (Vector3d)myCamera.position).Length;
 
          //error at those points
-         float e12, e23, e31;
+         double e12, e23, e31;
          e12 = (h12 - v12.Length) / d12;
          e23 = (h23 - v23.Length) / d23;
          e31 = (h31 - v31.Length) / d31;
@@ -612,16 +537,18 @@ namespace Planet
 
       public bool freezeRebuild = false;
 
-      float distancePriority(Tri t)
+      double distancePriority(Tri t)
       {
-         Vector3 v1, v2, v3;
+         Vector3d v1, v2, v3;
          v1 = myVerts[t.i1].Position;
          v2 = myVerts[t.i2].Position;
          v3 = myVerts[t.i3].Position;
 
-         Vector3 triCenter = (v1 + v2 + v3) / 3.0f;
+         Vector3d triCenter = (v1 + v2 + v3) / 3.0f;
 
-         float distanceToCamera = (triCenter - myCamera.position).Length;
+         //get the camera position on the sphere surface
+         Vector3d camPos = ((Vector3d)myCamera.position).Normalized() * myScale;
+         double distanceToCamera = (triCenter - camPos).Length;
          return 1.0f / distanceToCamera;  //further things get smaller priority
       }
 
@@ -648,10 +575,11 @@ namespace Planet
          return true;
       }
 
-      public bool keepTesselating(double start)
+      public bool shouldKeepTesselating(double start)
       {
          //check time
-         if (TimeSource.currentTime() - start >= 0.005) return false;
+         if (TimeSource.currentTime() - start >= 0.033) //more than 30hz to update
+            return false;
 
          //check tri count
          if ((myVertCount + 3) > MAX_VERTEX) return false;
@@ -674,7 +602,7 @@ namespace Planet
 
          double start = TimeSource.currentTime();
          bool vboChanged = false;
-         while (keepTesselating(start) == true)
+         while (shouldKeepTesselating(start) == true)
          {
             Tri t = mySplitQueue.Dequeue();
             if (t != null)
@@ -703,30 +631,41 @@ namespace Planet
 
       public void render()
       {
-         myRenderCommand.renderState.reset();
+         myRenderPlanetCommand.renderState.reset();
 
-         myRenderCommand.renderState.setVertexBuffer(myVBO.id, 0, 0, V3F1.stride);
-         myRenderCommand.renderState.setIndexBuffer(myIBO.id);
-         myRenderCommand.renderState.setUniform(new UniformData(0, Uniform.UniformType.Bool, true));
-         myRenderCommand.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-         myRenderCommand.renderState.setUniform(new UniformData(20, Uniform.UniformType.Int, 0));
-         myRenderCommand.renderState.setTexture(myHeightTexture.id(), 0, TextureTarget.Texture2D);
+         myRenderPlanetCommand.renderState.setVertexBuffer(myVBO.id, 0, 0, V3F1.stride);
+         myRenderPlanetCommand.renderState.setIndexBuffer(myIBO.id);
+         myRenderPlanetCommand.renderState.setUniform(new UniformData(0, Uniform.UniformType.Float, myMaxHeight));
+         myRenderPlanetCommand.renderState.setUniform(new UniformData(1, Uniform.UniformType.Int, 0));
+         myRenderPlanetCommand.renderState.setTexture(myNoiseTexture.id(), 0, TextureTarget.TextureCubeMap);
+         myRenderPlanetCommand.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
 
-         myRenderCommand.renderState.wireframe.enabled = false;
-         myRenderCommand.myCount = (int)myIndexCount;
-         myRenderCommand.renderState.setUniform(new UniformData(22, Uniform.UniformType.Bool, false));
-         myRenderCommand.execute();
+         myRenderPlanetCommand.renderState.setUniform(new UniformData(20, Uniform.UniformType.Int, 1));
+         myRenderPlanetCommand.renderState.setTexture(myHeightTexture.id(), 1, TextureTarget.Texture2D);
+
+         myRenderPlanetCommand.renderState.wireframe.enabled = false;
+         myRenderPlanetCommand.myCount = (int)myIndexCount;
+         myRenderPlanetCommand.renderState.setUniform(new UniformData(22, Uniform.UniformType.Bool, false));
+         myRenderPlanetCommand.execute();
 
          if (myRenderWireframe == true)
          {
-            myRenderCommand.renderState.wireframe.enabled = true;
-            myRenderCommand.renderState.polygonOffset.enableType = PolygonOffset.EnableType.LINE;
-            myRenderCommand.renderState.polygonOffset.factor = -1.0f;
-            myRenderCommand.renderState.polygonOffset.units = -1.0f;
-            myRenderCommand.renderState.setUniform(new UniformData(21, Uniform.UniformType.Color4, Color4.Black));
-            myRenderCommand.renderState.setUniform(new UniformData(22, Uniform.UniformType.Bool, true));
-            myRenderCommand.execute();
+            myRenderPlanetCommand.renderState.wireframe.enabled = true;
+            myRenderPlanetCommand.renderState.polygonOffset.enableType = PolygonOffset.EnableType.LINE;
+            myRenderPlanetCommand.renderState.polygonOffset.factor = -1.0f;
+            myRenderPlanetCommand.renderState.polygonOffset.units = -1.0f;
+            myRenderPlanetCommand.renderState.setUniform(new UniformData(21, Uniform.UniformType.Color4, Color4.Black));
+            myRenderPlanetCommand.renderState.setUniform(new UniformData(22, Uniform.UniformType.Bool, true));
+            myRenderPlanetCommand.execute();
          }
+
+         //draw the water using the same triangles, but without any elevation change
+         myRenderWaterCommand.renderState.reset();
+         myRenderWaterCommand.renderState.setVertexBuffer(myVBO.id, 0, 0, V3F1.stride);
+         myRenderWaterCommand.renderState.setIndexBuffer(myIBO.id);
+         myRenderWaterCommand.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
+         myRenderWaterCommand.myCount = (int)myIndexCount;
+         myRenderWaterCommand.execute();
       }
    }
 }

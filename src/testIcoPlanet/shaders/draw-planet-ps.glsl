@@ -1,8 +1,9 @@
-#version 430
+#version 440
 
-layout(location = 20) uniform sampler2D tex;
+layout(location = 20) uniform sampler2D heightColorTex;
 layout(location = 21) uniform vec4 overrideColor;
 layout(location = 22) uniform bool useOverride;
+
 
 layout(std140, binding = 0) uniform camera{
    mat4 view; //aligned 4N
@@ -17,19 +18,28 @@ layout(std140, binding = 0) uniform camera{
    float dt;
 };
 
-in GeometryStage
+in VertexStage
 {
    flat float depth;
-} gs_out;
+   smooth float height;
+} vs_out;
 
 out vec4 FragColor;
 
 void main()
 {
-   vec4 texColor = texture(tex, vec2(gs_out.depth / 22.0f, 0.5));
+   float val = (vs_out.height + 1.0) / 2.0;
+   if (val < 0) val = 0;
+   if (val > 1) val = 1;
+   vec4 texColor = texture(heightColorTex, vec2(val, 0.5));
 
    if (useOverride)
+   {
       texColor = overrideColor;
+   }
 
    FragColor = texColor;
+  
+   return;
+   
 }

@@ -194,12 +194,12 @@ namespace GpuNoise
 
       public Texture[] myTextures = new Texture[6];
       public CubemapTexture myCubemap;
-      public int octaves = 5;
-      public float frequency = 1.0f;
+      public int octaves = 10;
+      public float frequency = 1.1f;
       public float offset = 0.0f;
-      public float lacunarity = 2.0f;
+      public float lacunarity = 2.1f;
       public float gain = 1.0f;
-      public float H = 1.0f;
+      public float H = 1.2f;
       public Fractal.Function function = Fractal.Function.multiFractal;
 
       Fractal[] myFractal = new Fractal[6];
@@ -230,6 +230,8 @@ namespace GpuNoise
       {
          myAutoCorrect.reset();
 
+         bool didChange = false;
+
          //generate each face and update the min/max
          for (int i = 0; i < 6; i++)
          {
@@ -242,19 +244,24 @@ namespace GpuNoise
             myFractal[i].gain = gain;
             myFractal[i].offset = offset;
             myFractal[i].face = i;
-            myFractal[i].update();
-
-            myAutoCorrect.findMinMax(myFractal[i].output);
+            if(myFractal[i].update() == true)
+            {
+               myAutoCorrect.findMinMax(myFractal[i].output);
+               didChange = true;
+            }
          }
-         
-         //correct all the images with the same min/max
-         for (int i = 0; i < 6; i++)
+        
+         if(didChange == true)
          {
-            myAutoCorrect.output = myTextures[i];
-            myAutoCorrect.correct(myFractal[i].output);
+            //correct all the images with the same min/max
+            for (int i = 0; i < 6; i++)
+            {
+               myAutoCorrect.output = myTextures[i];
+               myAutoCorrect.correct(myFractal[i].output);
+            }
+
+            myCubemap.updateFaces(myTextures);
          }
-         
-         myCubemap.updateFaces(myTextures);
       }
 
       public void update()

@@ -47,7 +47,7 @@ namespace Graphics
 
    public class Uniform
    {
-      public enum UniformType { Bool, Int, Float, Vec2, Vec3, Vec4, IVec2, IVec3, IVec4, Quat, Color4, Mat4, Mat4Array };
+      public enum UniformType { Bool, Int, Float, Double, Vec2, Vec3, Vec4, IVec2, IVec3, IVec4, DVec2, DVec3, DVec4, Quat, Color4, Mat4, DMat4, Mat4Array, DMat4Array };
 
       protected String myName;
       protected int myLocation;
@@ -58,11 +58,17 @@ namespace Graphics
          public bool myBool;
          public int myInt;
          public float myFloat;
+         public double myDouble;
          public Vector2 myVec2;
+         public Vector2d myDVec2;
          public Vector3 myVec3;
+         public Vector3d myDVec3;
          public Vector4 myVec4;
+         public Vector4d myDVec4;
          public Matrix4 myMat4;
+         public Matrix4d myDMat4;
          public Matrix4[] myMat4Array;
+         public Matrix4d[] myDMat4Array;
       };
 
       protected InternalValue myValue;
