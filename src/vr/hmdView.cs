@@ -43,5 +43,8 @@ namespace VR
          myLeftEyeView.removePass(passName);
          myRightEyeView.removePass(passName);
       }
+
+      public View leftEyeView { get { return myLeftEyeView; } }
+      public View rightEyeView { get { return myRightEyeView; } }
    }
 }

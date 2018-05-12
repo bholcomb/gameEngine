@@ -55,7 +55,7 @@ namespace VR
          return true;
       }
 
-      static string getTrackedDeviceString(ETrackedDeviceProperty prop)
+      public static string getTrackedDeviceString(ETrackedDeviceProperty prop)
       {
          var error = ETrackedPropertyError.TrackedProp_Success;
          uint bufferLength = vrSystem.GetStringTrackedDeviceProperty(OpenVR.k_unTrackedDeviceIndex_Hmd, prop, null, 0, ref error);
@@ -86,6 +86,19 @@ namespace VR
 
          return mat;
       }
+
+      public static Matrix4 convertToMatrix4(HmdMatrix44_t m)
+      {
+         Matrix4 mat = new Matrix4(
+            m.m0, m.m4, m.m8, m.m12,
+            m.m1, m.m5, m.m9, m.m13,
+            m.m2, m.m6, m.m10, m.m14,
+            m.m3, m.m7, m.m11, m.m15
+            );
+
+         return mat;
+      }
+
 
       public static HmdMatrix34_t convertToMatrix34(Matrix4 m)
       {

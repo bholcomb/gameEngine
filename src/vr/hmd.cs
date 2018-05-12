@@ -18,6 +18,7 @@ namespace VR
       public RenderTarget[] myRenderTargets = new RenderTarget[2];
       public Camera[] myCameras = new Camera[2];
       Matrix4[] myEyeTransform = new Matrix4[2];
+      Matrix4 myHeadPose = Matrix4.Identity;
 
       TrackedDevicePose_t[] renderPoseArray = new TrackedDevicePose_t[OpenVR.k_unMaxTrackedDeviceCount];
       TrackedDevicePose_t[] gamePoseArray = new TrackedDevicePose_t[OpenVR.k_unMaxTrackedDeviceCount];
@@ -82,10 +83,9 @@ namespace VR
 
          //get head position
          TrackedDevicePose_t pose = renderPoseArray[OpenVR.k_unTrackedDeviceIndex_Hmd];
-         Matrix4 headPose = Matrix4.Identity;
          if (pose.bDeviceIsConnected == true && pose.bPoseIsValid == true)
          {
-            headPose = VR.convertToMatrix4(pose.mDeviceToAbsoluteTracking);
+            myHeadPose = VR.convertToMatrix4(pose.mDeviceToAbsoluteTracking);
          }
          else
          {
@@ -97,12 +97,14 @@ namespace VR
          for (int i = 0; i < 2; i++)
          {
             //TODO:  this doesn't look right, but seems to work.  Work through the math.
-            Matrix4 view = Matrix4.CreateTranslation(-position) * Matrix4.CreateFromQuaternion(orientation) * myEyeTransform[i].Inverted() * headPose.Inverted();
+            Matrix4 view = Matrix4.CreateTranslation(-position) * Matrix4.CreateFromQuaternion(orientation) * myEyeTransform[i].Inverted() * myHeadPose.Inverted();
             myCameras[i].setView(view);
          }
 
          return true;
       }
+
+      public Matrix4 headPose { get { return myHeadPose; } }
 
       public void present()
       {
