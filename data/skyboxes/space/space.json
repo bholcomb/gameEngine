@@ -1,0 +1,13 @@
+{
+	"skybox":{
+		"name": "intersteller",
+		"cubemap":{
+			"+x": "space_rt.png",
+			"-x": "space_lf.png",
+			"+y": "space_up.png",
+			"-y": "space_dn.png",
+			"+z": "space_bk.png",
+			"-z": "space_ft.png",
+		}
+	}
+}
