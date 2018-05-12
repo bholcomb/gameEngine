@@ -148,6 +148,7 @@ namespace Graphics
                }
             }
 
+            m.upload();
             myMaterials.Add(m);
          }
       }

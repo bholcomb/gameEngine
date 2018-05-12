@@ -30,7 +30,8 @@ namespace Terrain
 			}
 
          //material properties
-         PerPixelUniformData matData = new PerPixelUniformData
+         /*
+         MaterialUniformData matData = new MaterialUniformData
          {
             ambientReflectivity = m.ambient,
             diffuseReflectivity = m.diffuse,
@@ -39,6 +40,7 @@ namespace Terrain
             shininess = m.shininess,
             alpha = m.alpha
          };
+         */
 
          //setup diffuse map, it should exists
          ArrayTexture tex = (m.findAttribute("texArray") as TextureAttribute).value() as ArrayTexture;
@@ -46,9 +48,9 @@ namespace Terrain
 			state.setUniform(new UniformData(20, Uniform.UniformType.Int, 0));
 
          //setup the lights that influence this terrain
-         byte[] data = matData.toBytes();
-         state.setUniformUpload(myMaterialUniform, data);
-         state.setUniformBuffer(myMaterialUniform.id, 3);
+         //byte[] data = matData.toBytes();
+         //state.setUniformUpload(myMaterialUniform, data);
+         state.setUniformBuffer(m.myMaterialUniformBuffer.id, 3);
          state.setUniformBuffer(myLightVisualizer.myLightUniforBuffer.id, 1);
       }
 

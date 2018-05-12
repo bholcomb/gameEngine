@@ -284,7 +284,7 @@ namespace Graphics
       UniformUploadData[] myUniformUploadData = new UniformUploadData[5];
       int currentUniformUpload = -1;
 
-      UniformData[] myUniforms = new UniformData[10];
+      public UniformData[] myUniforms = new UniformData[10];
       int currentUniformData = -1;
 
       public struct VertexInfo
@@ -345,6 +345,11 @@ namespace Graphics
          currentUniformUpload = -1;
          currentVertexBuffer = -1;
          myIndexBuffer = 0;
+      }
+
+      public void resetUniforms()
+      {
+         currentUniformData = -1;
       }
 
       public void setUniform(UniformData ud)

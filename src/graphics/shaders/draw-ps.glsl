@@ -39,6 +39,8 @@ void main()
 
 	switch (textureSource)
 	{
+   case -1:
+      break;
 	case 0:
 		texColor = texture(tex, texCoord);
 		break;

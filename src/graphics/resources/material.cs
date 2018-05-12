@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 using OpenTK;
 using OpenTK.Graphics;
@@ -7,6 +8,38 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Graphics
 {
+   /*
+layout(std140) uniform material {
+   uniform vec4 matAmbientReflectivity;
+   uniform vec4 matDiffuseReflectivity;
+   uniform vec4 matSpecularReflectivity;
+   uniform vec4 emmission;
+   uniform float shininess;
+   uniform float alpha;
+   uniform float alphaTest;
+   uniform float parallaxScale;
+   uniform bool hasSpecularMap;
+   uniform bool hasNormalMap;		
+   uniform bool hasParallaxMap;
+};
+*/
+   [StructLayout(LayoutKind.Sequential)]
+   public struct MaterialUniformData
+   {
+      public Color4 ambientReflectivity;
+      public Color4 diffuseReflectivity;
+      public Color4 specularReflectivity;
+      public Color4 emmission;
+      public float shininess;
+      public float alpha;
+      public float alphaTest;
+      public float parallaxScale;
+      public int hasSpecularMap;
+      public int hasNormalMap;
+      public int hasParallaxMap;
+      int pad1;
+   };
+
    public class MaterialAttribute
    {
       public String name { get; set; }
@@ -134,6 +167,9 @@ namespace Graphics
       public float alphaTest { get; set; }
       public bool hasTransparency { get; set; }
 
+      public UniformBufferObject myMaterialUniformBuffer;
+      public MaterialUniformData myMaterialUniformData;
+
       public Material(String n ="")
       {
          name = n;
@@ -147,6 +183,8 @@ namespace Graphics
          alpha = 1.0f;
          alphaTest = 0.0f;
          hasTransparency = false;
+
+         myMaterialUniformBuffer = new UniformBufferObject(BufferUsageHint.StaticDraw);
       }
       
       public bool hasAttribute(string name)
@@ -203,6 +241,37 @@ namespace Graphics
                   break;
             }
          }
+      }
+
+      public void upload()
+      {
+         myMaterialUniformData.ambientReflectivity = ambient;
+         myMaterialUniformData.diffuseReflectivity = diffuse;
+         myMaterialUniformData.specularReflectivity = spec;
+         myMaterialUniformData.emmission = emission;
+         myMaterialUniformData.shininess = shininess;
+         myMaterialUniformData.alpha = alpha;
+         myMaterialUniformData.alphaTest = alphaTest;
+         myMaterialUniformData.hasSpecularMap = myTextures[(int)TextureId.Specular] != null ? 1 : 0;
+         myMaterialUniformData.hasNormalMap = 0;
+         
+         if(myTextures[(int)TextureId.Normal] != null)
+         {
+            myMaterialUniformData.hasNormalMap = 1;
+            Texture tex = myTextures[(int)TextureId.Normal].value();
+            if(tex.hasAlpha)
+            {
+               myMaterialUniformData.hasParallaxMap = 1;
+               myMaterialUniformData.hasParallaxMap = 1;
+               myMaterialUniformData.parallaxScale = 0.04f;
+            }
+            else
+            {
+               myMaterialUniformData.hasParallaxMap = 0;
+            }
+         }
+
+         myMaterialUniformBuffer.setData(myMaterialUniformData);
       }
    }
 }

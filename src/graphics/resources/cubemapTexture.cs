@@ -40,6 +40,12 @@ namespace Graphics
 
          return t;
       }
+
+      public bool flip
+      {
+         get { return myFlip; }
+         set { myFlip = value; }
+      }
    }
 
    public class CubemapTexture : Texture
@@ -139,6 +145,12 @@ namespace Graphics
 
             if (bm != null)
             {
+               //flip the image since it's backwards from what opengl expects
+               if (myFlip == true)
+               {
+                  bm.RotateFlip(RotateFlipType.RotateNoneFlipY);
+               }
+
                BitmapData Data = bm.LockBits(new System.Drawing.Rectangle(0, 0, bm.Width, bm.Height), ImageLockMode.ReadOnly, bm.PixelFormat);
 
                GL.TexImage2D(myFaces[i], 0, myPixelFormat, Data.Width, Data.Height, 0, pf, myDataType, Data.Scan0);
