@@ -187,6 +187,7 @@ namespace Terrain
             ArrayTextureDescriptor td = new ArrayTextureDescriptor(myTextureFilenames.ToArray(), true);
             myMaterialTextureArray = Renderer.resourceManager.getResource(td) as ArrayTexture;
 				visualMaterial.addAttribute(new TextureAttribute("texArray", myMaterialTextureArray));
+            visualMaterial.upload();
          }
       }
    }

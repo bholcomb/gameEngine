@@ -84,7 +84,7 @@ void main()
    //http://www.lighthouse3d.com/tutorials/glsl-tutorial/the-normal-matrix/
    vs_out.normalMatrix = mat3(model);
    vs_out.worldVert = (model * vec4(pos.xyz, 1)).xyz;
-   vs_out.texCoord = uv * 102.4;
+   vs_out.texCoord = uv / 100.0f;
    vs_out.texLayer =  texIndex;
 
    mat4 MVP = viewProj * model;

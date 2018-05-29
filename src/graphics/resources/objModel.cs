@@ -330,6 +330,7 @@ namespace Graphics
                         line = file.ReadLine();
                      }
 
+                     m.upload();
                      myMaterials.Add(tokens[1], m);
                   }
                   break;

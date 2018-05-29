@@ -318,7 +318,7 @@ namespace testRenderer
 				if (i % 2 == 0)
 					mdesc = new ObjModelDescriptor("../data/models/vegetation/fir/fir2.obj");
 				else
-					mdesc = new ObjModelDescriptor("../data/models/props/rocks_3_by_nobiax-d6s8l2b/rocks_03-blend.obj");
+					mdesc = new ObjModelDescriptor("../data/models/props/rocks_3_by_nobiax-d6s8l2b/rocks_3.obj");
 
 				smr.model = Renderer.resourceManager.getResource(mdesc) as StaticModel;
 				Renderer.renderables.Add(smr);

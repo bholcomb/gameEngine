@@ -155,18 +155,18 @@ namespace Graphics
             case Key.Plus:
                {
                   if (shiftDown == true)
-                     defaultBigStepSize += 5.0f;
+                     defaultBigStepSize *= 2.0f;
                   else
-                     defaultStepSize += 1.0f;
+                     defaultStepSize *= 2.0f;
 
                }
                break;
             case Key.Minus:
                {
                   if (shiftDown == true)
-                     defaultBigStepSize -= 5.0f;
+                     defaultBigStepSize /= 2.0f;
                   else
-                     defaultStepSize -= 1.0f;
+                     defaultStepSize /= 2.0f;
 
                   if (defaultStepSize <= 0) defaultStepSize = 1.0f;
                   if (defaultBigStepSize <= 0) defaultStepSize = 1.0f;
@@ -200,11 +200,24 @@ namespace Graphics
       {
          if (myMouseLook == true)
          {
-            Quaternion q = new Quaternion();
-            myMouseLookHeading += xDelta;
-            myMouseLookPitch += yDelta;
-            myViewOri = q.fromHeadingPitchRoll(myMouseLookHeading, myMouseLookPitch, 0.0f);
-         }
+//             Quaternion q = new Quaternion();
+             myMouseLookHeading += xDelta;
+             myMouseLookPitch += yDelta;
+            //             myViewOri = q.fromHeadingPitchRoll(myMouseLookHeading, myMouseLookPitch, 0.0f);
+
+            if(shiftDown == true)
+            {
+               myViewOri = myViewOri * 
+                  Quaternion.FromAxisAngle(myCamera.forward, MathHelper.DegreesToRadians(xDelta));
+            }
+            else
+            {
+               myViewOri = myViewOri *
+                  Quaternion.FromAxisAngle(myCamera.up, MathHelper.DegreesToRadians(xDelta)) *
+                  Quaternion.FromAxisAngle(myCamera.right, MathHelper.DegreesToRadians(yDelta));
+            }
+
+         } 
       }
 
 

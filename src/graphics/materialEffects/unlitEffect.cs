@@ -25,16 +25,16 @@ namespace Graphics
          {
             Texture tex = m.myTextures[(int)Material.TextureId.Diffuse].value();
             state.setTexture((int)tex.id(), 0, TextureTarget.Texture2D);
-            state.setUniform(new UniformData(0, Uniform.UniformType.Bool, true));
-            state.setUniform(new UniformData(1, Uniform.UniformType.Int, 0));
+            state.setUniform(new UniformData(20, Uniform.UniformType.Bool, true));
+            state.setUniform(new UniformData(21, Uniform.UniformType.Int, 0));
          }
          else
          {
-            state.setUniform(new UniformData(0, Uniform.UniformType.Bool, false));
+            state.setUniform(new UniformData(20, Uniform.UniformType.Bool, false));
          }
 
-			state.setUniform(new UniformData(2, Uniform.UniformType.Color4, m.diffuse));
-			state.setUniform(new UniformData(3, Uniform.UniformType.Float, m.alpha));
+			state.setUniform(new UniformData(22, Uniform.UniformType.Color4, m.diffuse));
+			state.setUniform(new UniformData(23, Uniform.UniformType.Float, m.alpha));
 		}
 
 		public override PipelineState createPipeline(Material m)

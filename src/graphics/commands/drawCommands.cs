@@ -328,7 +328,97 @@ namespace Graphics
 		}
 	}
 
-	public class RenderTexturedQuadCommand : StatelessRenderCommand
+   public class RenderFrustumCommand : StatelessRenderCommand
+   {
+      V3T2B4[] myVerts;
+
+      static Vector4[] theVerts = new Vector4[8];
+      static VertexBufferObject<V3T2B4> theVBO;
+      static IndexBufferObject theIBO;
+      static VertexArrayObject theVAO;
+      static ShaderProgram theShader;
+
+      static UInt16 PRIM_RESTART = 0xFFFF;
+
+      static RenderFrustumCommand()
+      {
+         //setup the shader
+         List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
+         desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\draw-vs.glsl", ShaderDescriptor.Source.File));
+         desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Graphics\\shaders\\draw-ps.glsl", ShaderDescriptor.Source.File));
+         ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
+         theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
+
+         theVBO = new VertexBufferObject<V3T2B4>(BufferUsageHint.DynamicDraw);
+         theIBO = new IndexBufferObject(BufferUsageHint.StaticDraw);
+
+         ushort[] index = {
+            0, 1, 3, 2, PRIM_RESTART,
+            5, 1, 3, 7, PRIM_RESTART,
+            4, 5, 7, 6, PRIM_RESTART,
+            0, 4, 6, 2};
+
+         theVerts[0] = new Vector4(-1, -1, -1, 1);
+         theVerts[1] = new Vector4(1, -1, -1, 1);
+         theVerts[2] = new Vector4(-1, 1, -1, 1);
+         theVerts[3] = new Vector4(1, 1, -1, 1);
+
+         theVerts[4] = new Vector4(-1, -1, 1, 1);
+         theVerts[5] = new Vector4(1, -1, 1, 1);
+         theVerts[6] = new Vector4(-1, 1, 1, 1);
+         theVerts[7] = new Vector4(1, 1, 1, 1);
+
+         theIBO.setData(index);
+
+         //setup the vao
+         theVAO = new VertexArrayObject();
+         theVAO.bindVertexFormat<V3T2B4>(theShader);
+      }
+
+      public RenderFrustumCommand(Matrix4 viewProj, Color4 c)
+         : base()
+      {
+         Matrix4 inv = viewProj.Inverted();
+         myVerts = new V3T2B4[8];
+         UInt32 col = c.toUInt();
+
+         myVerts[0].Position = (theVerts[0] * inv).Xyz; myVerts[0].TexCoord = Vector2.Zero; myVerts[0].Color = col;
+         myVerts[1].Position = (theVerts[1] * inv).Xyz; myVerts[1].TexCoord = Vector2.Zero; myVerts[1].Color = col;
+         myVerts[2].Position = (theVerts[2] * inv).Xyz; myVerts[2].TexCoord = Vector2.Zero; myVerts[2].Color = col;
+         myVerts[3].Position = (theVerts[3] * inv).Xyz; myVerts[3].TexCoord = Vector2.Zero; myVerts[3].Color = col;
+         myVerts[4].Position = (theVerts[4] * inv).Xyz; myVerts[4].TexCoord = Vector2.Zero; myVerts[4].Color = col;
+         myVerts[5].Position = (theVerts[5] * inv).Xyz; myVerts[5].TexCoord = Vector2.Zero; myVerts[5].Color = col;
+         myVerts[6].Position = (theVerts[6] * inv).Xyz; myVerts[6].TexCoord = Vector2.Zero; myVerts[6].Color = col;
+         myVerts[7].Position = (theVerts[7] * inv).Xyz; myVerts[7].TexCoord = Vector2.Zero; myVerts[7].Color = col;
+
+         renderState.setIndexBuffer(theIBO.id);
+         renderState.setVertexBuffer(theVBO.id, 0, 0, V3T2B4.stride);
+         renderState.setUniform(new UniformData(0, Uniform.UniformType.Bool, true)); //is 3d
+         renderState.setUniform(new UniformData(23, Uniform.UniformType.Int, -1)); //no texture
+         renderState.primativeRestart.enabled = true;
+         renderState.primativeRestart.value = PRIM_RESTART;
+
+         pipelineState = new PipelineState();
+         pipelineState.shaderState.shaderProgram = theShader;
+         pipelineState.vaoState.vao = theVAO;
+         pipelineState.depthTest.enabled = false;
+         pipelineState.blending.enabled = c.A < 1.0f;
+         pipelineState.generateId();
+      }
+
+      public override void execute()
+      {
+         //update the buffer with this command's draw data
+         theVBO.setData(myVerts);
+
+         base.execute();
+
+         GL.DrawElements(PrimitiveType.LineStrip, theIBO.count, DrawElementsType.UnsignedShort, 0);
+      }
+   }
+
+
+   public class RenderTexturedQuadCommand : StatelessRenderCommand
 	{
 		V3T2B4[] myVerts;
 
@@ -369,9 +459,9 @@ namespace Graphics
 			UInt32 col = new Color4(1.0f, 1.0f, 1.0f, alpha).toUInt();
 			myVerts = new V3T2B4[4];
 			myVerts[0].Position = verts[0]; myVerts[0].TexCoord = new Vector2(0, 0); myVerts[0].Color = col;
-			myVerts[1].Position = verts[1]; myVerts[1].TexCoord = new Vector2(0, 1); myVerts[1].Color = col;
+			myVerts[1].Position = verts[1]; myVerts[1].TexCoord = new Vector2(1, 0); myVerts[1].Color = col;
 			myVerts[2].Position = verts[2]; myVerts[2].TexCoord = new Vector2(1, 1); myVerts[2].Color = col;
-			myVerts[3].Position = verts[3]; myVerts[3].TexCoord = new Vector2(1, 0); myVerts[3].Color = col;
+			myVerts[3].Position = verts[3]; myVerts[3].TexCoord = new Vector2(0, 1); myVerts[3].Color = col;
 
 			renderState.setTexture(t.id(), 0, t.target);
 
@@ -648,4 +738,40 @@ namespace Graphics
 			GL.DrawElements(PrimitiveType.Triangles, theIBO.count, DrawElementsType.UnsignedShort, 0);
 		}
 	}
+
+   /*
+public class RenderCubemap2dCommand: StatelessRenderCommand
+{
+   vertexBuffer[] = {
+{ -0.25f, 0.375f, 0.0f,
+   -1,  1, -1 },
+{   0.0f, 0.375f, 0.0f,
+    1,  1, -1 },
+{  -0.5f, 0.125f, 0.0f,
+   -1,  1, -1 },
+{ -0.25f, 0.125f, 0.0f,
+   -1,  1,  1 },
+{   0.0f, 0.125f, 0.0f,
+    1,  1,  1 },
+{  0.25f, 0.125f, 0.0f,
+    1,  1, -1 },
+{   0.5f, 0.125f, 0.0f,
+   -1,  1, -1 },
+{  -0.5f, -0.125f, 0.0f,
+   -1, -1, -1 },
+{ -0.25f, -0.125f, 0.0f,
+   -1, -1,  1 },
+{   0.0f, -0.125f, 0.0f,
+    1, -1,  1 },
+{  0.25f, -0.125f, 0.0f,
+   1, -1, -1 },
+{   0.5f, -0.125f, 0.0f,
+   -1, -1, -1 },
+{ -0.25f, -0.375f, 0.0f,
+   -1, -1, -1 },
+{   0.0f, -0.375f, 0.0f,
+    1, -1, -1 }
+};
+}
+*/
 }

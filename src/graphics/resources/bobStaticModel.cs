@@ -103,6 +103,7 @@ namespace Graphics
          foreach (BobMaterial bm in mats)
          {
             Material m = new Material(bm.name);
+            m.myFeatures |= Material.Feature.Lighting;
             m.ambient = bm.ambient;
             m.diffuse = bm.diffuse;
             m.spec = bm.spec;
@@ -147,6 +148,7 @@ namespace Graphics
                }
             }
 
+            m.upload();
             myMaterials.Add(m);
          }
       }

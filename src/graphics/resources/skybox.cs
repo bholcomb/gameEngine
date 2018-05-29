@@ -36,6 +36,7 @@ namespace Graphics
          faces.Add(Path.Combine(path, (string)cubemap["-z"]));
 
          CubemapTextureDescriptor td = new CubemapTextureDescriptor(faces);
+         td.flip = true;
          CubemapTexture tex = mgr.getResource(td) as CubemapTexture;
          if(tex == null)
          {
@@ -70,13 +71,23 @@ namespace Graphics
 			};
 
 			ushort[] index ={
+            //CCW inside box
+                  5,7,1, 7,3,1,    //+X  RIGHT
+                  0,2,4, 2,6,4,    //-X  LEFT
+                  6,2,7, 2,3,7,    //+Y  TOP
+                  0,4,1, 4,5,1,   //-Y  BOTTOM
+                  4,6,5, 6,7,5,   //+Z  BACK
+                  1,3,0, 3,2,0     //-Z  FRONT
+          /*
+             //CCW from outside box
 						5,1,7, 7,1,3,    //+X  RIGHT
                   0,4,2, 2,4,6,    //-X  LEFT
                   6,7,2, 2,7,3,    //+Y  TOP
                   0,1,4, 4,1,5,   //-Y  BOTTOM
                   4,5,6, 6,5,7,   //+Z  BACK
                   1,0,3, 3,0,2     //-Z  FRONT
-                         };
+          */
+          };
 
 			theVbo.setData(verts);
 			theIbo.setData(index);

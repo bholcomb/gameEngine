@@ -23,6 +23,12 @@ namespace Graphics
       Dictionary<FramebufferAttachment, Texture> myBuffers = new Dictionary<FramebufferAttachment, Texture>();
       Dictionary<FramebufferAttachment, uint> myRenderBuffers = new Dictionary<FramebufferAttachment, uint>();
 
+      int myWidth;
+      int myHeight;
+
+      public int width { get { return myWidth; } }
+      public int height { get { return myHeight; } }
+
       public RenderTarget()
       {
          myId = GL.GenFramebuffer();
@@ -36,11 +42,16 @@ namespace Graphics
       public RenderTarget(int width, int height, List<RenderTargetDescriptor> desc) : this()
       {
          update(width, height, desc);
+         myWidth = width;
+         myHeight = height;
       }
 
       public void update(int width, int height, List<RenderTargetDescriptor> desc)
       {
          myTargets.Clear();
+
+         myWidth = width;
+         myHeight = height;
 
          foreach (RenderTargetDescriptor d in desc)
          {

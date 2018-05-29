@@ -328,11 +328,11 @@ namespace Graphics
 			myZAxis.Y = myViewMatrix.M23;
 			myZAxis.Z = myViewMatrix.M33;
 
-			myXAxis.Normalize();
+         myXAxis.Normalize();
 			myYAxis.Normalize();
 			myZAxis.Normalize();
 
-			myViewDir = -myZAxis;
+         myViewDir = -myZAxis;
 
 			myViewMatrix.M41 = -Vector3.Dot(myXAxis, myEye);
 			myViewMatrix.M42 = -Vector3.Dot(myYAxis, myEye);
@@ -388,6 +388,11 @@ namespace Graphics
 			get { return myEye; }
 			set { myEye = value; updateViewMatrix(); }
 		}
+
+      public Vector3 forward
+      {
+         get { return myViewDir; }
+      }
 
 		public Vector3 up
 		{
