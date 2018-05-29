@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using Util;
 
-namespace GUI
+namespace UI2
 {
    public class IdStack
    {

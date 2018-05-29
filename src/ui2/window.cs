@@ -7,10 +7,9 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
 using Graphics;
-using GUI;
 using Util;
 
-namespace GUI
+namespace UI2
 {
    public class Window
    {

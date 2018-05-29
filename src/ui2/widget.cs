@@ -1,6 +1,6 @@
 using System;
 
-namespace GUI
+namespace UI2
 {
    [Flags]
    public enum WidgetState

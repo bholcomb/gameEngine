@@ -5,7 +5,7 @@ using Util;
 using OpenTK;
 using OpenTK.Input;
 
-namespace GUI
+namespace UI2
 {
 	//pressed is down this frame
 	//released is going up this frame

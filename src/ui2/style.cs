@@ -6,7 +6,7 @@ using Graphics;
 using OpenTK;
 using OpenTK.Graphics;
 
-namespace GUI
+namespace UI2
 {
    [Flags]
    public enum Alignment

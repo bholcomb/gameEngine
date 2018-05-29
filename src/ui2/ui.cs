@@ -9,7 +9,7 @@ using OpenTK.Input;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace GUI
+namespace UI2
 {
    [Flags]
    public enum SetCondition
