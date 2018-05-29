@@ -195,7 +195,7 @@ namespace Graphics
          Renderer.device.drawIndexed(PrimitiveType.TriangleStrip, myIbo.count, 0, DrawElementsType.UnsignedShort);
       }
 
-      public override int width(String txt)
+      public override float width(String txt)
       {
          int size = 0;
          for (int i = 0; i < txt.Length; i++)
@@ -207,7 +207,7 @@ namespace Graphics
          return size;
       }
 
-      public override int height(String txt)
+      public override float height(String txt)
       {
          return mySize;
       }

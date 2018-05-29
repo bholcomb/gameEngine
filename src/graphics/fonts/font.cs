@@ -20,9 +20,9 @@ namespace Graphics
       protected List<Glyph> myGlyphs = new List<Glyph>();
 
       protected String myName;
-      protected int mySize;
+      protected float mySize;
 
-      public Font(String name, int size)
+      public Font(String name, float size)
       {
          myName = name;
          mySize = size;
@@ -49,10 +49,15 @@ namespace Graphics
          get { return myName; }
       }
 
-      public int size
+      public float fontSize
       {
          get { return mySize; }
          set { mySize = value; }
+      }
+
+      public Vector2 size(string text)
+      {
+         return new Vector2(width(text), height(text));
       }
 
       public abstract void setupRenderCommand(StatelessRenderCommand rc);
@@ -79,12 +84,12 @@ namespace Graphics
          print3d(x, y, z, String.Format(txt, objs));
       }
 
-      public virtual int width(String txt, params Object[] objs)
+      public virtual float width(String txt, params Object[] objs)
       {
          return width(String.Format(txt, objs));
       }
 
-      public virtual int height(String txt, params Object[] objs)
+      public virtual float height(String txt, params Object[] objs)
       {
          return height(String.Format(txt, objs));
       }
@@ -101,7 +106,7 @@ namespace Graphics
          cmd.execute();
       }
 
-      public abstract int width(String txt);
-      public abstract int height(String txt);
+      public abstract float width(String txt);
+      public abstract float height(String txt);
    }
 }

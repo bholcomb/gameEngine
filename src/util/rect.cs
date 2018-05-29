@@ -94,6 +94,16 @@ namespace Util
          set { myTop =value + myBottom;}
       }
 
+      public Vector2 min
+      {
+         get { return position; }
+      }
+
+      public Vector2 max
+      {
+         get { return position + size; }
+      }
+
       public Vector2 SW
       {
          get { return new Vector2(myLeft, myBottom); }
@@ -277,7 +287,7 @@ namespace Util
          return false;
       }
 
-      public bool intersects(Rect other)
+      public bool overlaps(Rect other)
       {
          //determined by if distances from centers of each rectangles is less than
          //combined size of rectangles on either axis.  Works only for axis aligned

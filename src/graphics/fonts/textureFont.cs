@@ -129,13 +129,13 @@ namespace Graphics
          Renderer.device.drawIndexed(PrimitiveType.TriangleStrip, myIbo.count, 0, DrawElementsType.UnsignedShort);
       }
 
-      public override int width(String txt)
+      public override float width(String txt)
       {
          //estimate for the width of a character
          return txt.Length * mySize - (mySize / 2);
       }
 
-      public override int height(String txt)
+      public override float height(String txt)
       {
          return mySize;
       }
