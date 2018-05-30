@@ -9,7 +9,7 @@ using OpenTK.Input;
 using Graphics;
 using Util;
 
-namespace UI2
+namespace GUI
 {
    public static partial class UI
    {

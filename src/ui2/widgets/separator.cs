@@ -9,7 +9,7 @@ using OpenTK.Input;
 using Graphics;
 using Util;
 
-namespace UI2
+namespace GUI
 {
    public static partial class UI
    {
@@ -24,7 +24,7 @@ namespace UI2
          Vector2 a = win.cursorScreenPosition + new Vector2(1, 2);
          Vector2 b = win.cursorScreenPosition + new Vector2(win.size.X - 1, 2);
 
-         win.canvas.addLine(a, b, style.colors[(int)ElementColor.Border], 1);
+         win.canvas.addLine(a, b, style.window.borderColor, 1);
 
          win.addItem(size);
       }

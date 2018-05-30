@@ -30,12 +30,12 @@ namespace Graphics
 
       private static void loadDefaults()
       {
-         addFont(new TextureFont("DEFAULT", "../data/fonts/proggy12.png", 15));
-         addFont(new TextureFont("PROGGY", "../data/fonts/proggy12.png", 15));
-         addFont(new TextureFont("CONSOLA", "../data/fonts/consola.png", 16));
-         addFont(new TextureFont("COURIER", "../data/fonts/font.png", 15));
+         addFont(new TextureFont("DEFAULT", "../data/fonts/proggy12.png", 16, 16, 32));
+         addFont(new TextureFont("PROGGY", "../data/fonts/proggy12.png", 16, 16, 32));
+         addFont(new TextureFont("CONSOLA", "../data/fonts/consola.png", 16, 16, 32));
+         addFont(new TextureFont("COURIER", "../data/fonts/font.png", 16, 16, 32));
          //addFont(new TTFFont("SANS", "../data/fonts/freeSans.ttf", 15));
-         addFont(new SDFont("FREESANS", "../data/fonts/freeSans", 15));
+         addFont(new SDFont("FREESANS", "../data/fonts/freeSans", 16));
       }
    }
 }

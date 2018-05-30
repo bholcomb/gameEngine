@@ -22,10 +22,10 @@ namespace UI
       static bool sliderBehavior(Rect r, UInt32 id, ref float val, float min, float max, ref bool hovered, SliderFlags flags = 0)
       {
          Window win = currentWindow;
-         if(win != ImGui.focusedWindow)
-         {
-            return false;
-         }
+//          if(win != ImGui.focusedWindow)
+//          {
+//             return false;
+//          }
 
          hovered = r.containsPoint(mouse.pos);
          if (hovered)

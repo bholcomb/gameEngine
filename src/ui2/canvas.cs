@@ -10,7 +10,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace UI2
+namespace GUI
 {
    public class Glyph
    {
@@ -123,11 +123,6 @@ namespace UI2
    {
       [Flags]
       public enum Corners { NONE = 0, LL = 1, LR = 2, UR = 4, UL = 8, TOP = UL | UR, BOTTOM = LL | LR, LEFT = LL | UL, RIGHT = LR | UR, ALL = LL | LR | UL | UR }
-      public enum Icons
-      {
-         CHECKBOX_UNCHECKED = 256, //start of the icons in the built in texture
-         CHECKBOX_CHECKED
-      };
 
       public static readonly Vector4 theNullClipRect = new Vector4(0.0f, 0.0f, +8192.0f, +8192.0f);
       public static readonly Vector2 uv_zero = new Vector2(0, 0);
@@ -142,7 +137,6 @@ namespace UI2
       Matrix4 myModelMatrix;
 
       public static Texture theDefaultTexture;
-      static List<Glyph> theGlyphs;
 
       const int MAX_ELEMENTS = 65536;
       internal V2T2B4[] myVerts = new V2T2B4[MAX_ELEMENTS];
@@ -164,30 +158,19 @@ namespace UI2
       #region Top level
       static Canvas()
       {
-         ShaderProgramDescriptor desc = new ShaderProgramDescriptor("UI.shaders.ui-vs.glsl", "UI.shaders.ui-ps.glsl");
+         ShaderProgramDescriptor desc = new ShaderProgramDescriptor("UI2.shaders.ui-vs.glsl", "UI2.shaders.ui-ps.glsl");
          theShader = Renderer.resourceManager.getResource(desc) as ShaderProgram;
 
-         //we're expecting a sheet that is 32x32 glyphs each 32pix x 32pix in size. (1024 x 1024 texture)
-         theDefaultTexture = Graphics.Util.getEmbeddedTexture("UI.data.fontIconSheet.png");
-         theDefaultTexture.setMinMagFilters(TextureMinFilter.NearestMipmapNearest, TextureMagFilter.Nearest);
-
-         theGlyphs = new List<Glyph>(1024);
-         float width = theDefaultTexture.width;
-         float height = theDefaultTexture.height;
-         float step = 1.0f / 32.0f;
-         for (int i = 0; i < 1024; i++)
+         //a single white pixel
+         Texture.PixelData pd = new Texture.PixelData()
          {
-            float cx = (float)(i % 32) / 32.0f;					// X Position Of Current Character
-            float cy = (float)(i / 32) / 32.0f;					// Y Position Of Current Character
-            Glyph g = new Glyph();
-            g.size = new Vector2(32, 32);
-            g.minTexCoord.X = cx;
-            g.minTexCoord.Y = 1 - cy - step;
-            g.maxTexCoord.X = cx + step;
-            g.maxTexCoord.Y = 1 - cy;
-            g.advance = g.size * 0.6f;
-            theGlyphs.Add(g);
-         }
+            pixelFormat = PixelFormat.Rgba,
+            dataType = PixelType.UnsignedByte,
+            data = new byte[] {255, 255, 255, 255}
+         };
+         theDefaultTexture = new Texture(1, 1, PixelInternalFormat.Rgba8, pd);
+         theDefaultTexture.setMinMagFilters(TextureMinFilter.Linear, TextureMagFilter.Linear);
+         theDefaultTexture.setWrapping(TextureWrapMode.Repeat, TextureWrapMode.Repeat, TextureWrapMode.Repeat);
       }
 
       public Canvas()
@@ -338,7 +321,7 @@ namespace UI2
             pathStroke(col, true);
       }
 
-      public void addText(Rect r, Color4 col, String text, Alignment align, float size = 0.0f)
+      public void addText(Rect r, Color4 col, String text, Alignment align)
       {
          Vector2 pos = r.SW;
          Vector2 textSize = new Vector2(UI.style.font.width(text), UI.style.font.height(text));
@@ -346,26 +329,22 @@ namespace UI2
          if (align.HasFlag(Alignment.Right) == true) pos.X = Math.Max(pos.X, r.NE.X - textSize.X);
          if (align.HasFlag(Alignment.VCenter) == true) pos.Y = Math.Max(pos.Y, (r.SW.Y + r.NE.Y - textSize.Y) * 0.5f);
 
-         addText(pos, col, text, size);
+         addText(pos, col, text);
       }
 
-      public void addText(Vector2 pos, Color4 col, String text, float size = 0.0f)
+      public void addText(Vector2 pos, Color4 col, String text)
+      {
+         addText(UI.style.font, pos, col, text);
+      }
+
+      public void addText(Font font, Vector2 pos, Color4 col, String text, float wrap_width = 0.0f)
       {
          if (col.A == 0.0)
             return;
 
-         if (size == 0)
-            size = UI.style.font.fontSize;
-
-         primativeText(size, pos, col, text);
-      }
-
-      public void addText(Font font, float size, Vector2 pos, Color4 col, String text, float wrap_width = 0.0f)
-      {
-         if (col.A == 0.0)
-            return;
-
-         //addCustomRenderCommand(new RenderFontCommand(font, text, col, pos.X + myPosition.X, pos.Y + myPosition.Y));
+         //modify position for screen coordinates, not window coords
+         pos.Y = myScreenSize.Y - pos.Y - font.fontSize;
+         addCustomRenderCommand(new RenderFontCommand(font, pos, text, col));
       }
 
       public void addIcon(Icons icon, Rect r)
@@ -375,8 +354,13 @@ namespace UI2
 
       public void addIcon(Icons icon, Vector2 a, Vector2 b)
       {
-         Glyph g = theGlyphs[(int)icon];
-         addImage(theDefaultTexture, a, b, g.minTexCoord, g.maxTexCoord, Color4.White);
+         //Glyph g = theGlyphs[(int)icon];
+         //addImage(theDefaultTexture, a, b, g.minTexCoord, g.maxTexCoord, Color4.White);
+      }
+
+      public void addImage(Texture tex, Rect r)
+      {
+         addImage(tex, r, uv_zero, uv_one, Color4.White);
       }
 
       public void addImage(Texture tex, Rect r, Vector2 uv0, Vector2 uv1, Color4 col)
@@ -650,62 +634,7 @@ namespace UI2
          myVerts[myVertCount].Position = c; myVerts[myVertCount].TexCoord = uvc; myVerts[myVertCount].Color = cl; myVertCount++;
          myVerts[myVertCount].Position = d; myVerts[myVertCount].TexCoord = uvd; myVerts[myVertCount].Color = cl; myVertCount++;
       }
-      void primativeText(float size, Vector2 pos, Color4 col, String text)
-      {
-         float x = (float)(int)pos.X;
-         float y = (float)(int)pos.Y;
 
-         //the built in font is 32 pixels high
-         float scale = size / 32.0f;
-         float lineHeight = 32.0f * scale;
-
-         foreach (Char c in text)
-         {
-            if (c < 32)
-            {
-               if (c == '\n')
-               {
-                  x = pos.X;
-                  y -= lineHeight;
-                  continue;
-               }
-
-               if (c == '\r')
-               {
-                  continue;
-               }
-            }
-
-            float charWidth = 0.0f;
-            Glyph g = theGlyphs[c];
-            if (g != null)
-            {
-               charWidth = g.size.X * scale;
-
-               if ((c != ' ') && (c != '\t'))
-               {
-                  float x1 = x + g.offset.X * scale;
-                  float y1 = y + g.offset.Y * scale;
-                  float x2 = x + g.size.Y * scale;
-                  float y2 = y + g.size.Y * scale;
-
-                  //these seem backwards but only because we're doing some crazy inversion thing with UI screen space to window space
-                  Vector2 uv1 = new Vector2(g.minTexCoord.X, g.maxTexCoord.Y);
-                  Vector2 uv2 = new Vector2(g.maxTexCoord.X, g.minTexCoord.Y);
-
-                  primativeRectUv(new Vector2(x1, y1), new Vector2(x2, y2), uv1, uv2, col);
-
-                  //keep the letters a little closer together than needed
-                  x += g.advance.X * scale;
-               }
-               else
-               {
-                  if (c == ' ') x += g.advance.X * scale;
-                  if (c == '\t') x += g.advance.X * scale * 3;
-               }
-            }
-         }
-      }
       void primativeVert(Vector2 pos, Vector2 uv, Color4 col)
       {
          writeIndex((UInt16)myVertCount);

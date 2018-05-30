@@ -2,7 +2,7 @@ using System;
 
 using OpenTK;
 
-namespace UI2
+namespace GUI
 {
    public class Popup
    {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using Util;
 
-namespace UI2
+namespace GUI
 {
    public class IdStack
    {
@@ -17,6 +17,12 @@ namespace UI2
       public void push(UInt32 id)
       {
          mySeeds.Push(id);
+      }
+
+      public void push(String name)
+      {
+         UInt32 id = getId(name);
+         push(id);
       }
 
       public void pop()

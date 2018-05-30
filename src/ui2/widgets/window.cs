@@ -9,7 +9,7 @@ using OpenTK.Input;
 using Graphics;
 using Util;
 
-namespace UI2
+namespace GUI
 {
    public static partial class UI
    {
@@ -97,13 +97,13 @@ namespace UI2
          setNextWindowFocused = true;
       }
 
-      public static void setWindowLayout(Window.Layout layout)
+      public static void setWindowLayout(Group.Layout layout)
       {
          Window win = currentWindow;
          win.setLayout(layout);
       }
 
-      public static void setWindowLayout(String winName, Window.Layout layout)
+      public static void setWindowLayout(String winName, Group.Layout layout)
       {
          Window win = findWindow(winName);
          if (win != null)
@@ -117,10 +117,10 @@ namespace UI2
             focusWindow(win);
       }
 
-      public static void beginGroup()
+      public static void beginGroup(Group.Layout layout, float[] spacing = null)
       {
          Window win = currentWindow;
-         win.beginGroup();
+         win.beginGroup(layout, spacing);
       }
 
       public static void endGroup()

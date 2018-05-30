@@ -230,6 +230,19 @@ namespace Util
          height += amount;
       }
 
+      public virtual void shrink(Vector2 amount)
+      {
+         grow(-amount);
+      }
+
+      public virtual void grow(Vector2 amount)
+      {
+         left -= amount.X / 2.0f;
+         bottom -= amount.Y / 2.0f;
+         width += amount.X;
+         height += amount.Y;
+      }
+
       public virtual void transpose()
       {
          float temp = width;

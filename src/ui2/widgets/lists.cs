@@ -10,7 +10,7 @@ using OpenTK.Input;
 using Graphics;
 using Util;
 
-namespace UI2
+namespace GUI
 {
    [Flags]
    public enum SelectableFlags
@@ -36,15 +36,12 @@ namespace UI2
          }
 
          UInt32 id = win.getChildId(label);
-         Vector2 labelSize = style.textSize(label);
+         Vector2 labelSize = style.font.size(label);
          Vector2 size = new Vector2(sizeArg.X != 0 ? sizeArg.X : labelSize.X, sizeArg.Y != 0 ? sizeArg.Y : labelSize.Y);
-         Vector2 rectPos = win.cursorScreenPosition + style.framePadding;
+         Vector2 rectPos = win.cursorScreenPosition + style.selectable.padding;
          Rect r = Rect.fromPosSize(rectPos, size);
 
-         if (flags.HasFlag(SelectableFlags.HasToggle) == false) //only move the draw cursor after the toggle is drawn
-         {
-            win.addItem(size);
-         }
+         win.addItem(size);
 
          bool hovered;
          bool held;
@@ -57,11 +54,11 @@ namespace UI2
 
          if (hovered)
          {
-            Color4 col = style.getColor((hovered == true ? ElementColor.HeaderHovered : ElementColor.Header));
+            Color4 col = style.selectable.textHoverActive;
             win.canvas.addRectFilled(r, col);
          }
 
-         win.canvas.addText(r, style.getColor(ElementColor.Text), label, Alignment.Default);
+         win.canvas.addText(r, style.selectable.textNormal, label, Alignment.Default);
 
          //close popups
          if (pressed && flags.HasFlag(SelectableFlags.DontClosePopups) == false && win.flags.HasFlag(Window.Flags.Popup))

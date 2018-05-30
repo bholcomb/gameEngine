@@ -9,7 +9,7 @@ using OpenTK.Input;
 using Graphics;
 using Util;
 
-namespace UI2
+namespace GUI
 {
    public static partial class UI
    {
@@ -33,8 +33,8 @@ namespace UI2
             return false;
          }
 
-         style.pushStyleVar(StyleVar.WindowRounding, 0.0f);
-         style.pushStyleVar(StyleVar.WindowFillAlpha, 1.0f);
+//          style.pushStyleVar(StyleVar.WindowRounding, 0.0f);
+//          style.pushStyleVar(StyleVar.WindowFillAlpha, 1.0f);
          Window.Flags flags = extraFlags | Window.Flags.Popup | Window.Flags.AutoResize;
 
          String name;
@@ -69,18 +69,18 @@ namespace UI2
          return true;
       }
 
-      public static bool beginPopupContextItem(String label, int mouseButton = 1)
+      public static bool beginPopupContextItem(String label, MouseButton mouseButton = MouseButton.Middle)
       {
-         if(hoveredId != 0 && mouse.buttonClicked[mouseButton]==true)
+         if(hoveredId != 0 && mouse.buttonAction(MouseAction.CLICKED, mouseButton) ==true)
          {
             openPopup(label);
          }
          return beginPopup(label, 0);
       }
 
-      public static bool beginPopupContextWindow(String label, int mouseButton = 1, bool alsoOverItems = true)
+      public static bool beginPopupContextWindow(String label, MouseButton mouseButton = MouseButton.Middle, bool alsoOverItems = true)
       {
-         if(hoveredWindow != null && mouse.buttonClicked[mouseButton])
+         if(hoveredWindow != null && mouse.buttonAction(MouseAction.CLICKED, mouseButton))
          {
             if(alsoOverItems==true || hoveredId == 0)
             {
@@ -91,9 +91,9 @@ namespace UI2
          return beginPopup(label, 0);
       }
 
-      public static bool beginPopupContextVoid(String label, int mouseButton = 1)
+      public static bool beginPopupContextVoid(String label, MouseButton mouseButton = MouseButton.Middle)
       {
-         if (hoveredWindow == null && mouse.buttonClicked[mouseButton])
+         if (hoveredWindow == null && mouse.buttonAction(MouseAction.CLICKED, mouseButton)==true)
          {
             openPopup(label);
          }
@@ -107,7 +107,7 @@ namespace UI2
          System.Diagnostics.Debug.Assert(win.flags.HasFlag(Window.Flags.Popup));
 
          endWindow();
-         style.popStyleVar(2);
+         //style.popStyleVar(2);
       }
 
       public static void closeCurrentPopup()

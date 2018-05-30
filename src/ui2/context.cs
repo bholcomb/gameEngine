@@ -8,7 +8,7 @@ using OpenTK.Graphics;
 
 using Util;
 
-namespace UI2
+namespace GUI
 {
 	public enum Heading { UP, RIGHT, DOWN, LEFT};
 	public enum ButtonBehavior { DEFAULT, REPEAT};
@@ -23,4 +23,9 @@ namespace UI2
 	public enum LayoutFormat { DYNAMIC, STATIC};
 	public enum TreeType { NODE, TAB};
 	public enum HeaderAlign  { LEFT, RIGHT	};
+
+   public class Context
+   {
+
+   }
 }

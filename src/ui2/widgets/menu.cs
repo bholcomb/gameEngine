@@ -9,7 +9,7 @@ using OpenTK.Input;
 using Graphics;
 using Util;
 
-namespace UI2
+namespace GUI
 {
    public static partial class UI
    {
@@ -27,7 +27,7 @@ namespace UI2
             return false;
          }
 
-         win.pushMenuDrawSettings(win.menuBarRect.position - win.position, Window.Layout.Horizontal);
+         win.beginGroup(win.menuBarRect.position - win.position, Group.Layout.Horizontal);
          idStack.push("menuBar");
          
          return true;
@@ -42,7 +42,7 @@ namespace UI2
          }
 
          idStack.pop();
-         win.popMenuDrawSettings();
+         win.endGroup();
       }
 
       public static bool beginMenu(String label, bool enabled = true)
@@ -60,7 +60,7 @@ namespace UI2
          }
 
          UInt32 id = win.getChildId(label);
-         Vector2 labelSize = style.textSize(label) + style.framePadding2x;
+         Vector2 labelSize = style.font.size(label) + style.menuButton.padding;
 
          bool pressed = false;
          bool opened = isPopupOpen(id);
@@ -110,16 +110,18 @@ namespace UI2
             return false;
          }
 
-         Vector2 labelSize = style.textSize(label);
-         float width = win.menuColums.declareColumns(labelSize.X, 0, style.currentFontSize * 1.2f);
+         Vector2 labelSize = style.font.size(label);
+         win.beginGroup(Group.Layout.Horizontal, new float[] { 0.0f, style.font.fontSize });
 
-         bool pressed = selectable(label, ref selected, new Vector2(width, 0), SelectableFlags.MenuItem | SelectableFlags.HasToggle);
+         float width = win.currentGroup().myElements[0].size;
+         bool pressed = selectable(label, ref selected, new Vector2(width, 0), SelectableFlags.MenuItem);
 
-         Rect iconRect = Rect.fromPosSize(new Vector2(win.menuColums.positions[2], win.cursorPosition.Y + style.framePadding.Y) + win.position, new Vector2(style.currentFontSize, style.currentFontSize));
-         win.canvas.addIcon( selected ? Canvas.Icons.CHECKBOX_CHECKED : Canvas.Icons.CHECKBOX_UNCHECKED, iconRect);
+         Rect iconRect = Rect.fromPosSize(new Vector2(win.currentGroup().myElements[1].position + style.selectable.padding.X, win.cursorPosition.Y + style.selectable.padding.Y) + win.position, new Vector2(style.font.fontSize, style.font.fontSize));
+         win.canvas.addIcon(selected ? Icons.CHECKBOX_CHECKED : Icons.CHECKBOX_UNCHECKED, iconRect);
 
-         win.addItem(new Vector2(width, style.currentFontSize + style.framePadding.Y));
+         win.addItem(new Vector2(style.font.fontSize, style.font.fontSize));
 
+         win.endGroup();
          return pressed;
       }
 
@@ -131,9 +133,8 @@ namespace UI2
             return false;
          }
 
-         Vector2 labelSize = style.textSize(label);
-         float width = win.menuColums.declareColumns(labelSize.X, 0, 0);
-
+         Vector2 labelSize = style.font.size(label);
+ 
          bool selected = false;
          bool pressed = selectable(label, ref selected, new Vector2(0, 0), SelectableFlags.MenuItem);
 

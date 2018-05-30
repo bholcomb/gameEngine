@@ -5,7 +5,7 @@ using Util;
 
 using OpenTK;
 
-namespace UI2
+namespace GUI
 {
    public enum CursorType
    {

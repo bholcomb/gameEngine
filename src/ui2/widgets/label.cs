@@ -9,7 +9,7 @@ using OpenTK.Input;
 using Graphics;
 using Util;
 
-namespace UI2
+namespace GUI
 {
    public static partial class UI
    {
@@ -23,10 +23,10 @@ namespace UI2
          Vector2 labelSize = style.font.size(txt);// + style.
 
          //add in padding
-         Vector2 pos = win.cursorScreenPosition + style.framePadding;
+         Vector2 pos = win.cursorScreenPosition + style.text.padding;
 
          Rect r = Rect.fromPosSize(pos, labelSize);
-         win.canvas.addText(r, style.colors[(int)ElementColor.Text], txt, Alignment.Default);
+         win.canvas.addText(r, style.text.color, txt, Alignment.Default);
          win.addItem(labelSize);
       }
 
@@ -36,7 +36,7 @@ namespace UI2
          if (win.skipItems)
             return;
 
-         size += style.framePadding2x;
+         size += style.text.padding;
          Vector2 pos = win.cursorScreenPosition;
 
          Rect r= Rect.fromPosSize(pos, size);

@@ -9,7 +9,7 @@ using OpenTK.Input;
 using Graphics;
 using Util;
 
-namespace UI2
+namespace GUI
 {
    public class Window
    {
@@ -49,19 +49,6 @@ namespace UI2
          DefaultWindow = Background | TitleBar | MenuBar | Borders | Movable | Collapsable | Resizable | Inputs | BringToFrontOnFocus | ChildWindow,
       };
 
-      public enum Layout
-      {
-         Vertical,
-         Horizontal
-      }
-      class Group
-      {
-         public Vector2 myPos;
-         public Vector2 mySize;
-         public Vector2 myCursorPos;
-         public Layout myLayout;
-      }
-
       public string name { get; set; }
       public UInt32 id { get; set; }
       public Flags flags { get; set; }
@@ -85,53 +72,6 @@ namespace UI2
       SetCondition mySetPositionAllowFlags;
       SetCondition mySetSizeAllowFlags;
 
-      //menu window only stuff
-      public class MenuColumns
-      {
-         Window myWindow;
-         float[] widths = new float[3];
-
-         public float[] positions = new float[3];
-
-         public MenuColumns(Window win)
-         {
-            myWindow = win;
-         }
-
-         public float declareColumns(float c1, float c2, float c3)
-         {
-            widths[0] = Math.Max(c1, widths[0]);
-            widths[1] = Math.Max(c2, widths[1]);
-            widths[2] = Math.Max(c3, widths[2]);
-
-            return update();
-         }
-
-         float update()
-         {
-            float totalWidth = 0;
-            positions[0] = 0;
-            for (int i = 0; i < 3; i++)
-            {
-               totalWidth += widths[i];
-
-               if (i > 0)
-               {
-                  if (widths[i] > 0)
-                  {
-                     totalWidth += UI.style.window.menuPadding.X;
-                  }
-
-                  positions[i] = totalWidth - widths[i];
-               }
-            }
-            
-            return totalWidth;
-         }
-      };
-
-      public MenuColumns menuColums;
-
       public Window(String winName, Flags createFlags = Flags.DefaultWindow)
       {
          parent = null;
@@ -146,10 +86,7 @@ namespace UI2
 
          mySetPositionAllowFlags = mySetSizeAllowFlags = SetCondition.Always | SetCondition.Appearing | SetCondition.FirstUseEver | SetCondition.Once;
 
-         menuColums = new MenuColumns(this);
-
-         Group g = new Group();
-         g.myLayout = Layout.Vertical;
+         Group g = new Group(this, Group.Layout.Vertical, myPosition);
          myGroupStack.Push(g);
       }
 
@@ -211,7 +148,7 @@ namespace UI2
             active = true;
             myGroupStack.Peek().myCursorPos = new Vector2(0, titleBarHeight + menuBarHeight);
             myGroupStack.Peek().mySize = new Vector2(0, 0);
-            myGroupStack.Peek().myLayout = Layout.Vertical;
+            myGroupStack.Peek().myLayout = Group.Layout.Vertical;
          }
 
          if (UI.currentWindow != this)
@@ -278,12 +215,12 @@ namespace UI2
 
          skipItems = myIsCollapsed;
 
+         drawWindowForeground();
          return true;
       }
 
       public bool end()
       {
-         drawWindowForeground();
          canvas.popClipRect();
          return true;
       }
@@ -386,7 +323,10 @@ namespace UI2
          }
          else
          {
-            canvas.pushClipRect(rect);
+            Rect clip = rect; //add 1 since we want to include that last pixel
+            clip.width += 1;
+            clip.height += 1;
+            canvas.pushClipRect(clip);
          }
 
          if (!myIsCollapsed)
@@ -480,60 +420,46 @@ namespace UI2
          size = sz;
       }
 
-      public void setLayout(Layout layout)
+      public void setLayout(Group.Layout layout)
       {
          myGroupStack.Peek().myLayout = layout;
       }
 
-      public void pushMenuDrawSettings(Vector2 newCursor, Layout layout)
+      public Group currentGroup()
       {
-         Group g = new Group();
-         g.myPos = newCursor;
-         g.myLayout = layout;
-         myGroupStack.Push(g);
-      }
+         if(myGroupStack.Count == 0)
+         {
+            return null;
+         }
 
-      public void popMenuDrawSettings()
-      {
-         Group g = myGroupStack.Pop();
+         return myGroupStack.Peek();
       }
 
       public void addItem(Vector2 itemSize)
       {
          Group g = myGroupStack.Peek();
-         g.mySize.X = Math.Max(g.mySize.X, g.myCursorPos.X + itemSize.X);
-         g.mySize.Y = Math.Max(g.mySize.Y, g.myCursorPos.Y + itemSize.Y);
-
-         switch (g.myLayout)
-         {
-            case Layout.Horizontal:
-               {
-                  g.myCursorPos.X += itemSize.X;
-                  break;
-               }
-            case Layout.Vertical:
-               {
-                  g.myCursorPos.Y += itemSize.Y;
-                  break;
-               }
-         }
+         g.addItem(itemSize);
       }
 
       public void nextLine()
       {
          Group g = myGroupStack.Peek();
-         g.myCursorPos.X = UI.style.window.groupPadding.X;
-         g.myCursorPos.Y = g.mySize.Y;
+         g.nextLine();
       }
 
-      public void beginGroup()
+      public void beginGroup(Group.Layout layout, float[] spacing = null)
       {
-         Group g = new Group();
-         g.myPos = myGroupStack.Peek().myCursorPos;
-         g.mySize = Vector2.Zero;
-         g.myCursorPos = Vector2.Zero;
-         g.myLayout = myGroupStack.Peek().myLayout;
+         Vector2 pos = Vector2.Zero;
+         if (myGroupStack.Count > 0)
+            pos = currentGroup().myCursorPos;
 
+         Group g = new Group(this, layout, pos, spacing);
+         myGroupStack.Push(g);
+      }
+
+      public void beginGroup(Vector2 position, Group.Layout layout, float[] spacing = null)
+      {
+         Group g = new Group(this, layout, position, spacing);
          myGroupStack.Push(g);
       }
 

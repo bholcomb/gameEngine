@@ -89,6 +89,8 @@ namespace testUi
          myViewport.width = Width;
          myViewport.height = Height;
          myViewport.apply();
+
+         myCanvas.setScreenResolution(new Vector2(Width, Height));
       }
 
       bool clearRed = false;
@@ -133,17 +135,17 @@ namespace testUi
             rc.execute();
          }
 
-         GUI.beginFrame();
-         GUI.label("Test");
-         if (GUI.button("click", new Vector2(100, 50)))
+         UI.beginFrame();
+         UI.label("Test");
+         if (UI.button("click", new Vector2(100, 50)))
          {
             clearRed = !clearRed;
          }
 
-         GUI.debug();
-         GUI.endFrame();
+         UI.debug();
+         UI.endFrame();
 
-         cmds = GUI.getRenderCommands();
+         cmds = UI.getRenderCommands();
          foreach(RenderCommand rc in cmds)
          {
              rc.execute();
@@ -155,7 +157,7 @@ namespace testUi
       public void initRenderer()
       {
          myUiEventHandler = new GuiEventHandler(this);
-         ImGui.displaySize = new Vector2(theWidth, theHeight);
+         UI.displaySize = new Vector2(theWidth, theHeight);
       }
    }
 

@@ -9,7 +9,7 @@ using OpenTK.Input;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace UI2
+namespace GUI
 {
    [Flags]
    public enum SetCondition
@@ -67,15 +67,19 @@ namespace UI2
       //settings
       public static Vector2 displaySize { get; set; }
 
+      public static Context ctx;
+
       static UI()
 		{
+         ctx = new Context();
+
          idStack = new IdStack();
          mouse = new MouseState();
          keyboard = new KeyboardState();
          style = new Style();
          styleStacks = new StyleStacks();
+         setDefaultStyle();
 
-         myRootWindow = new Window("root", Window.Flags.Root);
          myWindowStack = new Stack<Window>();
          windows = new List<Window>();
 
@@ -244,6 +248,8 @@ namespace UI2
             currentWindow.addChild(win);
             win.parent = currentWindow;
          }
+
+         windows.Add(win);
 
          return win;
       }

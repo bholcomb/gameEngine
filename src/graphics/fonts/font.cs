@@ -26,21 +26,11 @@ namespace Graphics
       {
          myName = name;
          mySize = size;
-
-         for (int i = 0; i < 256; i++)
-         {
-            myGlyphs.Add(new Glyph());
-         }
       }
 
       public Texture texture { get; set; }
       public Glyph findGlyph(char c)
       {
-         if (c < 0 || c > 255)
-         {
-            return null;
-         }
-
          return myGlyphs[c];
       }
 

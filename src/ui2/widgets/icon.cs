@@ -9,17 +9,17 @@ using OpenTK.Input;
 using Graphics;
 using Util;
 
-namespace UI2
+namespace GUI
 {
    public static partial class UI
    {
-      public static void icon(Canvas.Icons iconId, Color4 col)
+      public static void icon(Icons iconId, Color4 col)
       {
          Window win = currentWindow;
          if (win.skipItems)
             return;
 
-         Vector2 iconSize = new Vector2(style.currentFontSize, style.currentFontSize);
+         Vector2 iconSize = new Vector2(style.font.fontSize, style.font.fontSize);
 
          win.canvas.addIcon(iconId, win.cursorScreenPosition, win.cursorScreenPosition + iconSize);
          win.addItem(iconSize);

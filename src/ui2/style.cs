@@ -6,7 +6,7 @@ using Graphics;
 using OpenTK;
 using OpenTK.Graphics;
 
-namespace UI2
+namespace GUI
 {
    [Flags]
    public enum Alignment
@@ -393,7 +393,7 @@ namespace UI2
 
 	public class StyleWindow
 	{
-		public StyleWindowHeader header;
+		public StyleWindowHeader header= new StyleWindowHeader();
 		public StyleItem fixedBackground;
 		public Color4 background;
 
@@ -532,6 +532,9 @@ namespace UI2
       public static void setStyleFromTable(Color4[] table)
       {
          Style style = UI.style;
+
+         Texture t = Graphics.Util.getEmbeddedTexture("UI2.data.fontIconSheet.png");
+         style.font = new TextureFont("UI", t, 32, 15, 0);
 
          // default text 
          StyleText text = new StyleText();
@@ -978,7 +981,7 @@ namespace UI2
          // window 
          win.background = table[(int)StyleColors.WINDOW];
          win.fixedBackground = styleItemColor(table[(int)StyleColors.WINDOW]);
-         win.borderColor = table[(int)StyleColors.BORDER];
+         win.borderColor = Color4.Red; // table[(int)StyleColors.BORDER];
          win.popupBorderColor = table[(int)StyleColors.BORDER];
          win.comboBorderColor = table[(int)StyleColors.BORDER];
          win.contextualBorderColor = table[(int)StyleColors.BORDER];

@@ -29,6 +29,12 @@ namespace Graphics
          : base(name, size)
       {
          myFilename = filename;
+
+         for (int i = 0; i < 256; i++)
+         {
+            myGlyphs.Add(new Glyph());
+         }
+
          buildFont();
 
 			//set shader
