@@ -33,16 +33,14 @@ namespace Graphics
 			}
 			else
 			{
-				//sort these front to back to prevent overdraw, but also in groups of similar
+				//sort these front to back to reduce overdraw, but also in groups of similar
 				//objects so we reduce state switches.  Put renderables in depth buckets 
 				// which then get sorted by the texture or vbo id (depending on which is available)
 				float maxDistance = 2000.0f;
-				Byte distBucket = (Byte)((info.distToCamera/maxDistance) * 5); //number of  distance buckets
-				sortId = (UInt64)distBucket << 56; //highest 8 bits
-				if (info.renderState.currentTextureInfo >= 0)
-					sortId |= (UInt64)info.renderState.myTextures[0].id;
-				else
-					sortId |= (UInt16)info.renderState.myVertexBuffers[0].id;
+				Byte distBucket = (Byte)((info.distToCamera/maxDistance) * 255); //number of  distance buckets
+            sortId = 0;
+            sortId |= (UInt64)info.renderState.myVertexBuffers[0].id << 32;
+            sortId |= (UInt64)distBucket;
 			}
 
 			return sortId;

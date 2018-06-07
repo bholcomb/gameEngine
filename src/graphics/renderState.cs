@@ -264,15 +264,15 @@ namespace Graphics
 
       int myIndexBuffer = 0;
 
-      struct BindBufferInfo
+      public struct BindBufferInfo
       {
          public int id;
          public int location;
       }
 
-      BindBufferInfo[] myUniformBuffers = new BindBufferInfo[5];
+      public BindBufferInfo[] myUniformBuffers = new BindBufferInfo[5];
       int currentUniformBuffer = -1;
-      BindBufferInfo[] myStorageBuffers = new BindBufferInfo[5];
+      public BindBufferInfo[] myStorageBuffers = new BindBufferInfo[5];
       int currentStoragebuffer = -1;
 
       struct UniformUploadData

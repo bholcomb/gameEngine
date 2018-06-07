@@ -1,4 +1,6 @@
 #version 430
+#extension GL_ARB_bindless_texture : require
+
 
 layout(std140, binding = 0) uniform camera {
 	mat4 view; //aligned 4N
@@ -40,14 +42,18 @@ layout(std140, binding = 2) uniform material{
 	float alpha;
    float alphaTest;
    float parallaxScale;
+   sampler2D diffuseMap;
+   sampler2D specularMap;
+   sampler2D normalMap;
 	bool hasSpecularMap;
 	bool hasNormalMap;
    bool hasParallaxMap;
 };
 
-layout(location = 20) uniform sampler2D diffuseMap;
-layout(location = 21) uniform sampler2D specularMap;
-layout(location = 22) uniform sampler2D normalMap;
+
+//layout(location = 20) uniform sampler2D diffuseMap;
+//layout(location = 21) uniform sampler2D specularMap;
+//layout(location = 22) uniform sampler2D normalMap;
 
 vec4 specularReflectivity;
 vec4 normal;

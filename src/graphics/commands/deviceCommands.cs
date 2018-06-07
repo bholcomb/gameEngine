@@ -17,7 +17,9 @@ namespace Graphics
 
       public override void execute()
       {
+#if DEBUG || TRACE
          GL.PushDebugGroup(DebugSourceExternal.DebugSourceApplication, 0, marker.Length, marker);
+#endif
       }
    }
 
@@ -30,7 +32,9 @@ namespace Graphics
 
       public override void execute()
       {
+#if DEBUG || TRACE
          GL.PopDebugGroup();
+#endif
       }
    }
 

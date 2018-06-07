@@ -51,27 +51,6 @@ namespace Graphics
             myLightVisualizer = Renderer.visualizers["light"] as LightVisualizer;
          }
 
-         //setup diffuse map, it should exists
-         Texture tex = m.myTextures[(int)Material.TextureId.Diffuse].value();
-         state.setTexture((int)tex.id(), 0, TextureTarget.Texture2D);
-         state.setUniform(new UniformData(20, Uniform.UniformType.Int, 0));
-
-         //setup specular map if it exists
-         if (m.myTextures[(int)Material.TextureId.Specular] != null)
-         {
-            tex = m.myTextures[(int)Material.TextureId.Specular].value();
-            state.setTexture((int)tex.id(), 1, TextureTarget.Texture2D);
-            state.setUniform(new UniformData(21, Uniform.UniformType.Int, 1));
-         }
-
-         //setup normal map if it exists
-         if (m.myTextures[(int)Material.TextureId.Normal] != null)
-         {
-            tex = m.myTextures[(int)Material.TextureId.Normal].value();
-            state.setTexture((int)tex.id(), 2, TextureTarget.Texture2D);
-            state.setUniform(new UniformData(22, Uniform.UniformType.Int, 2));
-         }
-
          state.setUniformBuffer(m.myMaterialUniformBuffer.id, 2);
          state.setUniformBuffer(myLightVisualizer.myLightUniforBuffer.id, 1);
       }

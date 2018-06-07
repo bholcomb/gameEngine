@@ -113,6 +113,7 @@ namespace Graphics
       protected bool myFlip = false;
       protected OGL.PixelInternalFormat myPixelFormat;
       protected OGL.PixelType myDataType;
+      protected UInt64 myHandle;
 
       public bool hasAlpha { get; set; }
       public TextureTarget target { get; set; }
@@ -161,6 +162,9 @@ namespace Graphics
             myId = 0;
             System.Console.WriteLine("Cannot create texture from file: {0}", filename);
          }
+
+         myHandle = (UInt64)GL.Arb.GetTextureHandle(myId);
+         GL.Arb.MakeTextureHandleResident(myHandle);
 		}
 
       public Texture(int texWidth, int texHeight, OGL.PixelInternalFormat pif = PixelInternalFormat.Rgba8, PixelData pixels = null , bool generateMipmaps=false)
@@ -208,7 +212,10 @@ namespace Graphics
 			}
 
 			unbind();
-		}
+
+         myHandle = (UInt64)GL.Arb.GetTextureHandle(myId);
+         GL.Arb.MakeTextureHandleResident(myHandle);
+      }
 
 		public void setMinMagFilters(TextureMinFilter min, TextureMagFilter mag)
 		{
@@ -283,20 +290,14 @@ namespace Graphics
          return myId;
       }
 
-      public bool isValid
-      {
-         get { return myId!=0; }
-      }
+      public UInt64 handle { get { return myHandle; } }
 
-      public int width
-      {
-         get { return myWidth; }
-      }
+      public bool isValid { get { return myId!=0; } }
 
-      public int height
-      {
-         get { return myHeight; }
-      }
+      public int width { get { return myWidth; } }
+
+      public int height { get { return myHeight; } }
+
       public void setName(String name)
       {
          GL.ObjectLabel(ObjectLabelIdentifier.Texture, myId, name.Length, name);

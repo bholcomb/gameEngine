@@ -18,6 +18,9 @@ layout(std140) uniform material {
    uniform float alpha;
    uniform float alphaTest;
    uniform float parallaxScale;
+   uniform sampler2D diffuseMapId;
+   uniform sampler2D specularMapId;
+   uniform sampler2D normalMapId;
    uniform bool hasSpecularMap;
    uniform bool hasNormalMap;		
    uniform bool hasParallaxMap;
@@ -34,6 +37,9 @@ layout(std140) uniform material {
       public float alpha;
       public float alphaTest;
       public float parallaxScale;
+      public UInt64 diffuseMapId;
+      public UInt64 specularMapId;
+      public UInt64 normalMapId;
       public int hasSpecularMap;
       public int hasNormalMap;
       public int hasParallaxMap;
@@ -252,12 +258,22 @@ layout(std140) uniform material {
          myMaterialUniformData.shininess = shininess;
          myMaterialUniformData.alpha = alpha;
          myMaterialUniformData.alphaTest = alphaTest;
-         myMaterialUniformData.hasSpecularMap = myTextures[(int)TextureId.Specular] != null ? 1 : 0;
-         myMaterialUniformData.hasNormalMap = 0;
+         
+         if(myTextures[(int)TextureId.Diffuse] != null)
+         {
+            myMaterialUniformData.diffuseMapId = myTextures[(int)TextureId.Diffuse].value().handle;
+         }
+
+         if (myTextures[(int)TextureId.Specular] != null)
+         {
+            myMaterialUniformData.hasSpecularMap = 1;
+            myMaterialUniformData.specularMapId = myTextures[(int)TextureId.Specular].value().handle;
+         }
          
          if(myTextures[(int)TextureId.Normal] != null)
          {
             myMaterialUniformData.hasNormalMap = 1;
+            myMaterialUniformData.normalMapId = myTextures[(int)TextureId.Normal].value().handle;
             Texture tex = myTextures[(int)TextureId.Normal].value();
             if(tex.hasAlpha)
             {
@@ -270,6 +286,7 @@ layout(std140) uniform material {
                myMaterialUniformData.hasParallaxMap = 0;
             }
          }
+
 
          myMaterialUniformBuffer.setData(myMaterialUniformData);
       }
