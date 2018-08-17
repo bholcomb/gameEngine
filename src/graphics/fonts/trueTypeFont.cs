@@ -100,7 +100,7 @@ namespace Graphics
             return false;
          }
 
-         texture = new Texture(256, 256);
+         texture = new Texture(1024, 1024); //should be big enough for most sized fonts
 
          uint glyphIndex;
          uint asciiCounter;

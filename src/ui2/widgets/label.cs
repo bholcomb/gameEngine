@@ -19,14 +19,17 @@ namespace GUI
          if (win.skipItems)
             return;
 
+         win.addItem(style.text.padding);
+
          String txt = String.Format(s, objs);
          Vector2 labelSize = style.font.size(txt);// + style.
 
          //add in padding
-         Vector2 pos = win.cursorScreenPosition + style.text.padding;
+         Vector2 pos = win.cursorScreenPosition;
 
          Rect r = Rect.fromPosSize(pos, labelSize);
          win.canvas.addText(r, style.text.color, txt, Alignment.Default);
+
          win.addItem(labelSize);
       }
 
@@ -36,7 +39,8 @@ namespace GUI
          if (win.skipItems)
             return;
 
-         size += style.text.padding;
+         win.addItem(style.text.padding);
+
          Vector2 pos = win.cursorScreenPosition;
 
          Rect r= Rect.fromPosSize(pos, size);

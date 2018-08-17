@@ -14,7 +14,7 @@ using OpenTK.Platform;
 using Util;
 using Graphics;
 using Terrain;
-using UI;
+using GUI;
 
 namespace testRenderer
 {
@@ -27,7 +27,7 @@ namespace testRenderer
       Viewport myViewport;
       Camera myCamera;
       GameWindowCameraEventHandler myCameraEventHandler;
-      UI.GuiEventHandler myUiEventHandler;
+      GuiEventHandler myUiEventHandler;
       RenderTarget myRenderTarget;
       SkinnedModelRenderable mySkinnedModel;
       LightRenderable mySun;
@@ -130,12 +130,12 @@ namespace testRenderer
          myTerrainRenderManager.init();
          myWorld.newWorld();
 
-         myFont = FontManager.findFont("DEFAULT");
-
          windowScale = this.Width / (float)theWidth; // derive current DPI scale factor
 
-         initRenderTarget();
          initRenderer();
+
+         myFont = FontManager.findFont("DEFAULT");
+
       }
 
       protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
@@ -171,48 +171,48 @@ namespace testRenderer
          //high frequency filter on avg fps
          avgFps = (0.99f * avgFps) + (0.01f * (float)TimeSource.fps());
 
-         ImGui.beginFrame();
-         if (ImGui.beginWindow("Render Stats", ref myShowRenderStats, Window.Flags.DefaultWindow))
+         UI.beginFrame();
+         if (UI.beginWindow("Render Stats", ref myShowRenderStats, Window.Flags.DefaultWindow))
          {
             //ImGui.currentWindow.canvas.setScale(windowScale);
-            ImGui.setWindowPosition(new Vector2(20, 50), SetCondition.FirstUseEver);
-            ImGui.setWindowSize(new Vector2(500, 650), SetCondition.FirstUseEver);
-            ImGui.label("FPS: {0:0.00}", avgFps);
-            ImGui.label("Camera position: {0}", myCamera.position);
-            ImGui.label("Camera view vector: {0}", myCamera.viewVector);
-            ImGui.separator();
-            ImGui.label("Frame Time: {0:0.00}ms", (Renderer.stats.cullTime + Renderer.stats.prepareTime + Renderer.stats.generateTime + Renderer.stats.executeTime) * 1000.0);
-            ImGui.label("   Cull Time: {0:0.00}ms", Renderer.stats.cullTime * 1000.0);
-            ImGui.label("   Prepare Time: {0:0.00}ms", Renderer.stats.prepareTime * 1000.0);
-            ImGui.label("   Submit Time: {0:0.00}ms", Renderer.stats.generateTime * 1000.0);
-            ImGui.label("   Execute Time: {0:0.00}ms", Renderer.stats.executeTime * 1000.0);
-            ImGui.separator();
-            ImGui.label("Camera Visible Renderables");
+            UI.setWindowPosition(new Vector2(20, 50), SetCondition.FirstUseEver);
+            UI.setWindowSize(new Vector2(500, 650), SetCondition.FirstUseEver);
+            UI.label("FPS: {0:0.00}", avgFps);
+            UI.label("Camera position: {0}", myCamera.position);
+            UI.label("Camera view vector: {0}", myCamera.viewVector);
+            UI.separator();
+            UI.label("Frame Time: {0:0.00}ms", (Renderer.stats.cullTime + Renderer.stats.prepareTime + Renderer.stats.generateTime + Renderer.stats.executeTime) * 1000.0);
+            UI.label("   Cull Time: {0:0.00}ms", Renderer.stats.cullTime * 1000.0);
+            UI.label("   Prepare Time: {0:0.00}ms", Renderer.stats.prepareTime * 1000.0);
+            UI.label("   Submit Time: {0:0.00}ms", Renderer.stats.generateTime * 1000.0);
+            UI.label("   Execute Time: {0:0.00}ms", Renderer.stats.executeTime * 1000.0);
+            UI.separator();
+            UI.label("Camera Visible Renderables");
             for (int i = 0; i < Renderer.stats.cameraVisibles.Count; i++)
             {
-               ImGui.label("Camera {0}: {1} / {2}", i, Renderer.stats.cameraVisibles[i], Renderer.stats.renderableCount);
+               UI.label("Camera {0}: {1} / {2}", i, Renderer.stats.cameraVisibles[i], Renderer.stats.renderableCount);
             }
-            ImGui.separator();
-            ImGui.label("View Stats");
+            UI.separator();
+            UI.label("View Stats");
             for (int i = 0; i < Renderer.stats.viewStats.Count; i++)
             {
-               ImGui.label("{0} {1}", i, Renderer.stats.viewStats[i].name);
-               ImGui.label("   Command List count {0}", Renderer.stats.viewStats[i].commandLists);
-               ImGui.label("   Passes {0}", Renderer.stats.viewStats[i].passStats.Count);
+               UI.label("{0} {1}", i, Renderer.stats.viewStats[i].name);
+               UI.label("   Command List count {0}", Renderer.stats.viewStats[i].commandLists);
+               UI.label("   Passes {0}", Renderer.stats.viewStats[i].passStats.Count);
                for (int j = 0; j < Renderer.stats.viewStats[i].passStats.Count; j++)
                {
                   PassStats ps = Renderer.stats.viewStats[i].passStats[j];
-                  ImGui.label("      {0} ({1})", ps.name, ps.technique);
-                  ImGui.label("         Queues: {0}", ps.queueCount);
-                  ImGui.label("         Render Commands: {0}", ps.renderCalls);
+                  UI.label("      {0} ({1})", ps.name, ps.technique);
+                  UI.label("         Queues: {0}", ps.queueCount);
+                  UI.label("         Render Commands: {0}", ps.renderCalls);
                }
             }
 
-            ImGui.endWindow();
+            UI.endWindow();
          }
 
          //ImGui.debug();
-         ImGui.endFrame();
+         UI.endFrame();
 
          //get any new chunks based on the camera position
          myWorld.setInterest(myCamera.position);
@@ -268,6 +268,9 @@ namespace testRenderer
 
       public void initRenderer()
       {
+         Renderer.init();
+         FontManager.init();
+
          myUiEventHandler = new GuiEventHandler(this);
 
          //setup the main render target
@@ -308,7 +311,7 @@ namespace testRenderer
          //add some sub-views for debug graphics and UI
          Graphics.View uiView = new Graphics.View("UI", myCamera, myViewport);
          uiView.processRenderables = false;
-         GuiPass uiPass = new GuiPass(myRenderTarget);
+         UIPass uiPass = new UIPass(myRenderTarget);
          uiView.addPass(uiPass);
          v.addSibling(uiView);
 

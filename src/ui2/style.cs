@@ -549,9 +549,6 @@ namespace GUI
       public static void setStyleFromTable(Color4[] table)
       {
          Style style = UI.style;
-
-         Texture t = Graphics.Util.getEmbeddedTexture("UI2.data.fontIconSheet.png");
-         //style.font = new TextureFont("UI", t, 32, 15, 0);
          style.font = FontManager.findFont("SANS");
 
          // default text 
