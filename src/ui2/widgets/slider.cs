@@ -27,11 +27,13 @@ namespace GUI
 
          UInt32 id = win.getChildId(s);
 
+         win.addItem(style.slider.padding);
+
          float width = win.size.X * 0.65f;
          Vector2 labelSize = style.font.size(s);
 
          //move cursor down for the size of the text accounting for the padding
-         Vector2 pos = win.cursorScreenPosition + style.slider.padding;
+         Vector2 pos = win.cursorScreenPosition;
          Rect sliderRect = Rect.fromPosSize(pos, new Vector2(width, labelSize.Y) + style.slider.padding);
          Rect totalRect = Rect.fromPosSize(pos, sliderRect.size + new Vector2(labelSize.X, 0));
 
@@ -40,7 +42,6 @@ namespace GUI
          bool hovered = false;
          bool isHorizontal = true;
         
-
          bool valChanged = sliderBehavior(sliderRect, id, ref val, min, max, ref hovered);
 
          string valString = "";
@@ -87,11 +88,13 @@ namespace GUI
 
          UInt32 id = win.getChildId(s);
 
+         win.addItem(style.slider.padding);
+
          float width = win.size.X * 0.65f;
          Vector2 labelSize = style.font.size(s);
 
          //move cursor down for the size of the text accounting for the padding
-         Vector2 pos = win.cursorScreenPosition + style.slider.padding;
+         Vector2 pos = win.cursorScreenPosition;
          Rect sliderRect = Rect.fromPosSize(pos, new Vector2(width, labelSize.Y) + style.slider.padding);
          Rect totalRect = Rect.fromPosSize(pos, sliderRect.size + new Vector2(labelSize.X, 0));
 
