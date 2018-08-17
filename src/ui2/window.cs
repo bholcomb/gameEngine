@@ -57,7 +57,7 @@ namespace GUI
       public bool skipItems { get; set; }
       public UInt32 moveId { get; set; }
 
-      Stack<Group> myGroupStack = new Stack<Group>();
+      Stack<Layout> myLayoutStack = new Stack<Layout>();
 
       Vector2 myPosition = Vector2.Zero;
       public Vector2 size = UI.displaySize;
@@ -85,9 +85,6 @@ namespace GUI
          moveId = getChildId("MOVE");
 
          mySetPositionAllowFlags = mySetSizeAllowFlags = SetCondition.Always | SetCondition.Appearing | SetCondition.FirstUseEver | SetCondition.Once;
-
-         Group g = new Group(this, Group.Layout.Vertical, myPosition);
-         myGroupStack.Push(g);
       }
 
       public UInt32 getChildId(String name)
@@ -109,12 +106,12 @@ namespace GUI
       {
          //this is in window space coordinates.  The conversion to screen space happens during rendering
          get {
-            Group g = myGroupStack.Peek();
-            return g.myPos + g.myCursorPos;
+            Layout l = myLayoutStack.Peek();
+            return l.myPos + l.myCursorPos;
          }
          set {
-            Group g = myGroupStack.Peek();
-            g.myCursorPos = value - g.myPos;
+            Layout l = myLayoutStack.Peek();
+            l.myCursorPos = value - l.myPos;
          }
       }
 
@@ -134,27 +131,6 @@ namespace GUI
       {
 			if (closed == true)
 				return false;
-
-         //is this the first time we've begun this window?
-         if (lastFrameActive != UI.frame)
-         {
-            if (flags.HasFlag(Flags.AutoResize))
-            {
-               //from the previous frame
-               size = myGroupStack.Peek().mySize + UI.style.window.padding;
-            }
-
-            lastFrameActive = UI.frame;
-            active = true;
-            myGroupStack.Peek().myCursorPos = new Vector2(0, titleBarHeight + menuBarHeight);
-            myGroupStack.Peek().mySize = new Vector2(0, 0);
-            myGroupStack.Peek().myLayout = Group.Layout.Vertical;
-         }
-
-         if (UI.currentWindow != this)
-         {
-            UI.pushWindow(this);
-         }
 
          //process the setNextWindow* functions
          if (UI.setNextWindowPositionCondition != 0)
@@ -177,6 +153,30 @@ namespace GUI
                UI.setNextWindowSizeCondition = 0;
                UI.setNextWindowSizeValue = UI.theInvalidVec2;
             }
+         }
+
+         //setup the layout for a window
+         List<float> layoutSizes = new List<float>();
+         if (flags.HasFlag(Flags.TitleBar))
+            layoutSizes.Add(titleBarHeight);
+
+         if (flags.HasFlag(Flags.MenuBar))
+            layoutSizes.Add(menuBarHeight);
+
+         layoutSizes.Add(0);
+
+         beginLayout(Layout.Direction.Vertical, layoutSizes);
+
+         //is this the first time we've begun this window?
+         if (lastFrameActive != UI.frame)
+         {
+            lastFrameActive = UI.frame;
+            active = true;
+         }
+
+         if (UI.currentWindow != this)
+         {
+            UI.pushWindow(this);
          }
 
          //check for collapsing window
@@ -222,6 +222,14 @@ namespace GUI
       public bool end()
       {
          canvas.popClipRect();
+
+         if (flags.HasFlag(Flags.AutoResize))
+         {
+            //new size for next frame
+            size = myLayoutStack.Peek().mySize + UI.style.window.padding;
+         }
+
+         myLayoutStack.Clear();
          return true;
       }
 
@@ -368,6 +376,7 @@ namespace GUI
             {
                canvas.addRectFilled(titleBarRect, UI.style.window.header.active.color, UI.style.window.rounding, Canvas.Corners.TOP);
                canvas.addText(titleBarRect, UI.style.window.header.labelNormal, name, Alignment.Middle);
+               addItem(titleBarRect.size);
             }
 
             //menu bar
@@ -420,54 +429,58 @@ namespace GUI
          size = sz;
       }
 
-      public void setLayout(Group.Layout layout)
+      public void setLayout(Layout.Direction layout)
       {
-         myGroupStack.Peek().myLayout = layout;
+         myLayoutStack.Peek().myDirection = layout;
       }
 
-      public Group currentGroup()
+      public Layout currentLayout
       {
-         if(myGroupStack.Count == 0)
-         {
-            return null;
-         }
+         get {
+            if (myLayoutStack.Count == 0)
+            {
+               return null;
+            }
 
-         return myGroupStack.Peek();
+            return myLayoutStack.Peek();
+         }
       }
 
       public void addItem(Vector2 itemSize)
       {
-         Group g = myGroupStack.Peek();
-         g.addItem(itemSize);
+         Layout l = myLayoutStack.Peek();
+         l.addItem(itemSize);
       }
 
       public void nextLine()
       {
-         Group g = myGroupStack.Peek();
-         g.nextLine();
+         Layout l = myLayoutStack.Peek();
+         l.nextLine();
       }
 
-      public void beginGroup(Group.Layout layout, float[] spacing = null)
+      public void beginLayout(Layout.Direction layout, List<float> spacing = null)
       {
          Vector2 pos = Vector2.Zero;
-         if (myGroupStack.Count > 0)
-            pos = currentGroup().myCursorPos;
+         if (myLayoutStack.Count > 0)
+         {
+            pos = cursorPosition;
+         }
 
-         Group g = new Group(this, layout, pos, spacing);
-         myGroupStack.Push(g);
+         Layout l = new Layout(this, layout, pos, spacing);
+         myLayoutStack.Push(l);
       }
 
-      public void beginGroup(Vector2 position, Group.Layout layout, float[] spacing = null)
+      public void beginLayout(Vector2 position, Layout.Direction layout, List<float> spacing = null)
       {
-         Group g = new Group(this, layout, position, spacing);
-         myGroupStack.Push(g);
+         Layout l = new Layout(this, layout, position, spacing);
+         myLayoutStack.Push(l);
       }
 
-      public void endGroup()
+      public void endLayout()
       {
-         Group g = myGroupStack.Pop();
+         Layout l = myLayoutStack.Pop();
 
-         addItem(g.mySize);
+         addItem(l.mySize);
       }
    }
 }

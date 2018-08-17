@@ -27,7 +27,7 @@ namespace GUI
             return false;
          }
 
-         win.beginGroup(win.menuBarRect.position - win.position, Group.Layout.Horizontal);
+         win.beginLayout(win.menuBarRect.position - win.position, Layout.Direction.Horizontal);
          idStack.push("menuBar");
          
          return true;
@@ -42,7 +42,7 @@ namespace GUI
          }
 
          idStack.pop();
-         win.endGroup();
+         win.endLayout();
       }
 
       public static bool beginMenu(String label, bool enabled = true)
@@ -72,7 +72,7 @@ namespace GUI
          popupPos = new Vector2(pos.X , pos.Y + win.menuBarRect.size.Y);
 
          bool shouldOpen = false;
-         pressed = selectable(label, ref shouldOpen, new Vector2(labelSize.X, 0.0f), SelectableFlags.Menu | SelectableFlags.DontClosePopups);
+         pressed = selectable(label, ref shouldOpen, labelSize, SelectableFlags.Menu | SelectableFlags.DontClosePopups);
 
          if(!opened && shouldOpen)
          {
@@ -90,6 +90,7 @@ namespace GUI
             else
             {
                setNextWindowPosition(popupPos);
+               setNextWindowSize(new Vector2(10, 10), SetCondition.FirstUseEver);
                opened = beginPopup(label, Window.Flags.Background | Window.Flags.Borders | Window.Flags.ChildMenu);
             }
          }
@@ -111,17 +112,18 @@ namespace GUI
          }
 
          Vector2 labelSize = style.font.size(label);
-         win.beginGroup(Group.Layout.Horizontal, new float[] { 0.0f, style.font.fontSize });
+         win.beginLayout(Layout.Direction.Horizontal);
+         bool pressed = selectable(label, ref selected, new Vector2(labelSize.X, 0), SelectableFlags.MenuItem);
 
-         float width = win.currentGroup().myElements[0].size;
-         bool pressed = selectable(label, ref selected, new Vector2(width, 0), SelectableFlags.MenuItem);
+         //spacer to push checkbox up on right side of menu box reguardless of size
+         float s = win.size.X - (style.selectable.padding.X + labelSize.X + style.selectable.padding.X + style.font.fontSize + style.window.padding.X);
+         if (s < 0.0f) s = 0.0f;
+         Vector2 spacer = new Vector2(s, labelSize.Y);
+         win.addItem(spacer);
 
-         Rect iconRect = Rect.fromPosSize(new Vector2(win.currentGroup().myElements[1].position + style.selectable.padding.X, win.cursorPosition.Y + style.selectable.padding.Y) + win.position, new Vector2(style.font.fontSize, style.font.fontSize));
-         win.canvas.addIcon(selected ? Icons.CHECKBOX_CHECKED : Icons.CHECKBOX_UNCHECKED, iconRect);
+         icon(selected ? Icons.CHECKBOX_CHECKED : Icons.CHECKBOX_UNCHECKED);
 
-         win.addItem(new Vector2(style.font.fontSize, style.font.fontSize));
-
-         win.endGroup();
+         win.endLayout();
          return pressed;
       }
 

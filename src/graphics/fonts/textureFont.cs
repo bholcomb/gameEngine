@@ -178,7 +178,7 @@ namespace Graphics
       public override float width(String txt)
       {
          //estimate for the width of a character
-         return txt.Length * mySize - (mySize / 2);
+         return txt.Length * mySize * 0.6f;
       }
 
       public override float height(String txt)

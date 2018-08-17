@@ -129,10 +129,11 @@ namespace Graphics
 
 			myVao.bindVertexFormat<V3T2B4>(myShader);
 
-			myTexture = Graphics.Util.getEmbeddedTexture("Graphics.data.debugFont.png");
+			//myTexture = Graphics.Util.getEmbeddedTexture("Graphics.data.debugFont.png");
+			myTexture = Graphics.Util.getEmbeddedTexture("Graphics.data.proggy12.png");
 			myTexture.setMinMagFilters(TextureMinFilter.NearestMipmapNearest, TextureMagFilter.Nearest);
          myTexture.setWrapping(TextureWrapMode.ClampToEdge, TextureWrapMode.ClampToEdge);
-			myFont = FontManager.findFont("DEFAULT");
+         myFont = new TextureFont("Debug", myTexture, 16, 16, 32);
 		}
 
       public void reset()

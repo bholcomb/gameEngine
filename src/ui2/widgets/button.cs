@@ -44,6 +44,7 @@ namespace GUI
          drawButtonText(s, r, win, hovered, held);
 
          //update the window cursor
+         win.addItem(style.button.padding);
          win.addItem(size);
 
          return pressed;
@@ -70,6 +71,7 @@ namespace GUI
          win.canvas.addImage(t, ir, Canvas.uv_zero, Canvas.uv_one, Canvas.col_white);
 
          //update the window cursor
+         win.addItem(style.button.padding);
          win.addItem(size);
 
          return pressed;
@@ -81,9 +83,11 @@ namespace GUI
          if (win.skipItems)
             return false;
 
+         win.addItem(style.button.padding);
+
          string name = t.ToString() + "-" + idx.ToString();
          UInt32 id = win.getChildId(name);
-         Vector2 pos = win.cursorScreenPosition + style.button.padding;
+         Vector2 pos = win.cursorScreenPosition;
          Rect r = Rect.fromPosSize(pos, size);
 
          bool hovered;
@@ -194,14 +198,21 @@ namespace GUI
          if (held) background = style.button.active;
          if (hovered) background = style.button.hover;
 
-         if (background.type == StyleItem.Type.COLOR)
+         switch(background.type)
          {
-            win.canvas.addRectFilled(r, background.color, style.button.rounding);
-            win.canvas.addRect(r, style.button.borderColor, style.button.rounding);
-         }
-         else
-         {
-            win.canvas.addImage(background.image, r);
+            case StyleItem.Type.COLOR:
+               win.canvas.addRectFilled(r, background.color, style.button.rounding);
+               win.canvas.addRect(r, style.button.borderColor, style.button.rounding);
+               break;
+            case StyleItem.Type.IMAGE:
+               win.canvas.addImage(background.image, r);
+               break;
+            case StyleItem.Type.SPRITE:
+               win.canvas.addImage(background.sprite, r);
+               break;
+            case StyleItem.Type.NINEPATCH:
+               win.canvas.addImage(background.patch, r);
+               break;
          }
       }
       #endregion

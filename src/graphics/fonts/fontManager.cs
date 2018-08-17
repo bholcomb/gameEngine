@@ -9,23 +9,36 @@ namespace Graphics
 
       static FontManager()
       {
-         loadDefaults();
+         
       }
 
-      public static Font findFont(String name)
+      public static Font findFont(String name, int size = 16)
       {
          Font f;
-         if (theFonts.TryGetValue(name, out f))
+         string fname = name + "-" + size.ToString();
+         if (theFonts.TryGetValue(fname, out f))
          {
             return f;
          }
 
-         return theFonts["COURIER"];
+         if(name != "DEFAULT")
+         {
+            return null;
+         }
+
+         f = findFont("DEFAULT");
+         return f;
+      }
+
+      public static void init()
+      {
+         loadDefaults();
       }
 
       public static void addFont(Font f)
       {
-         theFonts.Add(f.name, f);
+         string fname = f.name + "-" + ((int)f.fontSize).ToString();
+         theFonts.Add(fname, f);
       }
 
       private static void loadDefaults()
@@ -34,7 +47,7 @@ namespace Graphics
          addFont(new TextureFont("PROGGY", "../data/fonts/proggy12.png", 16, 16, 32));
          addFont(new TextureFont("CONSOLA", "../data/fonts/consola.png", 16, 16, 32));
          addFont(new TextureFont("COURIER", "../data/fonts/font.png", 16, 16, 32));
-         //addFont(new TTFFont("SANS", "../data/fonts/freeSans.ttf", 15));
+         addFont(new TTFFont("SANS", "../data/fonts/freeSans.ttf", 16));
          addFont(new SDFont("FREESANS", "../data/fonts/freeSans", 16));
       }
    }

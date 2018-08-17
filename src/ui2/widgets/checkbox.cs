@@ -22,14 +22,14 @@ namespace GUI
             return false;
          }
 
-         Vector2 labelSize = style.font.size(label);
-         win.beginGroup(Group.Layout.Horizontal, new float[] { 0.0f, style.font.fontSize });
-         float width = labelSize.X + style.font.fontSize * 1.2f;
-         
-         bool pressed = selectable(label, ref selected, new Vector2(width, 0), SelectableFlags.HasToggle);
+         win.addItem(style.checkbox.padding);
 
-         Rect iconRect = Rect.fromPosSize(new Vector2(win.currentGroup().myElements[1].position, win.cursorPosition.Y + style.checkbox.padding.Y) + win.position, new Vector2(style.font.fontSize, style.font.fontSize));
-         win.canvas.addIcon(selected ? Icons.CHECKBOX_CHECKED : Icons.CHECKBOX_UNCHECKED, iconRect);
+         Vector2 labelSize = style.font.size(label);
+         win.beginLayout(Layout.Direction.Horizontal, new List<float>() { 0.0f, style.font.fontSize });;
+         
+         bool pressed = selectable(label, ref selected, new Vector2(labelSize.X, 0), SelectableFlags.HasToggle);
+
+         icon(selected ? Icons.CHECKBOX_CHECKED : Icons.CHECKBOX_UNCHECKED);
 
          return pressed;
       }

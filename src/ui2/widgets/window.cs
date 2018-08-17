@@ -97,13 +97,13 @@ namespace GUI
          setNextWindowFocused = true;
       }
 
-      public static void setWindowLayout(Group.Layout layout)
+      public static void setWindowLayout(Layout.Direction layout)
       {
          Window win = currentWindow;
          win.setLayout(layout);
       }
 
-      public static void setWindowLayout(String winName, Group.Layout layout)
+      public static void setWindowLayout(String winName, Layout.Direction layout)
       {
          Window win = findWindow(winName);
          if (win != null)
@@ -117,16 +117,16 @@ namespace GUI
             focusWindow(win);
       }
 
-      public static void beginGroup(Group.Layout layout, float[] spacing = null)
+      public static void beginLayout(Layout.Direction layout, List<float> spacing = null)
       {
          Window win = currentWindow;
-         win.beginGroup(layout, spacing);
+         win.beginLayout(layout, spacing);
       }
 
-      public static void endGroup()
+      public static void endLayout()
       {
          Window win = currentWindow;
-         win.endGroup();
+         win.endLayout();
       }
 
       public static Vector2 cursorPosition()

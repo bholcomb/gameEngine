@@ -35,13 +35,12 @@ namespace GUI
             return false;
          }
 
+         win.addItem(style.selectable.padding);
+
          UInt32 id = win.getChildId(label);
          Vector2 labelSize = style.font.size(label);
          Vector2 size = new Vector2(sizeArg.X != 0 ? sizeArg.X : labelSize.X, sizeArg.Y != 0 ? sizeArg.Y : labelSize.Y);
-         Vector2 rectPos = win.cursorScreenPosition + style.selectable.padding;
-         Rect r = Rect.fromPosSize(rectPos, size);
-
-         win.addItem(size);
+         Rect r = Rect.fromPosSize(win.cursorScreenPosition, size);
 
          bool hovered;
          bool held;
@@ -70,6 +69,9 @@ namespace GUI
          {
             selected = !selected;
          }
+
+         
+         win.addItem(size);
 
          return pressed;
       }

@@ -87,6 +87,7 @@ namespace VR
          myProjection = VR.convertToMatrix4(proj);
 
          Info.print("Started VR Camera stream");
+         myIsStreaming = true;
          return true;
       }
 

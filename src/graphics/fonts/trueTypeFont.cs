@@ -93,7 +93,7 @@ namespace Graphics
          }
 
          //set the size of the Font in pixels
-         error = FT.Set_Pixel_Sizes(faceptr, (uint)0, (uint)mySize);
+         error = FT.Set_Pixel_Sizes(faceptr, (uint)0, (uint)mySize );
          if (error != 0)
          {
             System.Console.WriteLine("FT_Set_Pixel_Sizes Failed: Unknown Error: " + error);
@@ -151,20 +151,20 @@ namespace Graphics
             myVerts[counter * 4].TexCoord.X = g.minTexCoord.X;
             myVerts[counter * 4].TexCoord.Y = g.minTexCoord.Y;
 
-            myVerts[counter * 4 + 1].Position.X = posx + mySize;
+            myVerts[counter * 4 + 1].Position.X = posx + g.size.X;
             myVerts[counter * 4 + 1].Position.Y = posy;
             myVerts[counter * 4 + 1].Position.Z = 0.0f;
             myVerts[counter * 4 + 1].TexCoord.X = g.maxTexCoord.X;
             myVerts[counter * 4 + 1].TexCoord.Y = g.minTexCoord.Y;
 
-            myVerts[counter * 4 + 2].Position.X = posx + mySize;
-            myVerts[counter * 4 + 2].Position.Y = posy + mySize;
+            myVerts[counter * 4 + 2].Position.X = posx + g.size.X;
+            myVerts[counter * 4 + 2].Position.Y = posy + g.size.Y;
             myVerts[counter * 4 + 2].Position.Z = 0.0f;
             myVerts[counter * 4 + 2].TexCoord.X = g.maxTexCoord.X;
             myVerts[counter * 4 + 2].TexCoord.Y = g.maxTexCoord.Y;
 
             myVerts[counter * 4 + 3].Position.X = posx;
-            myVerts[counter * 4 + 3].Position.Y = posy + mySize;
+            myVerts[counter * 4 + 3].Position.Y = posy + g.size.Y;
             myVerts[counter * 4 + 3].Position.Z = 0.0f;
             myVerts[counter * 4 + 3].TexCoord.X = g.minTexCoord.X;
             myVerts[counter * 4 + 3].TexCoord.Y = g.maxTexCoord.Y;
@@ -197,7 +197,10 @@ namespace Graphics
          for (int i = 0; i < txt.Length; i++)
          {
             char c = txt[i];
-            size += (int)myGlyphs[(int)c].size.X;
+            Glyph g = myGlyphs[(int)c];
+            size += (int)g.offset.X;
+            //size += (int)g.size.X;
+            size += (int)g.advance.X;
          }
 
          return size;
@@ -234,7 +237,9 @@ namespace Graphics
 
          //copy the data to a managed buffer for use
          if (byteCount > 0)
+         {
             Marshal.Copy(glyph.bitmap.buffer, buffer, 0, byteCount);
+         }
 
          for (int y = 0; y < glyph.bitmap.rows; y++)
          {
@@ -251,8 +256,10 @@ namespace Graphics
 
          //copy bitmap to the Texture
          if (byteCount > 0)
+         {
             texture.paste(pixels, new Vector2((float)xCounter, (float)yCounter),
                 new Vector2((float)glyph.bitmap.width, (float)glyph.bitmap.rows), PixelFormat.Rgba);
+         }
 
          Glyph g = new Glyph();
          g.minTexCoord.X = (float)xCounter / (float)texture.width;

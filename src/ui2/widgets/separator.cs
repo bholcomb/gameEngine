@@ -28,5 +28,24 @@ namespace GUI
 
          win.addItem(size);
       }
+
+      public static void spacer(float x)
+      {
+         Window win = currentWindow;
+         if (win.skipItems)
+            return;
+
+         Vector2 space;
+         if(win.currentLayout.myDirection == Layout.Direction.Horizontal)
+         {
+            space = new Vector2(x, 0);
+         }
+         else
+         {
+            space = new Vector2(0, x);
+         }
+
+         win.addItem(space);
+      }
    }
 }

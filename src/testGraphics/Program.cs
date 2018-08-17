@@ -233,8 +233,8 @@ namespace testRenderer
       {
          //init render target
          int x, y;
-         x = theWidth; // myCamera.viewport().width;
-         y = theHeigth; // myCamera.viewport().height;
+         x = myCamera.viewport().width;
+         y = myCamera.viewport().height;
 
          List<RenderTargetDescriptor> rtdesc = new List<RenderTargetDescriptor>();
          rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.ColorAttachment0, format = SizedInternalFormat.Rgba32f }); //creates a texture internally

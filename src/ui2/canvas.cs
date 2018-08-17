@@ -12,15 +12,6 @@ using OpenTK.Graphics.OpenGL;
 
 namespace GUI
 {
-   public class Glyph
-   {
-      public Vector2 minTexCoord;
-      public Vector2 maxTexCoord;
-      public Vector2 size;             // size inside the Texture, in pixels
-      public Vector2 offset;           // offset from the top-left corner of the pen to the glyph image
-      public Vector2 advance;          // tells us how much we should advance the pen after drawing this glyph
-   };
-
    //used for UI rendering
    [StructLayout(LayoutKind.Sequential)]
    public struct V2T2B4
@@ -118,6 +109,77 @@ namespace GUI
          userRenderCommand = null;
       }
    };
+
+   public class Sprite
+   {
+      public Texture myTexture;
+      public Vector2 myMinUv;
+      public Vector2 myMaxUv;
+
+      public Sprite(Texture texture, Vector2 minUv, Vector2 maxUv)
+      {
+         myTexture = texture;
+         myMinUv = minUv;
+         myMaxUv = maxUv;
+      }
+   }
+
+   public class NinePatch : Sprite
+   {
+      public Vector4 myBounds;
+      public NinePatch(Texture texture, Vector2 minUv, Vector2 maxUv, Vector4 bounds)
+         :base(texture, minUv, maxUv)
+      {
+         myBounds = bounds;
+      }
+
+      public Vector2[] generateVerts(Rect r)
+      {
+         Vector2[] verts = new Vector2[16];
+
+         Vector2 rp = r.position;
+         Vector2 re = r.position + r.size;
+         float[] xp = new float[] { rp.X, rp.X + myBounds[0], re.X - myBounds[1], re.X };
+         float[] yp = new float[] { rp.Y, rp.Y + myBounds[2], re.Y - myBounds[3], re.Y };
+
+         //generate 16 verts
+         int vertCount = 0;
+         for (int i = 0; i < 4; i++)
+         {
+            for (int j = 0; j < 4; j++)
+            {
+               verts[vertCount] = new Vector2(xp[j], yp[i]);
+               vertCount++;
+            }
+         }
+
+         return verts;
+      }
+
+      public Vector2[] generateUvs()
+      {
+         Vector2[] uvs = new Vector2[16];
+
+         //scale pixels to texels
+         Vector2 scale = new Vector2(1.0f / (float)myTexture.width, 1.0f / (float)myTexture.height);
+
+         float[] xp = new float[] { myMinUv.X, myMinUv.X + (myBounds[0] * scale.X), myMaxUv.X - (myBounds[1] * scale.X), myMaxUv.X };
+         float[] yp = new float[] { myMinUv.Y, myMinUv.Y + (myBounds[2] * scale.Y), myMaxUv.Y - (myBounds[3] * scale.Y), myMaxUv.Y };
+
+         //generate 16 uvs
+         int vertCount = 0;
+         for (int i = 0; i < 4; i++)
+         {
+            for (int j = 0; j < 4; j++)
+            {
+               uvs[vertCount] = new Vector2(xp[j], yp[i]);
+               vertCount++;
+            }
+         }
+
+         return uvs;
+      }
+   }
 
    public class Canvas
    {
@@ -324,10 +386,10 @@ namespace GUI
       public void addText(Rect r, Color4 col, String text, Alignment align)
       {
          Vector2 pos = r.SW;
-         Vector2 textSize = new Vector2(UI.style.font.width(text), UI.style.font.height(text));
-         if (align.HasFlag(Alignment.HCenter) == true) pos.X = Math.Max(pos.X, (r.SW.X + r.NE.X - textSize.X) * 0.5f);
-         if (align.HasFlag(Alignment.Right) == true) pos.X = Math.Max(pos.X, r.NE.X - textSize.X);
-         if (align.HasFlag(Alignment.VCenter) == true) pos.Y = Math.Max(pos.Y, (r.SW.Y + r.NE.Y - textSize.Y) * 0.5f);
+         Vector2 textSize = UI.style.font.size(text);
+         if (align.HasFlag(Alignment.HCenter) == true) pos.X = Math.Max(pos.X, pos.X + (r.width - textSize.X) * 0.5f);
+         if (align.HasFlag(Alignment.Right) == true) pos.X = Math.Max(pos.X, r.right - textSize.X);
+         if (align.HasFlag(Alignment.VCenter) == true) pos.Y = Math.Max(pos.Y, pos.Y + (r.height- textSize.Y) * 0.5f);
 
          addText(pos, col, text);
       }
@@ -355,12 +417,17 @@ namespace GUI
       public void addIcon(Icons icon, Vector2 a, Vector2 b)
       {
          //Glyph g = theGlyphs[(int)icon];
-         //addImage(theDefaultTexture, a, b, g.minTexCoord, g.maxTexCoord, Color4.White);
+         addImage(theDefaultTexture, a, b, uv_zero, uv_one, Color4.White);
       }
 
       public void addImage(Texture tex, Rect r)
       {
          addImage(tex, r, uv_zero, uv_one, Color4.White);
+      }
+
+      public void addImage(Sprite s, Rect r)
+      {
+         addImage(s.myTexture, r, s.myMinUv, s.myMaxUv, Color4.White);
       }
 
       public void addImage(Texture tex, Rect r, Vector2 uv0, Vector2 uv1, Color4 col)
@@ -385,11 +452,77 @@ namespace GUI
          if (pushTex)
             popTexture();
       }
+      public void addImage(NinePatch p, Rect r)
+      {
+         bool pushTex = shouldPushTexture(p.myTexture);
+         if (pushTex)
+            pushTexture(p.myTexture);
+
+         UInt32 cl = Color4.White.toUInt();
+         Vector2[] verts = p.generateVerts(r);
+         Vector2[] uvs = p.generateUvs();
+
+         UInt16 startVertex = (UInt16)myVertCount;
+
+         //generate 16 verts
+         int index = 0;
+         for (int i = 0; i<4; i++)
+         {
+            for(int j = 0; j<4; j++)
+            {
+               myVerts[myVertCount].Position = verts[index];
+               myVerts[myVertCount].TexCoord = uvs[index];
+               myVerts[myVertCount].Color = cl;
+               myVertCount++;
+               index++;
+            }
+         }
+
+         //indexes in verts
+         writeIndex((UInt16)(startVertex + 0)); writeIndex((UInt16)(startVertex + 4)); writeIndex((UInt16)(startVertex + 1));
+         writeIndex((UInt16)(startVertex + 1)); writeIndex((UInt16)(startVertex + 4)); writeIndex((UInt16)(startVertex + 5));
+
+         writeIndex((UInt16)(startVertex + 1)); writeIndex((UInt16)(startVertex + 5)); writeIndex((UInt16)(startVertex + 2));
+         writeIndex((UInt16)(startVertex + 2)); writeIndex((UInt16)(startVertex + 5)); writeIndex((UInt16)(startVertex + 6));
+
+         writeIndex((UInt16)(startVertex + 2)); writeIndex((UInt16)(startVertex + 6)); writeIndex((UInt16)(startVertex + 3));
+         writeIndex((UInt16)(startVertex + 3)); writeIndex((UInt16)(startVertex + 6)); writeIndex((UInt16)(startVertex + 7));
+
+
+
+         writeIndex((UInt16)(startVertex + 4)); writeIndex((UInt16)(startVertex + 8)); writeIndex((UInt16)(startVertex + 5));
+         writeIndex((UInt16)(startVertex + 5)); writeIndex((UInt16)(startVertex + 8)); writeIndex((UInt16)(startVertex + 9));
+
+         writeIndex((UInt16)(startVertex + 5)); writeIndex((UInt16)(startVertex + 9)); writeIndex((UInt16)(startVertex + 6));
+         writeIndex((UInt16)(startVertex + 6)); writeIndex((UInt16)(startVertex + 9)); writeIndex((UInt16)(startVertex + 10));
+
+         writeIndex((UInt16)(startVertex + 6)); writeIndex((UInt16)(startVertex + 10)); writeIndex((UInt16)(startVertex + 7));
+         writeIndex((UInt16)(startVertex + 7)); writeIndex((UInt16)(startVertex + 10)); writeIndex((UInt16)(startVertex + 11));
+
+
+
+         writeIndex((UInt16)(startVertex + 8)); writeIndex((UInt16)(startVertex + 12)); writeIndex((UInt16)(startVertex + 9));
+         writeIndex((UInt16)(startVertex + 9)); writeIndex((UInt16)(startVertex + 12)); writeIndex((UInt16)(startVertex + 13));
+
+         writeIndex((UInt16)(startVertex + 9)); writeIndex((UInt16)(startVertex + 13)); writeIndex((UInt16)(startVertex + 10));
+         writeIndex((UInt16)(startVertex + 10)); writeIndex((UInt16)(startVertex + 13)); writeIndex((UInt16)(startVertex + 14));
+
+         writeIndex((UInt16)(startVertex + 10)); writeIndex((UInt16)(startVertex + 14)); writeIndex((UInt16)(startVertex + 11));
+         writeIndex((UInt16)(startVertex + 11)); writeIndex((UInt16)(startVertex + 14)); writeIndex((UInt16)(startVertex + 15));
+
+
+         if (pushTex)
+         {
+            popTexture();
+         }
+      }
 
       public void addPolyline(List<Vector2> points, Color4 col, bool closed, float thickness)
       {
          if (points.Count < 2)
+         {
             return;
+         }
 
          Vector2 uv = uv_zero;
 

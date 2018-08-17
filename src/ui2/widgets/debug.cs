@@ -34,7 +34,7 @@ namespace GUI
                if (beginMenu("Eggy"))
                {
                   menuItem("Empty 1");
-                  menuItem("Empty 2");
+                  menuItem("Really Empty 2");
                   endMenu();
                }
                endMenuBar();

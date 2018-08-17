@@ -5,6 +5,8 @@ using System.Security;
 
 using System.Collections;
 
+using Util;
+
 
 namespace FreeType
 {
@@ -420,12 +422,16 @@ namespace FreeType
 
    public class FT
    {
-      private const string FT_DLL = "freetype2412-32.dll";
+      private const string FT_DLL = "freetype.dll";
 
       public static Hashtable ErrorStrings;
 
+      static DllLoader theDll;
+
       static FT()
       {
+         theDll = new DllLoader(FT_DLL);
+
          ErrorStrings = new Hashtable();
          ErrorStrings[0x00] = "no error";
          ErrorStrings[0x01] = "cannot open resource";

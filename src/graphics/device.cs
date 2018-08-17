@@ -232,7 +232,7 @@ namespace Graphics
 
       public void bindTexture(int bufferId, int location, TextureTarget textureType)
       {
-         if (myBoundTextures[location].id != bufferId)
+         //if (myBoundTextures[location].id != bufferId)
          {
             GL.ActiveTexture(TextureUnit.Texture0 + location);
 

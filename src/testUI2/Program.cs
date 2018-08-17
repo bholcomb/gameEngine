@@ -27,6 +27,7 @@ namespace testUi
       GameWindowCameraEventHandler myCameraEventHandler;
       GUI.GuiEventHandler myUiEventHandler;
       Canvas myCanvas;
+      Texture myUITex;
 
       public TestHarness()
          : base(theWidth, theHeight, new GraphicsMode(32, 24, 0, 8), "Test UI", GameWindowFlags.Default, DisplayDevice.Default, 4, 4,
@@ -75,6 +76,10 @@ namespace testUi
 
          initRenderer();
 
+         UI.style.button.normal = UI.styleItemNinePatch(new NinePatch(new Texture("..\\data\\ui\\button.png"), Vector2.Zero, Vector2.One, new Vector4(12, 12, 12, 12)));
+         //UI.style.button.normal = UI.styleItemImage(new Texture("..\\data\\textures\\bedrock.png"));
+         UI.style.button.hover = UI.styleItemImage(new Texture("..\\data\\textures\\brick.png"));
+         UI.style.button.active = UI.styleItemImage(new Texture("..\\data\\textures\\circle.png"));
          myCanvas = new Canvas();
       }
 
@@ -137,6 +142,7 @@ namespace testUi
 
          UI.beginFrame();
          UI.label("Test");
+         
          if (UI.button("click", new Vector2(100, 50)))
          {
             clearRed = !clearRed;
@@ -156,6 +162,9 @@ namespace testUi
 
       public void initRenderer()
       {
+         Renderer.init();
+         FontManager.init();
+
          myUiEventHandler = new GuiEventHandler(this);
          UI.displaySize = new Vector2(theWidth, theHeight);
       }

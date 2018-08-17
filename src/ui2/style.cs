@@ -55,10 +55,12 @@ namespace GUI
 
 	public class StyleItem
 	{
-		public enum Type { COLOR, IMAGE };
+		public enum Type { COLOR, IMAGE, SPRITE, NINEPATCH};
 		public Type type;
-		public Texture image;
 		public Color4 color;
+		public Texture image;
+      public Sprite sprite;
+      public NinePatch patch;
 	};
 
 	public class StyleText
@@ -524,7 +526,22 @@ namespace GUI
 			return i;
 		}
 
-		public static void setDefaultStyle()
+      public static StyleItem styleItemSprite(Sprite s)
+      {
+         StyleItem i = new StyleItem();
+         i.type = StyleItem.Type.SPRITE;
+         i.sprite = s;
+         return i;
+      }
+
+      public static StyleItem styleItemNinePatch(NinePatch p)
+      {
+         StyleItem i = new StyleItem();
+         i.type = StyleItem.Type.NINEPATCH;
+         i.patch = p;
+         return i;
+      }
+      public static void setDefaultStyle()
 		{
 			setStyleFromTable(Style.defaultColors);
 		}
@@ -534,7 +551,8 @@ namespace GUI
          Style style = UI.style;
 
          Texture t = Graphics.Util.getEmbeddedTexture("UI2.data.fontIconSheet.png");
-         style.font = new TextureFont("UI", t, 32, 15, 0);
+         //style.font = new TextureFont("UI", t, 32, 15, 0);
+         style.font = FontManager.findFont("SANS");
 
          // default text 
          StyleText text = new StyleText();
@@ -644,7 +662,7 @@ namespace GUI
          select.textNormalActive = table[(int)StyleColors.TEXT];
          select.textHoverActive = table[(int)StyleColors.TEXT];
          select.textPressedActive = table[(int)StyleColors.TEXT];
-         select.padding = new Vector2(2.0f, 2.0f);
+         select.padding = new Vector2(4.0f, 4.0f);
          select.touchPadding = new Vector2(0, 0);
          select.rounding = 0.0f;
          style.selectable = select;
