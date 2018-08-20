@@ -200,24 +200,11 @@ namespace Graphics
       {
          if (myMouseLook == true)
          {
-//             Quaternion q = new Quaternion();
-             myMouseLookHeading += xDelta;
-             myMouseLookPitch += yDelta;
-            //             myViewOri = q.fromHeadingPitchRoll(myMouseLookHeading, myMouseLookPitch, 0.0f);
-
-            if(shiftDown == true)
-            {
-               myViewOri = myViewOri * 
-                  Quaternion.FromAxisAngle(myCamera.forward, MathHelper.DegreesToRadians(xDelta));
-            }
-            else
-            {
-               myViewOri = myViewOri *
-                  Quaternion.FromAxisAngle(myCamera.up, MathHelper.DegreesToRadians(xDelta)) *
-                  Quaternion.FromAxisAngle(myCamera.right, MathHelper.DegreesToRadians(yDelta));
-            }
-
-         } 
+            Quaternion q = new Quaternion();
+            myMouseLookHeading += xDelta;
+            myMouseLookPitch += yDelta;
+            myViewOri = q.fromHeadingPitchRoll(myMouseLookHeading, myMouseLookPitch, 0.0f);
+         }
       }
 
 

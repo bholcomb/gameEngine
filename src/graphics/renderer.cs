@@ -25,7 +25,7 @@ namespace Graphics
 		public static ResourceManager resourceManager;
 		public static ShaderManager shaderManager;
 		public static VisibilityManager visiblityManager;
-		public static List<Renderable> renderables;
+		public static Scene scene;
 		public static int frameNumber { get; set; }
 
       public delegate void RendererFunction();
@@ -77,7 +77,7 @@ namespace Graphics
 
 			views = new Dictionary<string, View>();
 			visualizers = new Dictionary<string, Visualizer>();
-			renderables = new List<Renderable>();
+			scene = new Scene();
 
 			activeViews = new List<View>();
 			activeCameras = new List<Camera>();
@@ -94,6 +94,7 @@ namespace Graphics
 		{
 			if (initializer != null)
 			{
+            //configure any render specific stuff here
 			}
 		}
 
@@ -116,14 +117,14 @@ namespace Graphics
             onPreCull();
          }
 
-         stats.renderableCount = renderables.Count;
+         stats.renderableCount = scene.renderables.Count;
 			tdiff = TimeSource.currentTime();
 			//get a list of all the views in the order they should be processed
 			updateActiveViews();
 			updateActiveCameras();
 
 			//update renderable objects in each camera
-			visiblityManager.cullRenderablesPerCamera(renderables, activeViews); 
+			visiblityManager.cullRenderablesPerCamera(scene.renderables, activeViews); 
 
          //get camera visible stats
          foreach (Camera c in activeCameras)
@@ -269,6 +270,20 @@ namespace Graphics
 		{
 			visualizers[name] = vis;
 		}
+
+      public static void addView(View v)
+      {
+         views[v.name] = v;
+      }
+
+      public static void removeView(View v)
+      {
+         if(views.ContainsKey(v.name))
+         {
+            views.Remove(v.name);
+         }
+      }
+
 
 		#region culling functions
 		static void updateActiveViews()
