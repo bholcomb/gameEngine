@@ -13,7 +13,7 @@ namespace Audio
       {
       }
 
-      public override IResource create()
+      public override IResource create(ResourceManager mgr)
       {
          WavSource w = new WavSource(this);
          if(w.load()==false)

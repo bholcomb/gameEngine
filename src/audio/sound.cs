@@ -10,11 +10,15 @@ namespace Audio
 {
    public class SoundDescriptor
    {
-      public string filename;
-      public Source source;
-      public bool is3d;
-      public bool isLooping;
-      public AbstractAudio.Priority priority;
+      public String filename = "";
+      public Source source = null;
+      public bool is3d = false;
+      public bool isLooping = false;
+      public bool isRelative = true;
+      public Vector3 position = new Vector3();
+      public Vector3 velocity = new Vector3();
+      public float falloffDistance = 10.0f;
+      public AbstractAudio.Priority priority = AbstractAudio.Priority.BACKGROUND_FX;
    };
 
 
@@ -40,19 +44,17 @@ namespace Audio
       public Sound(SoundDescriptor desc)
          : base()
       {
-         myNextBufferIndex = 0;
          is3d = desc.is3d;
          isLooping = desc.isLooping;
-         myVoice = null;
-         relativePosition = false;
-         referenceDistance = 1.0f;
-
-         if (desc.source != null)
-            mySource = desc.source;
-       
-         position = new Vector3();
-         velocity = new Vector3();
+         position = desc.position;
+         velocity = desc.velocity;
          coneOrientation = new Vector3();
+         referenceDistance = desc.falloffDistance;
+         relativePosition = desc.isRelative;
+         mySource = desc.source;
+         priority = desc.priority;
+
+         myVoice = null;
          myNextBufferIndex = 0;
       }
 
@@ -227,7 +229,7 @@ namespace Audio
 
          //remove any finished buffers.  Tell the source in case it's streaming
          int finishedBuffer = myVoice.finishedBuffer();
-         while (finishedBuffer != -1)
+         while (finishedBuffer != 0)
          {
             mySource.finishedBuffer(finishedBuffer);
             finishedBuffer = myVoice.finishedBuffer();

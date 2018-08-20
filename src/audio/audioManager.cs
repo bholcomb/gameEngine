@@ -46,6 +46,36 @@ namespace Audio
 
    public class AudioManager
    {
+      static AudioManager theAudioManager;
+      AudioContext myContext;
+      IntPtr myDevice;
+      Capture myCaptureDevice;
+
+      bool myIsInitialized = false;
+      int myMaxVoices = 32;
+      bool myIsEnabled = false;
+      double myCurrentTime = 0.0;
+
+      bool myEnvironmentalProcessingAvailable = false;
+      bool myEnvironmentalProcessingEnabled = false;
+
+      float myMasterGain = 1.0f;
+      float myMusicVolume = 1.0f;
+
+      double myMusicTransitionTime;
+      double myCurrentMusicTransitionTime;
+      Sound myCurrentMusic = null;
+      Sound myNextMusic = null;
+
+      Listener myListener = new Listener();
+
+      List<AbstractAudio> myPlayingSounds = new List<AbstractAudio>();
+      List<AbstractAudio> myToAddPlayingSounds = new List<AbstractAudio>();
+      List<AbstractAudio> myToRemovePlayingSounds = new List<AbstractAudio>();
+
+      List<Voice> myActiveVoiceList = new List<Voice>();
+      Queue<Voice> myInactiveVoiceList = new Queue<Voice>();
+
       public static AudioManager instance()
       {
          if (theAudioManager == null)
@@ -131,7 +161,48 @@ namespace Audio
 
          Info.print("------------------AUDIO MANAGER----------------");
 
+         myIsInitialized = true;
          return true;
+      }
+
+      public void transitionMusic(SoundDescriptor music, double transitionTime)
+      {
+         Sound snd = new Sound(music);
+         myNextMusic = snd;
+         myNextMusic.volume = 0.0f;
+         myNextMusic.play();
+         myMusicTransitionTime = transitionTime;
+         myCurrentMusicTransitionTime = 0.0;
+      }
+
+      void updateMusicTransition(double dt)
+      {
+         if(myNextMusic != null)
+         {
+            myCurrentMusicTransitionTime += dt;
+
+            //check for the end condition
+            if(myCurrentMusicTransitionTime >= myMusicTransitionTime)
+            {
+               myNextMusic.volume = myMusicVolume;
+               if (myCurrentMusic != null)
+               {
+                  myCurrentMusic.stop();
+               }
+               myCurrentMusic = myNextMusic;
+               myNextMusic = null;
+               return;
+            }
+
+            //adjust the volumes of the current music and next music
+            float vol = myMusicVolume * (float)(myCurrentMusicTransitionTime / myMusicTransitionTime); ;
+            myNextMusic.volume = vol;
+
+            if(myCurrentMusic != null)
+            {
+               myCurrentMusic.volume = myMusicVolume - vol;
+            }
+         }
       }
 
       public void tick(double dt)
@@ -184,6 +255,8 @@ namespace Audio
                snd.update(dt);
             }
          }
+
+         updateMusicTransition(dt);
       }
 
       public void shutdown()
@@ -326,19 +399,9 @@ namespace Audio
          v.reset();
       }
 
-      public void playSoundOneTime(string filename, Vector3 pos, bool relative, Vector3 vel, float falloffDistance, AbstractAudio.Priority priority)
+      public void playSoundOnetime(SoundDescriptor sd)
       {
-         SoundDescriptor desc = new SoundDescriptor();
-         desc.filename = filename;
-         desc.is3d = true;
-         desc.isLooping = false;
-         desc.priority = priority;
-
-         Sound snd = new Sound(desc);
-
-         snd.position = pos;
-         snd.velocity = vel;
-         snd.relativePosition = relative;
+         Sound snd = new Sound(sd);
          snd.transient = true;
 
          snd.play();
@@ -423,30 +486,5 @@ namespace Audio
             }
          }
       }
-
-      static AudioManager theAudioManager;
-      AudioContext myContext;
-      IntPtr myDevice;
-      Capture myCaptureDevice;
-
-      bool myIsInitialized = false;
-      int myMaxVoices = 32;
-      bool myIsEnabled = false;
-      double myCurrentTime = 0.0;
-
-      bool myEnvironmentalProcessingAvailable = false;
-      bool myEnvironmentalProcessingEnabled = false;
-
-      float myMasterGain = 1.0f;
-      float myMusicVolume = 1.0f;
-
-      Listener myListener = new Listener();
-
-      List<AbstractAudio> myPlayingSounds = new List<AbstractAudio>();
-      List<AbstractAudio> myToAddPlayingSounds = new List<AbstractAudio>();
-      List<AbstractAudio> myToRemovePlayingSounds = new List<AbstractAudio>();
-
-      List<Voice> myActiveVoiceList = new List<Voice>();
-      Queue<Voice> myInactiveVoiceList = new Queue<Voice>();
    }
 }

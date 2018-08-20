@@ -14,7 +14,7 @@ namespace Audio
          streaming = stream;
       }
 
-      public override IResource create() { return null; }
+      public override IResource create(ResourceManager mgr) { return null; }
 
       public bool streaming { get; set; }
       public bool is3d { get; set; }
