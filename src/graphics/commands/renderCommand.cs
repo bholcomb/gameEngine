@@ -28,7 +28,7 @@ namespace Graphics
 
 		public override void execute()
 		{
-         Renderer.device.resetVboIboState();
+         //Renderer.device.resetVboIboState();
 			Renderer.device.bindPipeline(pipelineState);
 			renderState.apply();
 		}

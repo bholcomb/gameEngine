@@ -13,7 +13,7 @@ namespace Graphics
 {
    public class StaticModelRenderable : Renderable
    {
-      public StaticModel model;
+      public Model model;
 
       public StaticModelRenderable() 
          : base("staticModel")

@@ -27,7 +27,7 @@ namespace Graphics
          myParticleShaderProgram = Renderer.resourceManager.getResource(spDesc) as ShaderProgram;
 
          myVao = new VertexArrayObject();
-         myVao.bindVertexFormat<V3C4S3R>(myParticleShaderProgram);
+         myVao.bindVertexFormat(myParticleShaderProgram, V3C4S3R.bindings());
       }
 
       #region prepare phase

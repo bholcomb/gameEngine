@@ -13,9 +13,9 @@ using Util;
 
 namespace Graphics
 {
-   public class AssimpStaticModelDescriptor : ResourceDescriptor
+   public class AssimpModelDescriptor : ResourceDescriptor
    {
-      public AssimpStaticModelDescriptor(string name)
+      public AssimpModelDescriptor(string name)
          : base(name)
       {
          type = "AssimpModel";
@@ -23,25 +23,25 @@ namespace Graphics
 
       public override IResource create(ResourceManager mgr)
       {
-         AssimpStaticModelLoader loader = new AssimpStaticModelLoader(mgr);
-         StaticModel m = loader.loadFromFile(name);
+         AssimpModelLoader loader = new AssimpModelLoader(mgr);
+         Model m = loader.loadFromFile(name);
          return m;
       }
    }
 
-   public class AssimpStaticModelLoader : AssimpLoader
+   public class AssimpModelLoader : AssimpLoader
    {
       List<V3N3T2> myVerts = new List<V3N3T2>();
       List<ushort> index = new List<ushort>();
       int currIndexOffset = 0;
       int currVertOffset = 0;
-      StaticModel myModel = new StaticModel();
+      Model myModel = new Model();
 
-      public AssimpStaticModelLoader(ResourceManager mgr) :base(mgr)
+      public AssimpModelLoader(ResourceManager mgr) :base(mgr)
       {
       }
 
-      public StaticModel loadFromFile(string filename)
+      public Model loadFromFile(string filename)
       {
          Info.print("Loading Assimp model {0}", filename);
 
@@ -66,7 +66,10 @@ namespace Graphics
             return null;
          }
 
-         myModel.myVbo.setData(myVerts);
+         myModel.myBindings = V3N3T2.bindings();
+         VertexBufferObject vbo = new VertexBufferObject(BufferUsageHint.StaticDraw);
+         vbo.setData(myVerts);
+         myModel.myVbos.Add(vbo);
          myModel.myIbo.setData(index);
 
          //should probably build a bounding box

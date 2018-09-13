@@ -18,6 +18,7 @@ namespace Graphics
       public SkinnedModelRenderable()
          : base("skinnedModel")
       {
+
       }
 
       public override bool isVisible(Camera c)

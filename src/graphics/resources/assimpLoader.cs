@@ -18,7 +18,7 @@ namespace Graphics
       protected static AssimpContext theAssimpContext;
       protected ResourceManager myResourceManager;
       protected string myRootPath;
-      protected Scene myScene;
+      protected Assimp.Scene myScene;
 
       static AssimpLoader()
       {

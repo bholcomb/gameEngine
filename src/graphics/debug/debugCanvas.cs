@@ -26,22 +26,18 @@ namespace Graphics
 
       public static int stride { get { return theStride; } }
 
-      public static void bindVertexAttribute(String fieldName, int id)
+      static Dictionary<string, BufferBinding> theBindings = null;
+      public static Dictionary<string, BufferBinding> bindings()
       {
-         switch (fieldName)
+         if (theBindings == null)
          {
-            case "position":
-					GL.VertexAttribFormat(id, 3, VertexAttribType.Float, false, 0);
-               break;
-            case "uv":
-					GL.VertexAttribFormat(id, 2, VertexAttribType.Float, false, 12);
-               break;
-            case "color":
-					GL.VertexAttribFormat(id, 4, VertexAttribType.UnsignedByte, true, 20);
-               break;
-            default:
-               throw new Exception(String.Format("Unknown attribute field: {0}", fieldName));
+            theBindings = new Dictionary<string, BufferBinding>();
+            theBindings["position"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 3, offset = 0 };
+            theBindings["uv"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = true, numElements = 2, offset = 12 };
+            theBindings["color"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.UnsignedByte, normalize = true, numElements = 4, offset = 20 };
          }
+
+         return theBindings;
       }
    }
 
@@ -88,7 +84,7 @@ namespace Graphics
    public class DebugCanvas
    {
       public ShaderProgram myShader;
-		public VertexBufferObject<V3T2B4> myVbo;
+		public VertexBufferObject myVbo;
 		public IndexBufferObject myIbo;
 		public VertexArrayObject myVao;
 		public Texture myTexture;
@@ -117,7 +113,7 @@ namespace Graphics
 
       public void init()
       {
-			myVbo = new VertexBufferObject<V3T2B4>(BufferUsageHint.DynamicDraw);
+			myVbo = new VertexBufferObject(BufferUsageHint.DynamicDraw);
 			myIbo = new IndexBufferObject(BufferUsageHint.DynamicDraw);
 			myVao = new VertexArrayObject();
 
@@ -127,10 +123,10 @@ namespace Graphics
 			ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
          myShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
-			myVao.bindVertexFormat<V3T2B4>(myShader);
+			myVao.bindVertexFormat(myShader, V3T2B4.bindings());
 
-			//myTexture = Graphics.Util.getEmbeddedTexture("Graphics.data.debugFont.png");
-			myTexture = Graphics.Util.getEmbeddedTexture("Graphics.data.proggy12.png");
+			myTexture = Graphics.Util.getEmbeddedTexture("Graphics.data.debugFont.png");
+			//myTexture = Util.getEmbeddedTexture("Graphics.data.proggy12.png");
 			myTexture.setMinMagFilters(TextureMinFilter.NearestMipmapNearest, TextureMagFilter.Nearest);
          myTexture.setWrapping(TextureWrapMode.ClampToEdge, TextureWrapMode.ClampToEdge);
          myFont = new TextureFont("Debug", myTexture, 16, 16, 32);

@@ -17,7 +17,7 @@ namespace Graphics
 		float myAlpha;
 		V3T2B4[] myVerts;
 
-		static VertexBufferObject<V3T2B4> theVBO;
+		static VertexBufferObject theVBO;
 		static IndexBufferObject theIBO;
 		static VertexArrayObject theVAO;
 		static ShaderProgram theShader;
@@ -31,7 +31,7 @@ namespace Graphics
 			ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
 			theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
-			theVBO = new VertexBufferObject<V3T2B4>(BufferUsageHint.DynamicDraw);
+			theVBO = new VertexBufferObject(BufferUsageHint.DynamicDraw);
 			theIBO = new IndexBufferObject(BufferUsageHint.StaticDraw);
 
 			ushort[] index = { 0, 1, 2, 0, 2, 3 };
@@ -39,7 +39,7 @@ namespace Graphics
 
 			//setup the vao
 			theVAO = new VertexArrayObject();
-			theVAO.bindVertexFormat<V3T2B4>(theShader);
+			theVAO.bindVertexFormat(theShader, V3T2B4.bindings());
 		}
 
 		public RenderTexture2dCommand(Vector2 min, Vector2 max, Texture t, float alpha = 1.0f, bool isDepthBuffer = false)
@@ -146,7 +146,7 @@ namespace Graphics
 	{
 		V3T2B4[] myVerts;
 
-		static VertexBufferObject<V3T2B4> theVBO;
+		static VertexBufferObject theVBO;
 		static IndexBufferObject theIBO;
 		static VertexArrayObject theVAO;
 		static ShaderProgram theShader;
@@ -160,7 +160,7 @@ namespace Graphics
 			ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
 			theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
-			theVBO = new VertexBufferObject<V3T2B4>(BufferUsageHint.DynamicDraw);
+			theVBO = new VertexBufferObject(BufferUsageHint.DynamicDraw);
 			theIBO = new IndexBufferObject(BufferUsageHint.StaticDraw);
 
 			ushort[] index ={0, 1, 2,
@@ -180,7 +180,7 @@ namespace Graphics
 
 			//setup the vao
 			theVAO = new VertexArrayObject();
-			theVAO.bindVertexFormat<V3T2B4>(theShader);
+			theVAO.bindVertexFormat(theShader, V3T2B4.bindings());
 		}
 
 		public RenderTextureCubeCommand(Vector3 min, Vector3 max, Texture t, float alpha = 1.0f)
@@ -256,7 +256,7 @@ namespace Graphics
 	{
 		V3T2B4[] myVerts;
 
-		static VertexBufferObject<V3T2B4> theVBO;
+		static VertexBufferObject theVBO;
 		static IndexBufferObject theIBO;
 		static VertexArrayObject theVAO;
 		static ShaderProgram theShader;
@@ -272,7 +272,7 @@ namespace Graphics
 			ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
 			theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
-			theVBO = new VertexBufferObject<V3T2B4>(BufferUsageHint.DynamicDraw);
+			theVBO = new VertexBufferObject(BufferUsageHint.DynamicDraw);
 			theIBO = new IndexBufferObject(BufferUsageHint.StaticDraw);
 
 			ushort[] index = {
@@ -285,8 +285,8 @@ namespace Graphics
 
 			//setup the vao
 			theVAO = new VertexArrayObject();
-			theVAO.bindVertexFormat<V3T2B4>(theShader);
-		}
+         theVAO.bindVertexFormat(theShader, V3T2B4.bindings());
+      }
 
 		public RenderWireframeCubeCommand(Vector3 min, Vector3 max, Color4 c)
 			: base()
@@ -333,7 +333,7 @@ namespace Graphics
       V3T2B4[] myVerts;
 
       static Vector4[] theVerts = new Vector4[8];
-      static VertexBufferObject<V3T2B4> theVBO;
+      static VertexBufferObject theVBO;
       static IndexBufferObject theIBO;
       static VertexArrayObject theVAO;
       static ShaderProgram theShader;
@@ -349,7 +349,7 @@ namespace Graphics
          ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
          theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
-         theVBO = new VertexBufferObject<V3T2B4>(BufferUsageHint.DynamicDraw);
+         theVBO = new VertexBufferObject(BufferUsageHint.DynamicDraw);
          theIBO = new IndexBufferObject(BufferUsageHint.StaticDraw);
 
          ushort[] index = {
@@ -372,7 +372,7 @@ namespace Graphics
 
          //setup the vao
          theVAO = new VertexArrayObject();
-         theVAO.bindVertexFormat<V3T2B4>(theShader);
+         theVAO.bindVertexFormat(theShader, V3T2B4.bindings());
       }
 
       public RenderFrustumCommand(Matrix4 viewProj, Color4 c)
@@ -422,16 +422,13 @@ namespace Graphics
 	{
 		V3T2B4[] myVerts;
 
-		static VertexBufferObject<V3T2B4> theVBO;
+		static VertexBufferObject theVBO;
 		static IndexBufferObject theIBO;
 		static VertexArrayObject theVAO;
 		static ShaderProgram theShader;
 
 		static RenderTexturedQuadCommand()
 		{
-			theVBO = new VertexBufferObject<V3T2B4>(BufferUsageHint.DynamicDraw);
-			theIBO = new IndexBufferObject(BufferUsageHint.StaticDraw);
-
 			//setup the shader
 			List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
 			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\draw-vs.glsl", ShaderDescriptor.Source.File));
@@ -439,7 +436,7 @@ namespace Graphics
 			ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
 			theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
-			theVBO = new VertexBufferObject<V3T2B4>(BufferUsageHint.DynamicDraw);
+			theVBO = new VertexBufferObject(BufferUsageHint.DynamicDraw);
 			theIBO = new IndexBufferObject(BufferUsageHint.StaticDraw);
 
 			
@@ -451,8 +448,8 @@ namespace Graphics
 
 			//setup the vao
 			theVAO = new VertexArrayObject();
-			theVAO.bindVertexFormat<V3T2B4>(theShader);
-		}
+         theVAO.bindVertexFormat(theShader, V3T2B4.bindings());
+      }
 
 		public RenderTexturedQuadCommand(Vector3[] verts, Texture t, float alpha = 1.0f)
 		{
@@ -497,16 +494,13 @@ namespace Graphics
 	{
 		V3T2B4[] myVerts;
 
-		static VertexBufferObject<V3T2B4> theVBO;
+		static VertexBufferObject theVBO;
 		static IndexBufferObject theIBO;
 		static VertexArrayObject theVAO;
 		static ShaderProgram theShader;
 
 		static RenderQuadCommand()
 		{
-			theVBO = new VertexBufferObject<V3T2B4>(BufferUsageHint.DynamicDraw);
-			theIBO = new IndexBufferObject(BufferUsageHint.StaticDraw);
-
 			//setup the shader
 			List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
 			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\draw-vs.glsl", ShaderDescriptor.Source.File));
@@ -514,7 +508,7 @@ namespace Graphics
 			ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
 			theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
-			theVBO = new VertexBufferObject<V3T2B4>(BufferUsageHint.DynamicDraw);
+			theVBO = new VertexBufferObject(BufferUsageHint.DynamicDraw);
 			theIBO = new IndexBufferObject(BufferUsageHint.StaticDraw);
 
 
@@ -526,8 +520,8 @@ namespace Graphics
 
 			//setup the vao
 			theVAO = new VertexArrayObject();
-			theVAO.bindVertexFormat<V3T2B4>(theShader);
-		}
+         theVAO.bindVertexFormat(theShader, V3T2B4.bindings());
+      }
 
 		public RenderQuadCommand(Vector3[] verts, Color4 c)
 		{
@@ -568,16 +562,13 @@ namespace Graphics
 	{
 		V3T2B4[] myVerts;
 
-		static VertexBufferObject<V3T2B4> theVBO;
+		static VertexBufferObject theVBO;
 		static IndexBufferObject theIBO;
 		static VertexArrayObject theVAO;
 		static ShaderProgram theShader;
 
 		static RenderLineCommand()
 		{
-			theVBO = new VertexBufferObject<V3T2B4>(BufferUsageHint.DynamicDraw);
-			theIBO = new IndexBufferObject(BufferUsageHint.StaticDraw);
-
 			//setup the shader
 			List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
 			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\draw-vs.glsl", ShaderDescriptor.Source.File));
@@ -585,7 +576,7 @@ namespace Graphics
 			ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
 			theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
-			theVBO = new VertexBufferObject<V3T2B4>(BufferUsageHint.DynamicDraw);
+			theVBO = new VertexBufferObject(BufferUsageHint.DynamicDraw);
 			theIBO = new IndexBufferObject(BufferUsageHint.StaticDraw);
 
 
@@ -595,8 +586,8 @@ namespace Graphics
 
 			//setup the vao
 			theVAO = new VertexArrayObject();
-			theVAO.bindVertexFormat<V3T2B4>(theShader);
-		}
+         theVAO.bindVertexFormat(theShader, V3T2B4.bindings());
+      }
 
 		public RenderLineCommand(Vector3 start, Vector3 end, Color4 c)
 		{
@@ -637,16 +628,13 @@ namespace Graphics
 		static int theSphereIndexCount = 600;
 		static Vector3[] theSphereVerts = new Vector3[theSphereVertCount];
 		static ushort[] theSphereIndexes = new ushort[theSphereIndexCount];
-		static VertexBufferObject<V3T2B4> theVBO;
+		static VertexBufferObject theVBO;
 		static IndexBufferObject theIBO;
 		static VertexArrayObject theVAO;
 		static ShaderProgram theShader;
 
 		static RenderSphereCommand()
 		{
-			theVBO = new VertexBufferObject<V3T2B4>(BufferUsageHint.DynamicDraw);
-			theIBO = new IndexBufferObject(BufferUsageHint.StaticDraw);
-
 			//setup the shader
 			List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
 			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\draw-vs.glsl", ShaderDescriptor.Source.File));
@@ -654,7 +642,7 @@ namespace Graphics
 			ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
 			theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
-			theVBO = new VertexBufferObject<V3T2B4>(BufferUsageHint.DynamicDraw);
+			theVBO = new VertexBufferObject(BufferUsageHint.DynamicDraw);
 			theIBO = new IndexBufferObject(BufferUsageHint.StaticDraw);
 
 			createTheSphere();
@@ -663,8 +651,8 @@ namespace Graphics
 
 			//setup the vao
 			theVAO = new VertexArrayObject();
-			theVAO.bindVertexFormat<V3T2B4>(theShader);
-		}
+         theVAO.bindVertexFormat(theShader, V3T2B4.bindings());
+      }
 
 		static void createTheSphere()
 		{

@@ -21,7 +21,7 @@ namespace Graphics
       public override IResource create(ResourceManager mgr)
       {
          ObjModelLoader loader = new ObjModelLoader(mgr);
-         StaticModel m = loader.loadFromFile(name);
+         Model m = loader.loadFromFile(name);
          return m;
       }
    }
@@ -52,7 +52,7 @@ namespace Graphics
          myResourceManager = mgr;
       }
 
-      public StaticModel loadFromFile(string path)
+      public Model loadFromFile(string path)
       {
          Info.print("Loading OBJ model {0}", path);
 
@@ -73,7 +73,7 @@ namespace Graphics
 
          file.Close();
 
-         StaticModel sm = buildMeshes();
+         Model sm = buildMeshes();
          sm.size = (findMax() - findMin()).Length / 2.0f;
 
          return sm;
@@ -341,12 +341,12 @@ namespace Graphics
          return true;
       }
 
-      public StaticModel buildMeshes()
+      public Model buildMeshes()
       {
          List<V3N3T2> verts = new List<V3N3T2>();
          List<ushort> index = new List<ushort>();
 
-         StaticModel sm = new StaticModel();
+         Model sm = new Model();
 
          int indexCount = 0;
          int indexOffset = indexCount;
@@ -389,8 +389,12 @@ namespace Graphics
             indexCount = 0;
          }
 
-         sm.myVbo.setData(verts);
+         VertexBufferObject vbo = new VertexBufferObject(BufferUsageHint.StaticDraw);
+         vbo.setData(verts);
+         sm.myVbos.Add(vbo);
          sm.myIbo.setData(index);
+
+         sm.myBindings = V3N3T2.bindings();
 
          return sm;
       }

@@ -79,7 +79,7 @@ namespace Graphics
 					rq = Renderer.device.createRenderQueue<StaticModelInfo>(pipeline);
                rq.name = rq.myPipeline.shaderState.shaderProgram.name + "-" + (mesh.material.hasTransparency == true ? "transparent" : "opaque");
                rq.myPipeline.vaoState.vao = new VertexArrayObject();
-					rq.myPipeline.vaoState.vao.bindVertexFormat<V3N3T2>(rq.myPipeline.shaderState.shaderProgram);
+					rq.myPipeline.vaoState.vao.bindVertexFormat(rq.myPipeline.shaderState.shaderProgram, V3N3T2.bindings());
 					rq.visualizer = this;
 			      p.registerQueue(rq);
 				}
@@ -93,7 +93,7 @@ namespace Graphics
 						
 				info.renderState.setUniform(new UniformData(0, Uniform.UniformType.Int, modelDataIndex));
 				info.renderState.setStorageBuffer(myModelBuffer.id, 2);
-				info.renderState.setVertexBuffer(smr.model.myVbo.id, 0, 0, V3N3T2.stride);
+				info.renderState.setVertexBuffer(smr.model.myVbos[0].id, 0, 0, V3N3T2.stride);
 				info.renderState.setIndexBuffer(smr.model.myIbo.id);
 				info.indexOffset = mesh.indexBase;
 				info.indexCount = mesh.indexCount;		

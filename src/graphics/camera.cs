@@ -179,38 +179,11 @@ namespace Graphics
 
 		public void lookAt(Vector3 eye, Vector3 target, Vector3 up)
 		{
-			myEye = eye;
+         myViewMatrix = Matrix4.LookAt(eye, target, up);
+         myOrientation = myOrientation.fromMatrix(myViewMatrix);
 
-			myZAxis = eye - target;
-			myZAxis.Normalize();
-
-			myViewDir = -myZAxis;
-
-			myXAxis = Vector3.Cross(up, myViewDir);
-			myXAxis.Normalize();
-
-			myYAxis = Vector3.Cross(myViewDir, myXAxis);
-			myYAxis.Normalize();
-
-			myViewMatrix.M11 = myXAxis.X;
-			myViewMatrix.M21 = myXAxis.Y;
-			myViewMatrix.M31 = myXAxis.Z;
-			myViewMatrix.M41 = -Vector3.Dot(myXAxis, eye);
-
-			myViewMatrix.M12 = myYAxis.X;
-			myViewMatrix.M22 = myYAxis.Y;
-			myViewMatrix.M32 = myYAxis.Z;
-			myViewMatrix.M42 = -Vector3.Dot(myYAxis, eye);
-
-			myViewMatrix.M13 = myZAxis.X;
-			myViewMatrix.M23 = myZAxis.Y;
-			myViewMatrix.M33 = myZAxis.Z;
-			myViewMatrix.M43 = -Vector3.Dot(myViewDir, eye);
-
-			myOrientation.fromMatrix(myViewMatrix);
-
-			updateViewMatrix();
-		}
+         updateViewMatrix();
+      }
 
 		public void move(float dx, float dy, float dz)
 		{
@@ -278,7 +251,7 @@ namespace Graphics
 
 		public void rotate(Quaternion q)
 		{
-			myOrientation *= q;
+			myOrientation = q * myOrientation;
 			updateViewMatrix();
 		}
 
@@ -328,11 +301,11 @@ namespace Graphics
 			myZAxis.Y = myViewMatrix.M23;
 			myZAxis.Z = myViewMatrix.M33;
 
-         myXAxis.Normalize();
+			myXAxis.Normalize();
 			myYAxis.Normalize();
 			myZAxis.Normalize();
 
-         myViewDir = -myZAxis;
+			myViewDir = -myZAxis;
 
 			myViewMatrix.M41 = -Vector3.Dot(myXAxis, myEye);
 			myViewMatrix.M42 = -Vector3.Dot(myYAxis, myEye);

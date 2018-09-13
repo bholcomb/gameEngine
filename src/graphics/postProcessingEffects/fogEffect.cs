@@ -25,16 +25,15 @@ namespace Graphics
       public Vector3 fogColor { get; set; }
       public float maxDistance { get; set; }
 
-      public override List<RenderCommand> getCommands()
+      public override void getCommands(List<RenderCommand> cmds)
       {
-         List<RenderCommand> ret=new List<RenderCommand>();
          StatelessRenderCommand cmd;
 
-         ret.Add(new PushDebugMarkerCommand("fog effect"));
+         cmds.Add(new PushDebugMarkerCommand("fog effect"));
 
          RenderTarget targetFbo = postPass.nextRenderTarget();
          output = targetFbo.buffers[FramebufferAttachment.ColorAttachment0];
-         ret.Add(new SetRenderTargetCommand(targetFbo));
+         cmds.Add(new SetRenderTargetCommand(targetFbo));
 
          cmd = new PostEffectRenderCommand(myShader, postPass.view.viewport.width, postPass.view.viewport.height);
          cmd.renderState.setTexture(postPass.previousEffectOutput(this).id(), 0, TextureTarget.Texture2D);
@@ -44,10 +43,9 @@ namespace Graphics
          cmd.renderState.setUniform(new UniformData(22, Uniform.UniformType.Vec3, fogColor));
          cmd.renderState.setUniform(new UniformData(23, Uniform.UniformType.Float, maxDistance));
 
-         ret.Add(cmd);
+         cmds.Add(cmd);
 
-         ret.Add(new PopDebugMarkerCommand());
-         return ret;
+         cmds.Add(new PopDebugMarkerCommand());
       }
    }
 }

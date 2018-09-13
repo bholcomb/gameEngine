@@ -17,8 +17,6 @@ namespace Graphics
       String myFilename;
       const int MAX_TEXT = 250;
      
-      VertexBufferObject<V3T2> myVbo = new VertexBufferObject<V3T2>(BufferUsageHint.DynamicDraw);
-      IndexBufferObject myIbo = new IndexBufferObject(BufferUsageHint.DynamicDraw);
       VertexArrayObject myVao = new VertexArrayObject();
       ShaderProgram myShader;
 
@@ -44,7 +42,7 @@ namespace Graphics
 			ShaderProgramDescriptor shDesc = new ShaderProgramDescriptor(desc);
 
 			myShader = Renderer.resourceManager.getResource(shDesc) as ShaderProgram;
-         myVao.bindVertexFormat<V3T2>(myShader);
+         myVao.bindVertexFormat(myShader, V3T2.bindings());
       }
 
       public override void setupRenderCommand(StatelessRenderCommand rc)
@@ -55,8 +53,6 @@ namespace Graphics
          rc.pipelineState.generateId();
 
 			//set renderstate
-			rc.renderState.setVertexBuffer(myVbo.id, 0, 0, V3T2.stride);
-			rc.renderState.setIndexBuffer(myIbo.id);
 			rc.renderState.setTexture(texture.id(), 0, texture.target);
 			rc.renderState.setUniform(new UniformData(20, Uniform.UniformType.Int, 0));
 
@@ -139,7 +135,7 @@ namespace Graphics
          return true;
       }
 
-      public override void updateText(String txt)
+      public override void updateText(String txt, VertexBufferObject vbo, IndexBufferObject ibo)
       {
          //build the VBO
          ushort counter = 0;
@@ -182,24 +178,20 @@ namespace Graphics
             //indicies to draw as tris
             myIndexes[indexCount++] = (ushort)(0 + (counter * 4));
             myIndexes[indexCount++] = (ushort)(1 + (counter * 4));
-            myIndexes[indexCount++] = (ushort)(3 + (counter * 4));
             myIndexes[indexCount++] = (ushort)(2 + (counter * 4));
+            myIndexes[indexCount++] = (ushort)(0 + (counter * 4));
+            myIndexes[indexCount++] = (ushort)(2 + (counter * 4));
+            myIndexes[indexCount++] = (ushort)(3 + (counter * 4));
+
 
             posx += g.advance.X;
             counter++;
          }
 
 			//update the VBO
-			myVbo.setData(myVerts, 0, (counter * 4 * V3T2.stride));
-			myIbo.setData(myIndexes, 0, (indexCount * 2));
+			vbo.setData(myVerts, 0, (counter * 4 * V3T2.stride));
+			ibo.setData(myIndexes, 0, (indexCount * 2));
 		}
-
-      public override void drawText()
-      {
-         Renderer.device.bindVertexBuffer(myVbo.id, 0, 0, V3T2.stride);
-         Renderer.device.bindIndexBuffer(myIbo.id);
-         Renderer.device.drawIndexed(PrimitiveType.TriangleStrip, myIbo.count, 0, DrawElementsType.UnsignedShort);
-      }
 
       public override float width(String txt)
       {

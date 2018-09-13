@@ -39,7 +39,7 @@ namespace Graphics
             return true;
          }
 
-			DebugRenderer.addSphere(position, 0.1f, color, Fill.TRANSPARENT, false, 0);
+			//DebugRenderer.addSphere(position, 0.1f, color, Fill.TRANSPARENT, false, 0);
 
 			return c.containsSphere(position, size);
 		}

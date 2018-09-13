@@ -113,7 +113,7 @@ namespace Graphics
       protected bool myFlip = false;
       protected OGL.PixelInternalFormat myPixelFormat;
       protected OGL.PixelType myDataType;
-      protected UInt64 myHandle;
+      protected UInt64 myHandle = 0;
 
       public bool hasAlpha { get; set; }
       public TextureTarget target { get; set; }
@@ -163,8 +163,11 @@ namespace Graphics
             System.Console.WriteLine("Cannot create texture from file: {0}", filename);
          }
 
-         myHandle = (UInt64)GL.Arb.GetTextureHandle(myId);
-         GL.Arb.MakeTextureHandleResident(myHandle);
+         if (Renderer.device.bindlessTextures)
+         {
+            myHandle = (UInt64)GL.Arb.GetTextureHandle(myId);
+            GL.Arb.MakeTextureHandleResident(myHandle);
+         }
 		}
 
       public Texture(int texWidth, int texHeight, OGL.PixelInternalFormat pif = PixelInternalFormat.Rgba8, PixelData pixels = null , bool generateMipmaps=false)
@@ -212,9 +215,6 @@ namespace Graphics
 			}
 
 			unbind();
-
-         myHandle = (UInt64)GL.Arb.GetTextureHandle(myId);
-         GL.Arb.MakeTextureHandleResident(myHandle);
       }
 
 		public void setMinMagFilters(TextureMinFilter min, TextureMagFilter mag)
@@ -290,7 +290,18 @@ namespace Graphics
          return myId;
       }
 
-      public UInt64 handle { get { return myHandle; } }
+      public UInt64 handle {
+         get
+         {
+            if(myHandle == 0 && Renderer.device.bindlessTextures)
+            {
+               myHandle = (UInt64)GL.Arb.GetTextureHandle(myId);
+               GL.Arb.MakeTextureHandleResident(myHandle);
+            }
+
+            return myHandle;
+         }
+      }
 
       public bool isValid { get { return myId!=0; } }
 

@@ -72,7 +72,10 @@ namespace Graphics
             return null;
          }
 
-         myModel.myVbo.setData(myVerts);
+         myModel.myBindings = V3N3T2B4W4.bindings();
+         VertexBufferObject vbo = new VertexBufferObject(BufferUsageHint.StaticDraw);
+         vbo.setData(myVerts);
+         myModel.myVbos.Add(vbo);
          myModel.myIbo.setData(index);
 
          //should probably build a bounding box

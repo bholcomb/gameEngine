@@ -73,10 +73,14 @@ namespace Graphics
 			modelData.normalMatrix = (smr.model.myInitialTransform * smr.modelMatrix).ClearTranslation();
 			//modelData.inverseNormalMatrix = modelData.normalMatrix.Inverted();
 			modelData.activeLights = new Vector4(0, 1, 2, 3);
-			modelData.currentFrame = (smr.findController("animation") as AnimationController).animation.currentFrame;
-			modelData.nextFrame = (smr.findController("animation") as AnimationController).animation.nextFrame;
-			modelData.interpolation = (smr.findController("animation") as AnimationController).animation.interpolation;
-			modelData.boneCount = smr.model.boneCount;
+         if (smr.findController("animation") != null)
+         {
+            modelData.currentFrame = (smr.findController("animation") as AnimationController).animation.currentFrame;
+            modelData.nextFrame = (smr.findController("animation") as AnimationController).animation.nextFrame;
+            modelData.interpolation = (smr.findController("animation") as AnimationController).animation.interpolation;
+         }
+
+			modelData.boneCount = smr.model.skeleton.boneCount;
 			myModelData.Add(modelData);
 
 			//save the index for this model
@@ -92,7 +96,7 @@ namespace Graphics
 					rq = Renderer.device.createRenderQueue<SkinnedModelInfo>(effect.createPipeline(mesh.material));
                rq.name = rq.myPipeline.shaderState.shaderProgram.name + "-" + (mesh.material.hasTransparency == true ? "transparent" : "opaque"); 
                rq.myPipeline.vaoState.vao = new VertexArrayObject();
-					rq.myPipeline.vaoState.vao.bindVertexFormat<V3N3T2B4W4>(rq.myPipeline.shaderState.shaderProgram);
+					rq.myPipeline.vaoState.vao.bindVertexFormat(rq.myPipeline.shaderState.shaderProgram, V3N3T2B4W4.bindings());
 					rq.visualizer = this;
 			      p.registerQueue(rq);
 				}
@@ -110,7 +114,7 @@ namespace Graphics
 				info.renderState.setUniform(new UniformData(0, Uniform.UniformType.Int, modelDataIndex));
 				info.renderState.setStorageBuffer(myModelBuffer.id, 0);
 				info.renderState.setStorageBuffer(smr.model.myFrames.id, 1);
-				info.renderState.setVertexBuffer(smr.model.myVbo.id, 0, 0, V3N3T2B4W4.stride);
+				info.renderState.setVertexBuffer(smr.model.myVbos[0].id, 0, 0, V3N3T2B4W4.stride);
 				info.renderState.setIndexBuffer(smr.model.myIbo.id);
 
 				info.sortId = getSortId(info);

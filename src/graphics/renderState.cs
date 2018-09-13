@@ -284,7 +284,7 @@ namespace Graphics
       UniformUploadData[] myUniformUploadData = new UniformUploadData[5];
       int currentUniformUpload = -1;
 
-      public UniformData[] myUniforms = new UniformData[10];
+      public UniformData[] myUniforms = new UniformData[20];
       int currentUniformData = -1;
 
       public struct VertexInfo
@@ -316,7 +316,7 @@ namespace Graphics
          public TextureTarget type;
       }
 
-      public TextureInfo[] myTextures = new TextureInfo[5];
+      public TextureInfo[] myTextures = new TextureInfo[10];
       public int currentTextureInfo = -1;
 
       public RenderState()

@@ -570,7 +570,10 @@ namespace Graphics
             }
          }
         
-         sm.myVbo.setData(verts);
+         sm.myBindings = V3N3T2B4W4.bindings();
+         VertexBufferObject vbo = new VertexBufferObject(BufferUsageHint.StaticDraw);
+         vbo.setData(verts);
+         sm.myVbos.Add(vbo);
          sm.myIbo.setData(indexes);
          sm.myFrames.setData(boneData);
          sm.boneCount = boneCount;

@@ -18,6 +18,12 @@ namespace Graphics
       public int endFrame { get; set; }
       public float fps { get; set; }
       public bool loop { get; set; }
+      public List<AnimationEvent> events = new List<AnimationEvent>();
+      public List<List<Matrix4>> poses = new List<List<Matrix4>>();
+
+      public Animation()
+      {
+      }
 
       public Animation(string animName, int start, int end, float framesPerSecond, bool isLooping)
       {
@@ -82,36 +88,25 @@ namespace Graphics
       }
    }
 
-   public class SkinnedModel : IResource
+   public class SkinnedModel : Model
    {
-      public Matrix4 myInitialTransform = Matrix4.Identity;
-      public VertexBufferObject<V3N3T2B4W4> myVbo;
-      public IndexBufferObject myIbo;
       public ShaderStorageBufferObject myFrames;
-      public List<Mesh> myMeshes;
-
-      public int boneCount;
       public Dictionary<String, Animation> animations { get; set; }
-
-      public float size;
+      public Skeleton skeleton { get; set; }
 
       public SkinnedModel()
       {
-         myVbo = new VertexBufferObject<V3N3T2B4W4>(BufferUsageHint.StaticDraw);
-         myIbo = new IndexBufferObject(BufferUsageHint.StaticDraw);
-			myFrames = new ShaderStorageBufferObject(BufferUsageHint.StaticDraw);
-         myMeshes = new List<Mesh>();
-
+         myFrames = new ShaderStorageBufferObject(BufferUsageHint.StaticDraw);
          animations = new Dictionary<String, Animation>();
+         skeleton = new Skeleton();
 
          //insert the null animation
          animations["null"] = new Animation("null", 0, 0, 0, false);
       }
 
-      public void Dispose()
+      public new void Dispose()
       {
-         myVbo.Dispose();
-         myIbo.Dispose();
+         base.Dispose();
          myFrames.Dispose();
       }
 

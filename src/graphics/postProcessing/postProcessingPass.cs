@@ -27,6 +27,7 @@ namespace Graphics
          {
             throw new Exception("need fbo as input");
          }
+
          mySourceFbo = sourceFbo;
 
          //create temp render targets for ping pong type action
@@ -93,6 +94,16 @@ namespace Graphics
 
          effect.postPass = this;
          myEffects.Add(effect);
+         resetIndexes();
+      }
+
+      void resetIndexes()
+      {
+         int i = 0;
+         foreach(PostEffect e in myEffects)
+         {
+            e.index = i++;
+         }
       }
 
       public void removeEffect(String name)
@@ -105,6 +116,8 @@ namespace Graphics
                break;
             }
          }
+
+         resetIndexes();
       }
 
       public PostEffect findEffect(String name)
@@ -143,13 +156,10 @@ namespace Graphics
 
       public PostEffect previousEffect(PostEffect currentEffect)
       {
-         for (int i = 0; i < myEffects.Count; i++)
+         int i = currentEffect.index;
+         if(i > 0)
          {
-            if (myEffects[i] == currentEffect)
-            {
-               if (i > 0)
-                  return myEffects[i - 1];
-            }
+            return myEffects[i - 1];
          }
 
          return null;
@@ -157,13 +167,15 @@ namespace Graphics
 
       public Texture previousEffectOutput(PostEffect currentEffect)
       {
-         for (int i = 0; i < myEffects.Count; i++)
+         PostEffect effect = previousEffect(currentEffect);
+         while(effect != null)
          {
-            if (myEffects[i] == currentEffect)
+            if(effect.enabled == true)
             {
-               if (i > 0)
-                  return myEffects[i - 1].output;
+               return effect.output;
             }
+
+            effect = previousEffect(effect);
          }
 
          return sourceColorBuffer();
@@ -175,19 +187,27 @@ namespace Graphics
 
          RenderCommandList cmds = new RenderCommandList();
 
-         foreach (PostEffect e in myEffects)
+         List<PostEffect> activeEffects = new List<PostEffect>();
+         foreach(PostEffect e in myEffects)
+         {
+            if(e.enabled == true)
+            {
+               activeEffects.Add(e);
+            }
+         }
+
+         foreach (PostEffect e in activeEffects)
          {
             cmds.AddRange(e.getCommands());
          }
 
-         if (myEffects.Count > 0)
+         if (activeEffects.Count > 0)
          {
             cmds.Add(new SetRenderTargetCommand(renderTarget));
-            cmds.Add(new CopyFramebufferCommand(myEffects[myEffects.Count - 1].output, view.viewport.width, view.viewport.height));
+            cmds.Add(new CopyFramebufferCommand(activeEffects[activeEffects.Count - 1].output, view.viewport.width, view.viewport.height));
          }
 
          renderCmdLists.Add(cmds);
-
          renderCmdLists.Add(postCommands);
       }
 

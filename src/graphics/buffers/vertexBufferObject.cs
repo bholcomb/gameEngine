@@ -5,8 +5,8 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace Graphics 
-{
+namespace Graphics
+{     
    public abstract class BaseVertexBufferObject : BufferObject
    {
       public BaseVertexBufferObject(BufferUsageHint hint)
@@ -17,18 +17,11 @@ namespace Graphics
       public abstract Type GetVertexType();
    }
 
-
-   public class VertexBufferObject<T> : BaseVertexBufferObject where T : struct
+   public class VertexBufferObject : BufferObject
    {
       public VertexBufferObject(BufferUsageHint hint)
-         : base(hint)
+         : base(BufferTarget.ArrayBuffer, hint)
       {
-
-      }
-
-      public override Type GetVertexType()
-      {
-         return this.GetType().GetGenericArguments()[0];
       }
    }
 }

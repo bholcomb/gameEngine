@@ -200,24 +200,11 @@ namespace Graphics
       {
          if (myMouseLook == true)
          {
-//             Quaternion q = new Quaternion();
-             myMouseLookHeading += xDelta;
-             myMouseLookPitch += yDelta;
-            //             myViewOri = q.fromHeadingPitchRoll(myMouseLookHeading, myMouseLookPitch, 0.0f);
-
-            if(shiftDown == true)
-            {
-               myViewOri = myViewOri * 
-                  Quaternion.FromAxisAngle(myCamera.forward, MathHelper.DegreesToRadians(xDelta));
-            }
-            else
-            {
-               myViewOri = myViewOri *
-                  Quaternion.FromAxisAngle(myCamera.up, MathHelper.DegreesToRadians(xDelta)) *
-                  Quaternion.FromAxisAngle(myCamera.right, MathHelper.DegreesToRadians(yDelta));
-            }
-
-         } 
+            Quaternion q = new Quaternion();
+            myMouseLookHeading += xDelta;
+            myMouseLookPitch += yDelta;
+            myViewOri = q.fromHeadingPitchRoll(myMouseLookHeading, myMouseLookPitch, 0.0f);
+         }
       }
 
 
@@ -248,12 +235,12 @@ namespace Graphics
       public GameWindowCameraEventHandler(Camera c, GameWindow win)
          : base(c)
       {       
-         win.Mouse.Move += new EventHandler<MouseMoveEventArgs>(handleMouseMove);
-         win.Mouse.ButtonDown += new EventHandler<MouseButtonEventArgs>(handleMouseButtonDown);
-         win.Mouse.ButtonUp += new EventHandler<MouseButtonEventArgs>(handleMouseButtonUp);
-         win.Mouse.WheelChanged += new EventHandler<MouseWheelEventArgs>(handleMouseWheel);
-         win.Keyboard.KeyDown += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardDown);
-         win.Keyboard.KeyUp += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardUp);
+         win.MouseMove += new EventHandler<MouseMoveEventArgs>(handleMouseMove);
+         win.MouseDown += new EventHandler<MouseButtonEventArgs>(handleMouseButtonDown);
+         win.MouseUp += new EventHandler<MouseButtonEventArgs>(handleMouseButtonUp);
+         win.MouseWheel += new EventHandler<MouseWheelEventArgs>(handleMouseWheel);
+         win.KeyDown += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardDown);
+         win.KeyUp += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardUp);
       }
 
       #region OpenTK Gamewindow handler functions

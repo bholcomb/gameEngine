@@ -37,6 +37,10 @@ namespace Graphics
       public PipelineState currentPipeline;
       public RenderTarget currentRenderTarget;
 
+      bool myBindlessTextureSupport = false;
+
+      public bool bindlessTextures { get { return myBindlessTextureSupport; } }
+
       public Device()
       {
          //initialize all the things
@@ -50,7 +54,24 @@ namespace Graphics
       public bool init()
       {
          setupDebugCapture();
+         checkBindlessTextures();
          return true;
+      }
+
+      private void checkBindlessTextures()
+      {
+         List<string> ext = extensions();
+         foreach(string s in ext)
+         {
+            if(s == "GL_ARB_bindless_texture")
+            {
+               //myBindlessTextureSupport = true;
+               myBindlessTextureSupport = false;
+               return;
+            }
+         }
+
+         myBindlessTextureSupport = false;
       }
 
       public bool shutdown()
@@ -135,7 +156,7 @@ namespace Graphics
       {
          for (int i = 0; i < myBoundVertexBuffers.Length; i++)
          {
-            bindVertexBuffer(0, i, 0, 0);
+            //bindVertexBuffer(0, i, 0, 0);
             myBoundVertexBuffers[i] = 0;
          }
 
@@ -305,7 +326,7 @@ namespace Graphics
          GL.Enable(EnableCap.DebugOutputSynchronous);
 
          //filter out noise messages
-         disabledIds = new uint[4] { 131185, 131186, 131204, 1282 };
+         disabledIds = new uint[3] { 131185, 131186, 131204 };
          GL.DebugMessageControl(DebugSourceControl.DebugSourceApi, DebugTypeControl.DontCare, DebugSeverityControl.DontCare, disabledIds.Length, disabledIds, false);
          GL.DebugMessageControl(DebugSourceControl.DebugSourceApi, DebugTypeControl.DebugTypeOther, DebugSeverityControl.DebugSeverityNotification, 0, (uint[])null, false);
 
@@ -322,6 +343,18 @@ namespace Graphics
       {
          string msg = Marshal.PtrToStringAnsi(message, length);
          Info.print("GL Debug Message: {0} \n\tSource:{1} \n\tType:{2} \n\tSeverity:{3} \n\tID:{4} ", msg, source, type, severity, id);
+      }
+
+      public List<string> extensions()
+      {
+         List<string> ext = new List<string>();
+         int count = GL.GetInteger(GetPName.NumExtensions);
+         for(int i = 0; i < count; i++)
+         {
+            ext.Add(GL.GetString(StringName.Extensions, i));
+         }
+
+         return ext;
       }
       #endregion
 

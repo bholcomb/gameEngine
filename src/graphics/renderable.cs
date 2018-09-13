@@ -75,6 +75,13 @@ namespace Graphics
          myDirty = true;
       }
 
+      public virtual void setOrientation(Quaternion newOri)
+      {
+         Matrix4 m = Matrix4.CreateFromQuaternion(newOri);
+         myOrientation = m;
+         myDirty = true;
+      }
+
       public virtual void setScale(Vector3 newScale)
       {
          scale = newScale;

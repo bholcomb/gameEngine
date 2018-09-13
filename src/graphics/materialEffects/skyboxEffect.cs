@@ -23,6 +23,7 @@ namespace Graphics
 			CubemapTexture cubemap = m.myTextures[(int)Material.TextureId.Skybox].value() as CubemapTexture;
 			rs.setTexture((int)cubemap.id(), 0, TextureTarget.TextureCubeMap);
 			rs.setUniform(new UniformData(20, Uniform.UniformType.Int, 0)); // we know this location from the shader
+         rs.setUniform(new UniformData(21, Uniform.UniformType.Float, m.findAttribute("intensity")));
 			rs.setVertexBuffer(SkyBox.theVbo.id, 0, 0, V3.stride);
 			rs.setIndexBuffer(SkyBox.theIbo.id);
 		}

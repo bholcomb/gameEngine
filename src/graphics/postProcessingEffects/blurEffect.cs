@@ -22,12 +22,11 @@ namespace Graphics
          myShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
       }
 
-      public override List<RenderCommand> getCommands()
+      public override void getCommands(List<RenderCommand> cmds)
       {
-         List<RenderCommand> ret = new List<RenderCommand>();
          StatelessRenderCommand cmd;
 
-         ret.Add(new PushDebugMarkerCommand("blur effect"));
+         cmds.Add(new PushDebugMarkerCommand("blur effect"));
 
          RenderTarget target1;
          RenderTarget target2;
@@ -35,7 +34,7 @@ namespace Graphics
          target2 = postPass.nextRenderTarget();
 
          //target a new render target
-         ret.Add(new SetRenderTargetCommand(target1));
+         cmds.Add(new SetRenderTargetCommand(target1));
 
          //blur the input image in the horizontal direction
          cmd = new PostEffectRenderCommand(myShader, postPass.view.viewport.width, postPass.view.viewport.height);
@@ -44,10 +43,10 @@ namespace Graphics
          cmd.renderState.setTexture(postPass.sourceDepthBuffer().id(), 1, TextureTarget.Texture2D);
          cmd.renderState.setUniform(new UniformData(21, Uniform.UniformType.Int, 1));
          cmd.renderState.setUniform(new UniformData(22, Uniform.UniformType.Int, 0)); //blur horizontal
-         ret.Add(cmd);
+         cmds.Add(cmd);
 
          //target a new render target
-         ret.Add(new SetRenderTargetCommand(target2));
+         cmds.Add(new SetRenderTargetCommand(target2));
 
          //blur the previous render target in the vertical direction
          cmd = new PostEffectRenderCommand(myShader, postPass.view.viewport.width, postPass.view.viewport.height);
@@ -56,12 +55,11 @@ namespace Graphics
          cmd.renderState.setTexture(postPass.sourceDepthBuffer().id(), 1, TextureTarget.Texture2D);
          cmd.renderState.setUniform(new UniformData(21, Uniform.UniformType.Int, 1));
          cmd.renderState.setUniform(new UniformData(22, Uniform.UniformType.Int, 1)); //blur vertical
-         ret.Add(cmd);
+         cmds.Add(cmd);
 
          output = target2.buffers[FramebufferAttachment.ColorAttachment0];
 
-         ret.Add(new PopDebugMarkerCommand());
-         return ret;
+         cmds.Add(new PopDebugMarkerCommand());
       }
    }
 }

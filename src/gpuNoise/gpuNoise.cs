@@ -14,7 +14,7 @@ namespace GpuNoise
    public class RenderCubemapSphere : StatelessRenderCommand
    {
       static ShaderProgram theShader;
-      static VertexBufferObject<V3> theVBO;
+      static VertexBufferObject theVBO;
       static IndexBufferObject theIBO;
       static VertexArrayObject theVAO;
       static Matrix4 theOrientation;
@@ -35,7 +35,7 @@ namespace GpuNoise
          ShaderProgramDescriptor sd = new ShaderProgramDescriptor(shadersDesc);
          theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
-         theVBO = new VertexBufferObject<V3>(BufferUsageHint.StaticDraw);
+         theVBO = new VertexBufferObject(BufferUsageHint.StaticDraw);
          theIBO = new IndexBufferObject(BufferUsageHint.StaticDraw);
 
          int lats = 25;
@@ -85,7 +85,7 @@ namespace GpuNoise
          theIBO.setData(index);
 
          theVAO = new VertexArrayObject();
-         theVAO.bindVertexFormat<V3>(theShader);
+         theVAO.bindVertexFormat(theShader, V3.bindings());
 
          thePipeline = new PipelineState();
          thePipeline.shaderState.shaderProgram = theShader;
@@ -194,12 +194,12 @@ namespace GpuNoise
 
       public Texture[] myTextures = new Texture[6];
       public CubemapTexture myCubemap;
-      public int octaves = 10;
-      public float frequency = 1.1f;
+      public int octaves = 5;
+      public float frequency = 1.0f;
       public float offset = 0.0f;
-      public float lacunarity = 2.1f;
+      public float lacunarity = 2.0f;
       public float gain = 1.0f;
-      public float H = 1.2f;
+      public float H = 1.0f;
       public Fractal.Function function = Fractal.Function.multiFractal;
 
       Fractal[] myFractal = new Fractal[6];
@@ -230,8 +230,6 @@ namespace GpuNoise
       {
          myAutoCorrect.reset();
 
-         bool didChange = false;
-
          //generate each face and update the min/max
          for (int i = 0; i < 6; i++)
          {
@@ -244,24 +242,19 @@ namespace GpuNoise
             myFractal[i].gain = gain;
             myFractal[i].offset = offset;
             myFractal[i].face = i;
-            if(myFractal[i].update() == true)
-            {
-               myAutoCorrect.findMinMax(myFractal[i].output);
-               didChange = true;
-            }
-         }
-        
-         if(didChange == true)
-         {
-            //correct all the images with the same min/max
-            for (int i = 0; i < 6; i++)
-            {
-               myAutoCorrect.output = myTextures[i];
-               myAutoCorrect.correct(myFractal[i].output);
-            }
+            myFractal[i].update();
 
-            myCubemap.updateFaces(myTextures);
+            myAutoCorrect.findMinMax(myFractal[i].output);
          }
+         
+         //correct all the images with the same min/max
+         for (int i = 0; i < 6; i++)
+         {
+            myAutoCorrect.output = myTextures[i];
+            myAutoCorrect.correct(myFractal[i].output);
+         }
+         
+         myCubemap.updateFaces(myTextures);
       }
 
       public void update()

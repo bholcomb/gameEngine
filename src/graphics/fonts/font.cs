@@ -26,11 +26,21 @@ namespace Graphics
       {
          myName = name;
          mySize = size;
+
+         for (int i = 0; i < 256; i++)
+         {
+            myGlyphs.Add(new Glyph());
+         }
       }
 
       public Texture texture { get; set; }
       public Glyph findGlyph(char c)
       {
+         if (c < 0 || c > 255)
+         {
+            return null;
+         }
+
          return myGlyphs[c];
       }
 
@@ -51,8 +61,7 @@ namespace Graphics
       }
 
       public abstract void setupRenderCommand(StatelessRenderCommand rc);
-      public abstract void updateText(String str);
-      public abstract void drawText();
+      public abstract void updateText(String str, VertexBufferObject vbo, IndexBufferObject ibo);
 
       public virtual void print(int x, int y, String txt, params Object[] objs)
       {

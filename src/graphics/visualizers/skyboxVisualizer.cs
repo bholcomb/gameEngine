@@ -45,7 +45,7 @@ namespace Graphics
 				rq = Renderer.device.createRenderQueue<SkyboxRenderInfo>(effect.createPipeline(skyboxModel.model.mesh.material));
             rq.name = rq.myPipeline.shaderState.shaderProgram.name;
             rq.myPipeline.vaoState.vao = new VertexArrayObject();
-				rq.myPipeline.vaoState.vao.bindVertexFormat<V3>(rq.myPipeline.shaderState.shaderProgram);
+				rq.myPipeline.vaoState.vao.bindVertexFormat(rq.myPipeline.shaderState.shaderProgram, V3.bindings());
 				rq.visualizer = this;
 	         p.registerQueue(rq);
 			}

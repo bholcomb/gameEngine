@@ -59,10 +59,10 @@ namespace Graphics
       public bool compileShaderResource(ShaderType target, String resName, List<String> defines)
       {
          //check for embedded file
-         if (Util.hasEmbeddedResource(resName) == true)
+         if (Embedded.hasEmbeddedResource(resName) == true)
          {
             Info.print("Compiling {0}: {1}", target, resName);
-            return compileShaderText(target, Util.getString(resName), defines);
+            return compileShaderText(target, Embedded.getString(resName), defines);
          }
 
          //can't find it

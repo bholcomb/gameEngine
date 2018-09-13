@@ -26,7 +26,7 @@ layout(std140) uniform material {
    uniform bool hasParallaxMap;
 };
 */
-   [StructLayout(LayoutKind.Sequential)]
+   [StructLayout(LayoutKind.Sequential)]  
    public struct MaterialUniformData
    {
       public Color4 ambientReflectivity;
@@ -140,6 +140,7 @@ layout(std140) uniform material {
          AlphaMap          = 0x0200,
 			ReflectionMap		= 0x0400,
 			Skybox				= 0x0800,
+         Skydome           = 0x1000,
 		}
 
 		public enum TextureId
@@ -258,32 +259,35 @@ layout(std140) uniform material {
          myMaterialUniformData.shininess = shininess;
          myMaterialUniformData.alpha = alpha;
          myMaterialUniformData.alphaTest = alphaTest;
-         
-         if(myTextures[(int)TextureId.Diffuse] != null)
-         {
-            myMaterialUniformData.diffuseMapId = myTextures[(int)TextureId.Diffuse].value().handle;
-         }
 
-         if (myTextures[(int)TextureId.Specular] != null)
+         if (Renderer.device.bindlessTextures)
          {
-            myMaterialUniformData.hasSpecularMap = 1;
-            myMaterialUniformData.specularMapId = myTextures[(int)TextureId.Specular].value().handle;
-         }
-         
-         if(myTextures[(int)TextureId.Normal] != null)
-         {
-            myMaterialUniformData.hasNormalMap = 1;
-            myMaterialUniformData.normalMapId = myTextures[(int)TextureId.Normal].value().handle;
-            Texture tex = myTextures[(int)TextureId.Normal].value();
-            if(tex.hasAlpha)
+            if (myTextures[(int)TextureId.Diffuse] != null)
             {
-               myMaterialUniformData.hasParallaxMap = 1;
-               myMaterialUniformData.hasParallaxMap = 1;
-               myMaterialUniformData.parallaxScale = 0.04f;
+               myMaterialUniformData.diffuseMapId = myTextures[(int)TextureId.Diffuse].value().handle;
             }
-            else
+
+            if (myTextures[(int)TextureId.Specular] != null)
             {
-               myMaterialUniformData.hasParallaxMap = 0;
+               myMaterialUniformData.hasSpecularMap = 1;
+               myMaterialUniformData.specularMapId = myTextures[(int)TextureId.Specular].value().handle;
+            }
+
+            if (myTextures[(int)TextureId.Normal] != null)
+            {
+               myMaterialUniformData.hasNormalMap = 1;
+               myMaterialUniformData.normalMapId = myTextures[(int)TextureId.Normal].value().handle;
+               Texture tex = myTextures[(int)TextureId.Normal].value();
+               if (tex.hasAlpha)
+               {
+                  myMaterialUniformData.hasParallaxMap = 1;
+                  myMaterialUniformData.hasParallaxMap = 1;
+                  myMaterialUniformData.parallaxScale = 0.04f;
+               }
+               else
+               {
+                  myMaterialUniformData.hasParallaxMap = 0;
+               }
             }
          }
 

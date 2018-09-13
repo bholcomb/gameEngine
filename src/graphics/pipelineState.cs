@@ -10,15 +10,15 @@ namespace Graphics
    {
       public bool enabled { get; set; }
       public BlendEquationMode equation { get; set; }
-      public BlendingFactorDest factorDest { get; set; }
-      public BlendingFactorSrc factorSrc { get; set; }
+      public BlendingFactor factorDest { get; set; }
+      public BlendingFactor factorSrc { get; set; }
 
       public Blending()
       {
          enabled = false;
          equation = BlendEquationMode.FuncAdd;
-         factorSrc = BlendingFactorSrc.SrcAlpha;
-         factorDest = BlendingFactorDest.OneMinusSrcAlpha;
+         factorSrc = BlendingFactor.SrcAlpha;
+         factorDest = BlendingFactor.OneMinusSrcAlpha;
       }
 
       bool isDifferent(Blending other)

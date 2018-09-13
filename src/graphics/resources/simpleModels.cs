@@ -10,9 +10,9 @@ namespace Graphics
 { 
    public class SimpleModel
    {
-      public static StaticModel createCube(Vector3 min, Vector3 max, Texture t)
+      public static Model createCube(Vector3 min, Vector3 max, Texture t)
       {
-         StaticModel model= new StaticModel();
+         Model model= new Model();
 
          ushort[] index ={0, 1, 2,
                         0, 2, 3, //front
@@ -65,7 +65,10 @@ namespace Graphics
          verts[22].Position = new Vector3(max.X, max.Y, max.Z); verts[22].TexCoord = new Vector2(1, 1);
          verts[23].Position = new Vector3(min.X, max.Y, max.Z); verts[23].TexCoord = new Vector2(0, 1);
 
-         model.myVbo.setData(verts);
+         model.myBindings = V3N3T2.bindings();
+         VertexBufferObject vbo = new VertexBufferObject(BufferUsageHint.StaticDraw);
+         vbo.setData(verts);
+         model.myVbos.Add(vbo);
          model.myIbo.setData(index);
 
          Mesh mesh = new Mesh();
@@ -81,9 +84,9 @@ namespace Graphics
          return model;
       }
 
-      public static StaticModel CreatePlane(Vector3 min, Vector3 max, Texture t)
+      public static Model CreatePlane(Vector3 min, Vector3 max, Texture t)
       {
-         StaticModel model = new StaticModel();
+         Model model = new Model();
 
          ushort[] index ={0, 1, 2,
                         0, 2, 3, //front
@@ -97,7 +100,10 @@ namespace Graphics
          verts[2].Position = new Vector3(min.X, max.Y, min.Z); verts[2].TexCoord = new Vector2(1, 1);
          verts[3].Position = new Vector3(max.X, max.Y, min.Z); verts[3].TexCoord = new Vector2(0, 1);
 
-         model.myVbo.setData(verts);
+         model.myBindings = V3N3T2.bindings();
+         VertexBufferObject vbo = new VertexBufferObject(BufferUsageHint.StaticDraw);
+         vbo.setData(verts);
+         model.myVbos.Add(vbo);
          model.myIbo.setData(index);
 
          Mesh mesh = new Mesh();

@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
@@ -15,16 +16,16 @@ namespace Graphics
 
       public static int stride { get { return theStride; } }
 
-      public static void bindVertexAttribute(String fieldName, int id)
+      static Dictionary<string, BufferBinding> theBindings = null;
+      public static Dictionary<string, BufferBinding> bindings()
       {
-         switch (fieldName)
+         if (theBindings == null)
          {
-            case "position":
-					GL.VertexAttribFormat(id, 3, VertexAttribType.Float, false, 0);
-               break;
-            default:
-               throw new Exception(String.Format("Unknown attribute field: {0}", fieldName));
+            theBindings = new Dictionary<string, BufferBinding>();
+            theBindings["position"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 3, offset = 0 };
          }
+
+         return theBindings;
       }
    }
 
@@ -38,19 +39,17 @@ namespace Graphics
 
       public static int stride { get { return theStride; } }
 
-      public static void bindVertexAttribute(String fieldName, int id)
+      static Dictionary<string, BufferBinding> theBindings = null;
+      public static Dictionary<string, BufferBinding> bindings()
       {
-         switch (fieldName)
+         if (theBindings == null)
          {
-            case "position":
-					GL.VertexAttribFormat(id, 3, VertexAttribType.Float, false, 0);
-               break;
-            case "uv":
-					GL.VertexAttribFormat(id, 2, VertexAttribType.Float, false, 12);
-               break;
-            default:
-               throw new Exception(String.Format("Unknown attribute field: {0}", fieldName));
+            theBindings = new Dictionary<string, BufferBinding>();
+            theBindings["position"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 3, offset = 0 };
+            theBindings["uv"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 2, offset = 12 };
          }
+
+         return theBindings;
       }
    }
 
@@ -65,22 +64,18 @@ namespace Graphics
 
       public static int stride { get { return theStride; } }
 
-      public static void bindVertexAttribute(String fieldName, int id)
+      static Dictionary<string, BufferBinding> theBindings = null;
+      public static Dictionary<string, BufferBinding> bindings()
       {
-         switch (fieldName)
+         if (theBindings == null)
          {
-            case "position":
-					GL.VertexAttribFormat(id, 3, VertexAttribType.Float, false, 0);
-					break;
-            case "normal":
-					GL.VertexAttribFormat(id, 3, VertexAttribType.Float, false, 12);
-					break;
-            case "uv":
-					GL.VertexAttribFormat(id, 2, VertexAttribType.Float, false, 24);
-               break;
-            default:
-               throw new Exception(String.Format("Unknown attribute field: {0}", fieldName));
+            theBindings = new Dictionary<string, BufferBinding>();
+            theBindings["position"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 3, offset = 0 };
+            theBindings["normal"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 3, offset = 12 };
+            theBindings["uv"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 2, offset = 24 };
          }
+
+         return theBindings;
       }
    }
 
@@ -94,16 +89,16 @@ namespace Graphics
 
       public static int stride { get { return theStride; } }
 
-      public static void bindVertexAttribute(String fieldName, int id)
+      static Dictionary<string, BufferBinding> theBindings = null;
+      public static Dictionary<string, BufferBinding> bindings()
       {
-         switch (fieldName)
+         if (theBindings == null)
          {
-            case "uv":
-					GL.VertexAttribFormat(id, 2, VertexAttribType.Float, false, 0);
-               break;
-            default:
-               throw new Exception(String.Format("Unknown attribute field: {0}", fieldName));
+            theBindings = new Dictionary<string, BufferBinding>();
+            theBindings["uv"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 2, offset = 0 };
          }
+
+         return theBindings;
       }
    }
 
@@ -121,28 +116,20 @@ namespace Graphics
 
       public static int stride { get { return theStride; } }
 
-      public static void bindVertexAttribute(String fieldName, int id)
+      static Dictionary<string, BufferBinding> theBindings = null;
+      public static Dictionary<string, BufferBinding> bindings()
       {
-         switch (fieldName)
+         if (theBindings == null)
          {
-            case "position":
-					GL.VertexAttribFormat(id, 3, VertexAttribType.Float, false, 0);
-               break;
-            case "normal":
-					GL.VertexAttribFormat(id, 3, VertexAttribType.Float, false, 12);
-               break;
-            case "uv":
-					GL.VertexAttribFormat(id, 2, VertexAttribType.Float, false, 24);
-               break;
-            case "boneId":
-					GL.VertexAttribFormat(id, 4, VertexAttribType.Float, false, 32);
-               break;
-            case "boneWeight":
-					GL.VertexAttribFormat(id, 4, VertexAttribType.Float, false, 48);
-               break;
-            default:
-               throw new Exception(String.Format("Unknown attribute field: {0}", fieldName));
+            theBindings = new Dictionary<string, BufferBinding>();
+            theBindings["position"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 3, offset = 0 };
+            theBindings["normal"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = true, numElements = 3, offset = 12 };
+            theBindings["uv"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 2, offset = 24 };
+            theBindings["boneId"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 4, offset = 32 };
+            theBindings["boneWeight"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 4, offset = 48 };
          }
+
+         return theBindings;
       }
    }
 
@@ -178,6 +165,21 @@ namespace Graphics
             default:
                throw new Exception(String.Format("Unknown attribute field: {0}", fieldName));
          }
+      }
+
+      static Dictionary<string, BufferBinding> theBindings = null;
+      public static Dictionary<string, BufferBinding> bindings()
+      {
+         if (theBindings == null)
+         {
+            theBindings = new Dictionary<string, BufferBinding>();
+            theBindings["position"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 3, offset = 0 };
+            theBindings["color"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = true, numElements = 4, offset = 12 };
+            theBindings["size"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 3, offset = 28 };
+            theBindings["rotation"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 1, offset = 40 };           
+         }
+
+         return theBindings;
       }
    }
 }

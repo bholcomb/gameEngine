@@ -11,7 +11,7 @@ namespace Graphics
    public class ParticleSystem : Renderable
    {
       public List<Particle> particles = new List<Particle>();     
-      public VertexBufferObject<V3C4S3R> vbo = new VertexBufferObject<V3C4S3R>(BufferUsageHint.StreamDraw);
+      public VertexBufferObject vbo = new VertexBufferObject(BufferUsageHint.StreamDraw);
  
       public List<ParticleFeature> features { get; set; }
       public Texture material { get; set; }

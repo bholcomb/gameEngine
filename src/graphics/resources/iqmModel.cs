@@ -611,7 +611,11 @@ namespace Graphics
             }
 
             //setup the buffers
-            sm.myVbo.setData(vertexData);
+            sm.myBindings = V3N3T2B4W4.bindings();
+            VertexBufferObject vbo = new VertexBufferObject(BufferUsageHint.StaticDraw);
+            vbo.setData(vertexData);
+            sm.myVbos.Add(vbo);
+
             List<ushort> indexes = new List<ushort>();
             int indexCount = 0;
             for (int m = 0; m < sm.myMeshes.Count; m++)

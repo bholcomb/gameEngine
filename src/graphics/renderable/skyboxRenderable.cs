@@ -24,5 +24,10 @@ namespace Graphics
       {
          return true;
       }
+
+      public void setBlendColor(Color4 c)
+      {
+         model.mesh.material.ambient = c;
+      }
    }
 }

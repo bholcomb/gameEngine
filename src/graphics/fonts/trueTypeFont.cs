@@ -13,10 +13,8 @@ namespace Graphics
    public class TTFFont : Font
    {
       String myFilename;
-      const int MAX_TEXT = 255;
+      const int MAX_TEXT = 1024;
 
-      VertexBufferObject<V3T2> myVbo = new VertexBufferObject<V3T2>(BufferUsageHint.DynamicDraw);
-      IndexBufferObject myIbo = new IndexBufferObject(BufferUsageHint.DynamicDraw);
       VertexArrayObject myVao = new VertexArrayObject();
       ShaderProgram myShader;
 
@@ -40,10 +38,10 @@ namespace Graphics
 			//set shader
 			List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
 			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\font-vs.glsl", ShaderDescriptor.Source.File));
-			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Graphics\\shaders\\sdfont-ps.glsl", ShaderDescriptor.Source.File));
+			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Graphics\\shaders\\font-ps.glsl", ShaderDescriptor.Source.File));
 			ShaderProgramDescriptor shDesc = new ShaderProgramDescriptor(desc);
 			myShader = Renderer.resourceManager.getResource(shDesc) as ShaderProgram;
-         myVao.bindVertexFormat<V3T2>(myShader);
+         myVao.bindVertexFormat(myShader, V3T2.bindings());
       }
 
       public override void setupRenderCommand(StatelessRenderCommand rc)
@@ -51,10 +49,9 @@ namespace Graphics
 			//setup the pipeline
 			rc.pipelineState.shaderState.shaderProgram = myShader;
 			rc.pipelineState.vaoState.vao = myVao;
+         rc.pipelineState.generateId();
 
 			//set renderstate
-			rc.renderState.setVertexBuffer(myVbo.id, 0, 0, V3T2.stride);
-			rc.renderState.setIndexBuffer(myIbo.id);
 			rc.renderState.setTexture(texture.id(), 0, texture.target);
 			rc.renderState.setUniform(new UniformData(20, Uniform.UniformType.Int, 0));
 		}
@@ -131,19 +128,27 @@ namespace Graphics
          return true;
       }
 
-      public override void updateText(String txt)
+      public override void updateText(String txt, VertexBufferObject vbo, IndexBufferObject ibo)
       {
          int counter = 0;
          int indexCount = 0;
          float posx = 0;
          float posy = 0;
+         float lineY = 0;
          for (int i = 0; i < txt.Length; i++)
          {
             char ch = txt[i];
+            if(ch == '\n')
+            {
+               posx = 0;
+               lineY -= mySize;
+               continue;
+            }
+
             Glyph g = myGlyphs[(int)ch];
 
             posx += g.offset.X;
-            posy = g.offset.Y;
+            posy = lineY + g.offset.Y;
 
             myVerts[counter * 4].Position.X = posx;
             myVerts[counter * 4].Position.Y = posy;
@@ -172,24 +177,19 @@ namespace Graphics
             //indicies to draw as tris
             myIndexes[indexCount++] = (ushort)(0 + (counter * 4));
             myIndexes[indexCount++] = (ushort)(1 + (counter * 4));
-            myIndexes[indexCount++] = (ushort)(3 + (counter * 4));
             myIndexes[indexCount++] = (ushort)(2 + (counter * 4));
+            myIndexes[indexCount++] = (ushort)(0 + (counter * 4));
+            myIndexes[indexCount++] = (ushort)(2 + (counter * 4));
+            myIndexes[indexCount++] = (ushort)(3 + (counter * 4));
 
             posx += g.advance.X;
             counter++;
          }
 
 			//update the VBO
-			myVbo.setData(myVerts, 0, (counter * 4 * V3T2.stride));
-			myIbo.setData(myIndexes, 0, (indexCount * 2));			
+			vbo.setData(myVerts, 0, (counter * 4 * V3T2.stride));
+			ibo.setData(myIndexes, 0, (indexCount * 2));			
 		}
-
-      public override void drawText()
-      {
-         Renderer.device.bindVertexBuffer(myVbo.id, 0, 0, V3T2.stride);
-         Renderer.device.bindIndexBuffer(myIbo.id);
-         Renderer.device.drawIndexed(PrimitiveType.TriangleStrip, myIbo.count, 0, DrawElementsType.UnsignedShort);
-      }
 
       public override float width(String txt)
       {
@@ -199,7 +199,6 @@ namespace Graphics
             char c = txt[i];
             Glyph g = myGlyphs[(int)c];
             size += (int)g.offset.X;
-            //size += (int)g.size.X;
             size += (int)g.advance.X;
          }
 
@@ -208,7 +207,15 @@ namespace Graphics
 
       public override float height(String txt)
       {
-         return mySize;
+         int size = 0;
+         for (int i = 0; i < txt.Length; i++)
+         {
+            char c = txt[i];
+            Glyph g = myGlyphs[(int)c];
+            size = Math.Max(size, (int)g.size.Y);
+         }
+
+         return size;
       }
 
       bool addGlyph(GlyphSlotRec glyph, int ascii)

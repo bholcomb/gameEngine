@@ -46,14 +46,14 @@ namespace Graphics
 			m.mesh.material = new Material(name);
 			m.mesh.material.myFeatures |= Material.Feature.Skybox;
          m.mesh.material.myTextures[(int)Material.TextureId.Skybox] = new TextureAttribute("skybox", tex);
-
+         m.mesh.material.addAttribute(new ValueAttribute("intensity", 1.0f));
          return m;
       }
    }
 
-   public class SkyBox : IResource
+   public class SkyBox : Model
    {
-		static public VertexBufferObject<V3> theVbo = new VertexBufferObject<V3>(BufferUsageHint.StaticDraw);
+		static public VertexBufferObject theVbo = new VertexBufferObject(BufferUsageHint.StaticDraw);
 		static public IndexBufferObject theIbo = new IndexBufferObject(BufferUsageHint.StaticDraw);
 		static public VertexArrayObject theVao = new VertexArrayObject();
 
@@ -104,8 +104,9 @@ namespace Graphics
 			mesh.indexCount = 36;
 		}
 
-		public void Dispose()
+		public new void Dispose()
 		{
+         base.Dispose();
 			//clean up the cubemap here
 		}
 	}
