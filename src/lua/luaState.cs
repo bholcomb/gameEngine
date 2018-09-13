@@ -1,13 +1,29 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 namespace Lua
 {
+   public abstract class BaseLuaDecoder
+   {
+      public BaseLuaDecoder() { }
+      public abstract Object get(LuaState state, int index);
+   }
+
+   public abstract class BaseLuaEncoder
+   {
+      public BaseLuaEncoder() { }
+      public abstract void push(LuaState state, Object o);
+   }
+
    public class LuaState
    {
       LuaCSFunction myPrintFuction;
       IntPtr myStatePtr;
       LuaObject myGlobalTable;
+
+      public Dictionary<Type, BaseLuaDecoder> myDecoders = new Dictionary<Type, BaseLuaDecoder>();
+      public Dictionary<Type, BaseLuaEncoder> myEncoders = new Dictionary<Type, BaseLuaEncoder>();
 
       public LuaState()
       {
@@ -23,6 +39,9 @@ namespace Lua
          LuaDLL.lua_setglobal(myStatePtr, "print");
 
          printCallback = new PrintCallback(defaultPrint);
+
+         initEncoders();
+         initDecoders();
       }
 
       public IntPtr statePtr { get { return myStatePtr; } }
@@ -67,6 +86,18 @@ namespace Lua
          LuaDLL.luaL_dostring(myStatePtr, s);
       }
 
+      public LuaObject this[string index]
+      {
+         get { return myGlobalTable[index]; }
+      }
+
+      public LuaObject this[int index]
+      {
+         get { return myGlobalTable[index]; }
+      }
+
+      public LuaObject global { get { return myGlobalTable; } }
+
       public bool doFile(String s)
       {
          int ret = LuaDLL.luaL_dofile(myStatePtr, s);
@@ -102,57 +133,10 @@ namespace Lua
 
       public T getValue<T>(int index)
       {
-         if (typeof(T) == typeof(String))
+         BaseLuaDecoder getter = null;
+         if (myDecoders.TryGetValue(typeof(T), out getter) == true)
          {
-            IntPtr strPtr = LuaDLL.lua_tostring(statePtr, index);
-
-            //allow for null strings
-            if (strPtr == IntPtr.Zero)
-               return (T)Convert.ChangeType(null, typeof(T));
-
-            String str = Marshal.PtrToStringAnsi(strPtr);
-            return (T)Convert.ChangeType(str, typeof(T));
-         }
-
-         if (typeof(T) == typeof(bool))
-         {
-            return (T)Convert.ChangeType(LuaDLL.lua_toboolean(statePtr, index) == 0 ? false : true, typeof(T));
-         }
-
-         if (typeof(T) == typeof(float))
-         {
-            return (T)Convert.ChangeType(LuaDLL.lua_tonumber(statePtr, index), typeof(T));
-         }
-
-         if (typeof(T) == typeof(double))
-         {
-            return (T)Convert.ChangeType(LuaDLL.lua_tonumber(statePtr, index), typeof(T));
-         }
-
-         if (typeof(T) == typeof(Int32))
-         {
-            return (T)Convert.ChangeType(LuaDLL.lua_tointeger(statePtr, index), typeof(T));
-         }
-
-         if (typeof(T) == typeof(UInt32))
-         {
-            return (T)Convert.ChangeType(LuaDLL.lua_tointeger(statePtr, index), typeof(T));
-         }
-
-         if (typeof(T) == typeof(UInt64))
-         {
-            return (T)Convert.ChangeType(LuaDLL.lua_tointeger(statePtr, index), typeof(T));
-         }
-
-         if (typeof(T) == typeof(Int64))
-         {
-            return (T)Convert.ChangeType(LuaDLL.lua_tointeger(statePtr, index), typeof(T));
-         }
-
-         if (typeof(T) == typeof(LuaObject))
-         {
-            LuaObject temp = new LuaObject(this, index);
-            return (T)Convert.ChangeType(temp, typeof(T));
+            return (T)getter.get(this, index);
          }
 
          throw new Exception("Can't get this type");
@@ -160,58 +144,10 @@ namespace Lua
 
       public void pushValue<T>(T value)
       {
-         if (typeof(T) == typeof(String))
+         BaseLuaEncoder setter = null;
+         if (myEncoders.TryGetValue(typeof(T), out setter) == true)
          {
-            LuaDLL.lua_pushstring(statePtr, (String)Convert.ChangeType(value, typeof(String)));
-            return;
-         }
-
-         if (typeof(T) == typeof(bool))
-         {
-            LuaDLL.lua_pushboolean(statePtr, (int)Convert.ChangeType(value, typeof(int)));
-            return;
-         }
-
-         if (typeof(T) == typeof(float))
-         {
-            LuaDLL.lua_pushnumber(statePtr, (float)Convert.ChangeType(value, typeof(float)));
-            return;
-         }
-
-         if (typeof(T) == typeof(double))
-         {
-            LuaDLL.lua_pushnumber(statePtr, (double)Convert.ChangeType(value, typeof(double)));
-            return;
-         }
-
-         if (typeof(T) == typeof(Int32))
-         {
-            LuaDLL.lua_pushnumber(statePtr, (Int32)Convert.ChangeType(value, typeof(Int32)));
-            return;
-         }
-
-         if (typeof(T) == typeof(UInt32))
-         {
-            LuaDLL.lua_pushnumber(statePtr, (UInt32)Convert.ChangeType(value, typeof(UInt32)));
-            return;
-         }
-
-         if (typeof(T) == typeof(UInt64))
-         {
-            LuaDLL.lua_pushnumber(statePtr, (UInt64)Convert.ChangeType(value, typeof(UInt64)));
-            return;
-         }
-
-         if (typeof(T) == typeof(Int64))
-         {
-            LuaDLL.lua_pushnumber(statePtr, (Int64)Convert.ChangeType(value, typeof(Int64)));
-            return;
-         }
-
-         if (typeof(T) == typeof(LuaObject))
-         {
-            (value as LuaObject).push();
-            return;
+            setter.push(this, value);
          }
 
          throw new Exception("Can't push this type on");
@@ -353,5 +289,111 @@ namespace Lua
             LuaDLL.lua_pop(myStatePtr, 1);
          }
       }
+
+#region decoders
+      void initDecoders()
+      {
+         myDecoders[typeof(String)] = new StringDecoder();
+         myDecoders[typeof(UInt32)] = new NumberDecoder<UInt32>();
+         myDecoders[typeof(Int32)] = new NumberDecoder<Int32>();
+         myDecoders[typeof(UInt64)] = new NumberDecoder<UInt64>();
+         myDecoders[typeof(Int64)] = new NumberDecoder<Int64>();
+         myDecoders[typeof(float)] = new NumberDecoder<float>();
+         myDecoders[typeof(double)] = new NumberDecoder<double>();
+         myDecoders[typeof(bool)] = new BoolDecoder();
+         myDecoders[typeof(LuaObject)] = new LuaObjectDecoder();
+      }
+
+      class StringDecoder : BaseLuaDecoder
+      {
+         public override Object get(LuaState state, int index)
+         {
+            IntPtr strPtr = LuaDLL.lua_tostring(state.statePtr, index);
+
+            //allow for null strings
+            if (strPtr == IntPtr.Zero)
+               return "";
+
+            String str = Marshal.PtrToStringAnsi(strPtr);
+            return str;
+         }
+      }
+
+      class NumberDecoder<T> : BaseLuaDecoder
+      {
+         public override Object get(LuaState state, int index)
+         {
+            double val = LuaDLL.lua_tonumber(state.statePtr, index);
+            return (T)Convert.ChangeType(val, typeof(T));
+         }
+      }
+
+      class BoolDecoder : BaseLuaDecoder
+      {
+         public override Object get(LuaState state, int index)
+         {
+            return LuaDLL.lua_toboolean(state.statePtr, index) != 0;
+         }
+      }
+
+      class LuaObjectDecoder : BaseLuaDecoder
+      {
+         public override object get(LuaState state, int index)
+         {
+            LuaObject ret = new LuaObject(state, index);
+            return ret;
+         }
+      }
+
+#endregion
+
+#region encoders
+      void initEncoders()
+      {
+         myEncoders[typeof(String)] = new StringEncoder();
+         myEncoders[typeof(UInt32)] = new NumberEncoder<UInt32>();
+         myEncoders[typeof(Int32)] = new NumberEncoder<Int32>();
+         myEncoders[typeof(UInt64)] = new NumberEncoder<UInt64>();
+         myEncoders[typeof(Int64)] = new NumberEncoder<Int64>();
+         myEncoders[typeof(float)] = new NumberEncoder<float>();
+         myEncoders[typeof(double)] = new NumberEncoder<double>();
+         myEncoders[typeof(bool)] = new BoolEncoder();
+         myEncoders[typeof(LuaObject)] = new LuaObjectEncoder();
+      }
+
+      class StringEncoder : BaseLuaEncoder
+      {
+         public override void push(LuaState state, object o)
+         {
+            LuaDLL.lua_pushstring(state.statePtr, (String)o);
+         }
+      }
+
+      class NumberEncoder<T> : BaseLuaEncoder
+      {
+         public override void push(LuaState state, object o)
+         {
+            double d = (double)Convert.ChangeType(o, typeof(T));
+            LuaDLL.lua_pushnumber(state.statePtr, d);
+         }
+      }
+
+      class BoolEncoder : BaseLuaEncoder
+      {
+         public override void push(LuaState state, object o)
+         {
+            int v = (bool)o == true ? 1 : 0;
+            LuaDLL.lua_pushboolean(state.statePtr, v);
+         }
+      }
+
+      class LuaObjectEncoder : BaseLuaEncoder
+      {
+         public override void push(LuaState state, object o)
+         {
+            (o as LuaObject).push();
+         }
+      }
+      #endregion
    }
 }
