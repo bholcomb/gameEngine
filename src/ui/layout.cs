@@ -13,10 +13,10 @@ namespace GUI
 {
    public class Layout
    {
-      public enum Direction
+      public enum Direction : int
       {
-         Vertical,
-         Horizontal
+         Horizontal,
+         Vertical
       }
 
       public class Element

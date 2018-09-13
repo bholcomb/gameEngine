@@ -7,12 +7,11 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
 using Graphics;
-using UI;
 using Util;
 
-namespace UI
+namespace GUI
 {
-   public static partial class ImGui
+   public static partial class UI
    {
 
       public static bool beginMenuBar()
@@ -28,7 +27,7 @@ namespace UI
             return false;
          }
 
-         win.pushMenuDrawSettings(win.menuBarRect.position - win.position, Window.Layout.Horizontal);
+         win.beginLayout(win.menuBarRect.position - win.position, Layout.Direction.Horizontal);
          idStack.push("menuBar");
          
          return true;
@@ -43,7 +42,7 @@ namespace UI
          }
 
          idStack.pop();
-         win.popMenuDrawSettings();
+         win.endLayout();
       }
 
       public static bool beginMenu(String label, bool enabled = true)
@@ -61,7 +60,7 @@ namespace UI
          }
 
          UInt32 id = win.getChildId(label);
-         Vector2 labelSize = style.textSize(label) + style.framePadding2x;
+         Vector2 labelSize = style.font.size(label) + style.menuButton.padding;
 
          bool pressed = false;
          bool opened = isPopupOpen(id);
@@ -73,7 +72,7 @@ namespace UI
          popupPos = new Vector2(pos.X , pos.Y + win.menuBarRect.size.Y);
 
          bool shouldOpen = false;
-         pressed = selectable(label, ref shouldOpen, new Vector2(labelSize.X, 0.0f), SelectableFlags.Menu | SelectableFlags.DontClosePopups);
+         pressed = selectable(label, ref shouldOpen, labelSize, SelectableFlags.Menu | SelectableFlags.DontClosePopups);
 
          if(!opened && shouldOpen)
          {
@@ -91,6 +90,7 @@ namespace UI
             else
             {
                setNextWindowPosition(popupPos);
+               setNextWindowSize(new Vector2(10, 10), SetCondition.FirstUseEver);
                opened = beginPopup(label, Window.Flags.Background | Window.Flags.Borders | Window.Flags.ChildMenu);
             }
          }
@@ -111,16 +111,19 @@ namespace UI
             return false;
          }
 
-         Vector2 labelSize = style.textSize(label);
-         float width = win.menuColums.declareColumns(labelSize.X, 0, style.currentFontSize * 1.2f);
+         Vector2 labelSize = style.font.size(label);
+         win.beginLayout(Layout.Direction.Horizontal);
+         bool pressed = selectable(label, ref selected, new Vector2(labelSize.X, 0), SelectableFlags.MenuItem);
 
-         bool pressed = selectable(label, ref selected, new Vector2(width, 0), SelectableFlags.MenuItem | SelectableFlags.HasToggle);
+         //spacer to push checkbox up on right side of menu box reguardless of size
+         float s = win.size.X - (style.selectable.padding.X + labelSize.X + style.selectable.padding.X + style.font.fontSize + style.window.padding.X);
+         if (s < 0.0f) s = 0.0f;
+         Vector2 spacer = new Vector2(s, labelSize.Y);
+         win.addItem(spacer);
 
-         Rect iconRect = Rect.fromPosSize(new Vector2(win.menuColums.positions[2], win.cursorPosition.Y + style.framePadding.Y) + win.position, new Vector2(style.currentFontSize, style.currentFontSize));
-         win.canvas.addIcon( selected ? Canvas.Icons.CHECKBOX_CHECKED : Canvas.Icons.CHECKBOX_UNCHECKED, iconRect);
+         icon(selected ? Icons.CHECKBOX_CHECKED : Icons.CHECKBOX_UNCHECKED);
 
-         win.addItem(new Vector2(width, style.currentFontSize + style.framePadding.Y));
-
+         win.endLayout();
          return pressed;
       }
 
@@ -132,9 +135,8 @@ namespace UI
             return false;
          }
 
-         Vector2 labelSize = style.textSize(label);
-         float width = win.menuColums.declareColumns(labelSize.X, 0, 0);
-
+         Vector2 labelSize = style.font.size(label);
+ 
          bool selected = false;
          bool pressed = selectable(label, ref selected, new Vector2(0, 0), SelectableFlags.MenuItem);
 

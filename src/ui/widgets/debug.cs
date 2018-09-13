@@ -7,12 +7,11 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
 using Graphics;
-using UI;
 using Util;
 
-namespace UI
+namespace GUI
 {
-	public static partial class ImGui
+	public static partial class UI
 	{
 		static bool debug_viewMouseState = true;
 		static bool debug_viewActiveItemState = true;
@@ -20,46 +19,46 @@ namespace UI
 		public static void debug()
 		{
 			bool closed = false;
-			if (ImGui.beginWindow("Debug", ref closed, Window.Flags.DefaultWindow))
+			if (beginWindow("Debug", ref closed, Window.Flags.DefaultWindow))
 			{
-				ImGui.setWindowPosition(new Vector2(400, 100), SetCondition.FirstUseEver);
-				ImGui.setWindowSize(new Vector2(300, 400), SetCondition.FirstUseEver);
-				if (ImGui.beginMenuBar())
+				setWindowPosition(new Vector2(400, 100), SetCondition.FirstUseEver);
+				setWindowSize(new Vector2(300, 400), SetCondition.FirstUseEver);
+				if (beginMenuBar())
 				{
-					if (ImGui.beginMenu("View"))
+					if (beginMenu("View"))
 					{
-						ImGui.menuItem("Mouse State", ref debug_viewMouseState);
-						ImGui.menuItem("Active State", ref debug_viewActiveItemState);
-						ImGui.endMenu();
+						menuItem("Mouse State", ref debug_viewMouseState);
+						menuItem("Active State", ref debug_viewActiveItemState);
+						endMenu();
 					}
-               if (ImGui.beginMenu("Eggy"))
+               if (beginMenu("Eggy"))
                {
-                  ImGui.menuItem("Empty 1");
-                  ImGui.menuItem("Empty 2");
-                  ImGui.endMenu();
+                  menuItem("Empty 1");
+                  menuItem("Really Empty 2");
+                  endMenu();
                }
-               ImGui.endMenuBar();
+               endMenuBar();
 				}
 
 				if (debug_viewMouseState)
 				{
-					ImGui.label("mouse X: {0}", mouse.pos.X);
-					ImGui.label("mouse Y: {0}", mouse.pos.Y);
-					ImGui.separator();
+					label("mouse X: {0}", mouse.pos.X);
+					label("mouse Y: {0}", mouse.pos.Y);
+					separator();
 				}
 
 				if (debug_viewActiveItemState)
 				{
-					ImGui.label("Hover ID: {0}", hoveredId);
-					ImGui.label("Active ID: {0}", activeId);
-					ImGui.separator();
+					label("Hover ID: {0}", hoveredId);
+					label("Active ID: {0}", activeId);
+					separator();
 				}
 
 
-				ImGui.label("Hovered Window: {0}", ImGui.hoveredWindow == null ? "" : ImGui.hoveredWindow.name);
-				ImGui.label("Focused Window: {0}", ImGui.focusedWindow == null ? "" : ImGui.focusedWindow.name);
+				label("Hovered Window: {0}", UI.hoveredWindow == null ? "" : UI.hoveredWindow.name);
+				label("Focused Window: {0}", UI.focusedWindow == null ? "" : UI.focusedWindow.name);
 
-				ImGui.endWindow();
+				endWindow();
 			}
 		}
 	}

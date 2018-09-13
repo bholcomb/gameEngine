@@ -7,12 +7,11 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
 using Graphics;
-using UI;
 using Util;
 
-namespace UI
+namespace GUI
 {
-   public static partial class ImGui
+   public static partial class UI
    {
    }
 }

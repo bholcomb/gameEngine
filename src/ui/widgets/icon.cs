@@ -7,23 +7,32 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
 using Graphics;
-using UI;
 using Util;
 
-namespace UI
+namespace GUI
 {
-   public static partial class ImGui
+   public static partial class UI
    {
-      public static void icon(Canvas.Icons iconId, Color4 col)
+      public static void icon(Icons iconId)
+      {
+         icon(iconId, Color4.White);
+      }
+
+      public static void icon(Icons iconId, Color4 col)
       {
          Window win = currentWindow;
          if (win.skipItems)
             return;
 
-         Vector2 iconSize = new Vector2(style.currentFontSize, style.currentFontSize);
+         win.addItem(style.selectable.padding);
 
-         win.canvas.addIcon(iconId, win.cursorScreenPosition, win.cursorScreenPosition + iconSize);
-         win.addItem(iconSize);
+         Vector2 pos = win.cursorScreenPosition;
+         Vector2 size = new Vector2(style.font.fontSize);
+         Rect r = Rect.fromPosSize(pos, size);
+
+         win.canvas.addIcon(iconId, r);
+
+         win.addItem(r.size);
       }
    }
 }

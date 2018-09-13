@@ -1,115 +1,178 @@
 using System;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Collections.Generic;
-using System.Linq;
 
-using Graphics;
 using Util;
-using Events;
 
 using OpenTK;
-using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
-namespace UI
+namespace GUI
 {
+	//pressed is down this frame
+	//released is going up this frame
+	//clicked is a down and up motion
+	//double click is if there has been 2 clicks within the double click period
+	public enum MouseAction { PRESSED, RELEASED, CLICKED, DOUBLE_CLICKED };
+
+	public class MouseButtonState
+	{
+		public bool pressed;
+		public bool released;
+		public bool doubleClicked;
+	
+		public bool down;
+		public double pressedTime;
+		public Vector2 pressedPos = new Vector2();
+		public bool downOwned;
+		public double downDuration;
+		public double downDurationPrev;
+		public float dragMaxDistanceSqr;
+	}
 
    public class MouseState
    {
       public const int MAX_BUTTONS = 10;
 
+      public float doubleClickTime = 0.3f;
+      public float doubleClickDistance = 6.0f;
+      public float dragThreshold = 6.0f;
+      public float buttonRepeatDelay = 0.25f;
+      public float buttonRepeatRate = 0.02f;
+
       //mouse state
-      public Vector2 pos { get; set; }
-      public Vector2 posPrev { get; set; }
-      public Vector2 posDelta { get; set; }
-      public bool[] buttonDown = new bool[MAX_BUTTONS];
-      public bool[] buttonClicked = new bool[MAX_BUTTONS];
-      public double[] buttonClickedTime = new double[MAX_BUTTONS];
-      public bool[] buttonDoubleClicked = new bool[MAX_BUTTONS];
-      public bool[] buttonReleased = new bool[MAX_BUTTONS];
-      public bool[] buttonDownOwned = new bool[MAX_BUTTONS];
-      public double[] buttonDownDuration = new double[MAX_BUTTONS];
-      public double[] buttonDownDurationPrev = new double[MAX_BUTTONS];
-      public float[] buttonDragMaxDistanceSqr = new float[MAX_BUTTONS];
-      public Vector2[] buttonClickedPos = new Vector2[MAX_BUTTONS];
-      public float wheel { get; set; }
-      public float wheelPrev { get; set; }
-      public float wheelDelta { get; set; }
-      public bool drawCursor { get; set; }
+      public Vector2 pos;
+		public Vector2 prev;
+		public Vector2 delta;
+		public Vector2 scrollDelta;
+		public bool grab;
+		public bool grabbed;
+		public bool ungrab;
+
+      public MouseButtonState[] buttons = new MouseButtonState[MAX_BUTTONS];
+		public float wheel;
+		public float wheelPrev;
+		public float wheelDelta;
+
+		public bool drawCursor;
 
       public MouseState()
       {
          pos = new Vector2();
-         posPrev = new Vector2();
-         posDelta = new Vector2();
+         prev = new Vector2();
+         delta = new Vector2();
          for (int i = 0; i < MAX_BUTTONS; i++)
          {
-            buttonClickedPos[i] = new Vector2();
+				buttons[i] = new MouseButtonState();
          }
       }
 
-      public bool isButtonClicked(MouseButton button, bool repeat)
+      public bool isButtonClicked(MouseButton button, bool repeat = false)
       {
-         float t = (float)buttonDownDuration[(int)button];
-         if (t == 0.0)
+			MouseButtonState mb = buttons[(int)button];
+
+			if (mb.pressed) //this is a pressed event
          {
             return true;
          }
 
-         if (repeat && t > ImGui.keyRepeatDelay)
+			//look for repeat "pressed" events
+			double t = buttons[(int)button].downDuration;
+			if (repeat && t > buttonRepeatDelay)
          {
-            float delay = ImGui.keyRepeatDelay;
-            float rate = ImGui.keyRepeatRate;
-            float halfRate = rate * 0.5f;
-            if (((t - delay % rate) > halfRate) != (((t - delay - ImGui.dt) % rate) > halfRate))
+            double delay = buttonRepeatDelay;
+            double rate = buttonRepeatRate;
+            double halfRate = rate * 0.5;
+            if (((t - delay % rate) > halfRate) != (((t - delay - UI.dt) % rate) > halfRate))
                return true;
          }
 
          return false;
       }
 
-      public void newFrame()
+		internal void newFrame()
       {
-         posDelta = pos - posPrev;
-         posPrev = pos;
+         delta = pos - prev;
+         prev = pos;
 
          wheelDelta = wheel - wheelPrev;
          wheelPrev = wheel;
 
          for (int i = 0; i < MAX_BUTTONS; i++)
          {
-            buttonClicked[i] = buttonDown[i] && buttonDownDuration[i] < 0;
-            buttonReleased[i] = !buttonDown[i] && buttonDownDuration[i] >= 0;
-            buttonDownDurationPrev[i] = buttonDownDuration[i];
-            buttonDownDuration[i] = buttonDown[i] ? (buttonDownDuration[i] < 0 ? 0 : buttonDownDuration[i] + ImGui.dt) : -1.0;
-            buttonDoubleClicked[i] = false;
+				MouseButtonState mb = buttons[i];
+				mb.pressed = mb.down && mb.downDuration < 0;
+				mb.released = !mb.down && mb.downDuration >= 0;
+				mb.downDurationPrev = mb.downDuration;
+				mb.downDuration = mb.down ? (mb.downDuration < 0 ? 0.0 : mb.downDuration + UI.dt) : -1.0;
+				mb.doubleClicked = false;
 
-            if (buttonClicked[i])
+            if (mb.pressed)
             {
-               if (ImGui.time - buttonClickedTime[i] < ImGui.mouseDoubleClickTime)
+               if (UI.time - mb.pressedTime < doubleClickTime)
                {
-                  if ((pos - buttonClickedPos[i]).LengthSquared < ImGui.mouseDoubleClickDistance * ImGui.mouseDoubleClickDistance)
+                  if ((pos - mb.pressedPos).LengthSquared < doubleClickDistance * doubleClickDistance)
                   {
-                     buttonDoubleClicked[i] = true;
-                     buttonClickedTime[i] = -1;
+							mb.doubleClicked = true;
+							mb.pressedTime = -1.0f;
                   }
                }
                else
                {
-                  buttonClickedTime[i] = ImGui.time;
+						mb.pressedTime = UI.time;
                }
 
-               buttonClickedPos[i] = pos;
-               buttonDragMaxDistanceSqr[i] = 0;
+					mb.pressedPos = pos;
+					mb.dragMaxDistanceSqr = 0;
             }
-            else if (buttonDown[i])
+            else if (mb.down)
             {
-               buttonDragMaxDistanceSqr[i] = Math.Max(buttonDragMaxDistanceSqr[i], (pos - buttonClickedPos[i]).LengthSquared);
+					mb.dragMaxDistanceSqr = Math.Max(mb.dragMaxDistanceSqr, (pos - mb.pressedPos).LengthSquared);
             }
          }
       }
+
+      public bool buttonIsDown(MouseButton button)
+      {
+         return buttons[(int)button].down;
+      }
+
+      public bool buttonAction(MouseAction action, MouseButton button)
+      {
+         switch (action)
+         {
+            case MouseAction.CLICKED: return isButtonClicked(button);
+            case MouseAction.PRESSED: return buttons[(int)button].pressed;
+            case MouseAction.RELEASED: return buttons[(int)button].released;
+            case MouseAction.DOUBLE_CLICKED: return buttons[(int)button].doubleClicked;
+         }
+
+         return false;
+      }
+
+      public bool buttonActionInRect(MouseAction action, MouseButton button, Rect r)
+      {
+         switch (action)
+         {
+            case MouseAction.CLICKED:
+               {
+                  return r.containsPoint(buttons[(int)button].pressedPos) && isButtonClicked(button);
+               }
+            case MouseAction.PRESSED:
+               {
+                  return r.containsPoint(pos) && buttons[(int)button].down;
+               }
+            case MouseAction.RELEASED:
+               {
+                  return r.containsPoint(pos) && buttons[(int)button].released;
+               }
+            case MouseAction.DOUBLE_CLICKED:
+               {
+                  return r.containsPoint(buttons[(int)button].pressedPos) && buttons[(int)button].doubleClicked;
+               }
+         }
+
+         return false;
+      }
+
    }
 
    public class KeyboardState
@@ -118,24 +181,28 @@ namespace UI
       public bool[] keysDown = new bool[256];
       public double[] keysDownDuration = new double[256];
       public double[] keysDownDurationPrev = new double[256];
+		public string text;
+
+      public float keyRepeatDelay = 0.25f;
+      public float keyRepeatRate = 0.02f;
 
       public KeyboardState()
       {
 
       }
 
-      public void newFrame()
+		internal void newFrame()
       {
          keysDownDuration.CopyTo(keysDownDurationPrev, 0);
          for (int i = 0; i < 256; i++)
          {
             if (keysDown[i] == true)
             {
-               keysDownDuration[i] = keysDownDuration[i] < 0 ? 0 : keysDownDuration[i] + ImGui.dt;
+               keysDownDuration[i] = keysDownDuration[i] < 0 ? 0 : keysDownDuration[i] + UI.dt;
             }
             else
             {
-               keysDownDuration[i] = -1.0;
+               keysDownDuration[i] = -1.0f;
             }
          }
       }
@@ -147,7 +214,7 @@ namespace UI
 
       public bool keyReleased(Key key)
       {
-         //key is no long pressed, but it was, so it has been released
+         //key is not long pressed, but it was, so it has been released
          return (keysDown[(int)key] == false) && (keysDownDurationPrev[(int)key] > 0.0);
       }
 

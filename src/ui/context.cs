@@ -1,48 +1,31 @@
-
 using System;
 using System.Collections.Generic;
+
+using Graphics;
 
 using OpenTK;
 using OpenTK.Graphics;
 
-namespace UI
+using Util;
+
+namespace GUI
 {
+	public enum Heading { UP, RIGHT, DOWN, LEFT};
+	public enum ButtonBehavior { DEFAULT, REPEAT};
+	public enum Modify { FIXED, MODIFIABLE};
+	public enum Orientation { VERTICAL, HORIZONTAL};
+	public enum CollapseStates { MINIMZED, MAXIMIZED};
+	public enum ShowStates { HIDDEN, SHOWN};
+	public enum ChartType { LINES, COLUMN};
+	[Flags] public enum ChartEvent { HOVERING = 0x01, CLICKED = 0x02};
+	public enum ColorFormat { RGB, RGBA};
+	public enum PopupType { STATIC, DYNAMIC};
+	public enum LayoutFormat { DYNAMIC, STATIC};
+	public enum TreeType { NODE, TAB};
+	public enum HeaderAlign  { LEFT, RIGHT	};
+
    public class Context
    {
-      Dictionary<UInt32, Dictionary<String, Object>> myMap = new Dictionary<UInt32, Dictionary<String, Object>>();
-      
-      public Context()
-      {
-         
-      }
 
-      public T getValue<T>(UInt32 id, String name)
-      {
-         Dictionary<String, object> objMap;
-         if (myMap.TryGetValue(id, out objMap) == false)
-         {
-            throw new Exception(String.Format("Unknown UI Id: {0}", id));
-         }
-
-         Object val;
-         if (objMap.TryGetValue(name, out val) == false)
-         {
-            throw new Exception(String.Format("Unknown field: {0} for UI Id: {1}", name, id));
-         }
-
-         return (T)val;
-      }
-
-      public void setValue(UInt32 id, String name, Object value)
-      {
-         Dictionary<String, object> objMap;
-         if (myMap.TryGetValue(id, out objMap) == false)
-         {
-            objMap = new Dictionary<string, object>();
-            myMap[id] = objMap;
-         }
-
-         objMap[name] = value;
-      }
    }
 }

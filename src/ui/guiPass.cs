@@ -3,25 +3,25 @@ using System.Collections.Generic;
 
 using Graphics;
 
-namespace UI
+namespace GUI
 {
-   public class GuiPass : Pass
+   public class UIPass : Pass
    {
       BaseRenderQueue myRenderQueue;
-      public GuiPass(RenderTarget target) 
+      public UIPass(RenderTarget target) 
          :base ("UI", "ui")
       {
          renderTarget = target;
 
          PipelineState ps = new PipelineState();
          ps.blending.enabled = true;
-         ps.shaderState.shaderProgram = UI.Canvas.theShader;
+         ps.shaderState.shaderProgram = Canvas.theShader;
          ps.blending.enabled = true;
          ps.culling.enabled = false;
          ps.depthTest.enabled = false;
 
          ps.vaoState.vao = new VertexArrayObject();
-         ps.vaoState.vao.bindVertexFormat<V2T2B4>(ps.shaderState.shaderProgram);
+         ps.vaoState.vao.bindVertexFormat(ps.shaderState.shaderProgram, V2T2B4.bindings());
          ps.generateId();
 
          myRenderQueue = Renderer.device.createRenderQueue(ps);
@@ -61,7 +61,7 @@ namespace UI
 
          //add the view specific commands for each render queue
          bool needsCameraRebind = false;
-         foreach (RenderCommand rc in ImGui.getRenderCommands())
+         foreach (RenderCommand rc in UI.getRenderCommands())
          {
             //previous command was custom and reset the pipeline for UI drawing
             if (needsCameraRebind == true && rc is UiRenderCommand)

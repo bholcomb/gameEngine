@@ -7,16 +7,17 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
 using Graphics;
-using UI;
 using Util;
 
-namespace UI
+namespace GUI
 {
    public class Window
    {
       [Flags]
       public enum Flags
       {
+         None                 = 0,
+
          //decorations
          Background           = 1 << 0,
          TitleBar             = 1 << 1,
@@ -50,19 +51,6 @@ namespace UI
          DefaultWindow = Background | TitleBar | MenuBar | Borders | Movable | Collapsable | Resizable | Inputs | BringToFrontOnFocus | ChildWindow,
       };
 
-      public enum Layout
-      {
-         Vertical,
-         Horizontal
-      }
-      class Group
-      {
-         public Vector2 myPos;
-         public Vector2 mySize;
-         public Vector2 myCursorPos;
-         public Layout myLayout;
-      }
-
       public string name { get; set; }
       public UInt32 id { get; set; }
       public Flags flags { get; set; }
@@ -71,96 +59,42 @@ namespace UI
       public bool skipItems { get; set; }
       public UInt32 moveId { get; set; }
 
-      Stack<Group> myGroupStack = new Stack<Group>();
+      Stack<Layout> myLayoutStack = new Stack<Layout>();
 
       Vector2 myPosition = Vector2.Zero;
-      public Vector2 size = ImGui.displaySize;
+      public Vector2 size = UI.displaySize;
       bool myIsCollapsed = false;
 
-      internal Window parentWindow = null;
-      internal Window childWindow = null;
-      internal Window siblingWindow = null;
+      internal Window parent = null;
+      internal Window child = null;
+      internal Window sibling = null;
 
       public Canvas canvas = new Canvas();
-
-      //render stuff
-      internal float myBackgroundAlpha = ImGui.style.windowFillAlphaDefault;
 
       SetCondition mySetPositionAllowFlags;
       SetCondition mySetSizeAllowFlags;
 
-      //menu window only stuff
-      public class MenuColumns
-      {
-         Window myWindow;
-         float[] widths = new float[3];
-
-         public float[] positions = new float[3];
-
-         public MenuColumns(Window win)
-         {
-            myWindow = win;
-         }
-
-         public float declareColumns(float c1, float c2, float c3)
-         {
-            widths[0] = Math.Max(c1, widths[0]);
-            widths[1] = Math.Max(c2, widths[1]);
-            widths[2] = Math.Max(c3, widths[2]);
-
-            return update();
-         }
-
-         float update()
-         {
-            float totalWidth = 0;
-            positions[0] = 0;
-            for (int i = 0; i < 3; i++)
-            {
-               totalWidth += widths[i];
-
-               if (i > 0)
-               {
-                  if(widths[i] > 0)
-                     totalWidth += ImGui.style.itemInnerSpacing.X;
-
-                  positions[i] = totalWidth - widths[i];
-               }
-            }
-            
-            return totalWidth;
-         }
-      };
-
-      public MenuColumns menuColums;
-
       public Window(String winName, Flags createFlags = Flags.DefaultWindow)
       {
-         parentWindow = null;
-         childWindow = null;
-         siblingWindow = null;
+         parent = null;
+         child = null;
+         sibling = null;
          flags = createFlags;
 
          //setup the ID of this window
          name = winName;
-         id = ImGui.idStack.getId(winName);
+         id = UI.idStack.getId(winName);
          moveId = getChildId("MOVE");
 
          mySetPositionAllowFlags = mySetSizeAllowFlags = SetCondition.Always | SetCondition.Appearing | SetCondition.FirstUseEver | SetCondition.Once;
-
-         menuColums = new MenuColumns(this);
-
-         Group g = new Group();
-         g.myLayout = Layout.Vertical;
-         myGroupStack.Push(g);
       }
 
       public UInt32 getChildId(String name)
       {
-         ImGui.idStack.push(id);
-         UInt32 childId = ImGui.idStack.getId(name);
-         ImGui.idStack.pop();
-         ImGui.keepAliveId(childId);
+         UI.idStack.push(id);
+         UInt32 childId = UI.idStack.getId(name);
+         UI.idStack.pop();
+         UI.keepAliveId(childId);
          return childId;
       }
 
@@ -174,12 +108,12 @@ namespace UI
       {
          //this is in window space coordinates.  The conversion to screen space happens during rendering
          get {
-            Group g = myGroupStack.Peek();
-            return g.myPos + g.myCursorPos;
+            Layout l = myLayoutStack.Peek();
+            return l.myPos + l.myCursorPos;
          }
          set {
-            Group g = myGroupStack.Peek();
-            g.myCursorPos = value - g.myPos;
+            Layout l = myLayoutStack.Peek();
+            l.myCursorPos = value - l.myPos;
          }
       }
 
@@ -190,9 +124,9 @@ namespace UI
       }
 
       public Rect rect { get { return Rect.fromPosSize(position, size); } }
-      public float titleBarHeight { get { return flags.HasFlag(Flags.TitleBar) ? ImGui.style.currentFontSize + ImGui.style.framePadding2x.Y : 0.0f; } }
+      public float titleBarHeight { get { return flags.HasFlag(Flags.TitleBar) ? UI.style.font.fontSize + UI.style.window.groupPadding.Y : 0.0f; } }
       public Rect titleBarRect { get { return Rect.fromPosSize(new Vector2(0, 0) + position, new Vector2(size.X, titleBarHeight)); } }
-      public float menuBarHeight { get { return flags.HasFlag(Flags.MenuBar) ? ImGui.style.currentFontSize + ImGui.style.framePadding2x.Y : 0.0f; } }
+      public float menuBarHeight { get { return flags.HasFlag(Flags.MenuBar) ? UI.style.font.fontSize + UI.style.window.menuPadding.Y : 0.0f; } }
       public Rect menuBarRect { get { Vector2 pos = new Vector2(0, titleBarHeight) + position; return Rect.fromPosSize(pos, new Vector2(size.X, menuBarHeight)); } }
 
       public bool begin(ref bool closed)
@@ -200,55 +134,58 @@ namespace UI
 			if (closed == true)
 				return false;
 
-         //is this the first time we've begun this window?
-         if (lastFrameActive != ImGui.frame)
-         {
-            if (flags.HasFlag(Flags.AutoResize))
-            {
-               //from the previous frame
-               size = myGroupStack.Peek().mySize + ImGui.style.displayWindowPadding;
-            }
-
-            lastFrameActive = ImGui.frame;
-            active = true;
-            myGroupStack.Peek().myCursorPos = new Vector2(0, titleBarHeight + menuBarHeight);
-            myGroupStack.Peek().mySize = new Vector2(0, 0);
-            myGroupStack.Peek().myLayout = Layout.Vertical;
-         }
-
-         if (ImGui.currentWindow != this)
-         {
-            ImGui.pushWindow(this);
-         }
-
          //process the setNextWindow* functions
-         if (ImGui.setNextWindowPositionCondition != 0)
+         if (UI.setNextWindowPositionCondition != 0)
          {
-            bool shouldSet = (mySetPositionAllowFlags.HasFlag(ImGui.setNextWindowPositionCondition));
-            if (shouldSet && (ImGui.setNextWindowPositionValue != ImGui.theInvalidVec2))
+            bool shouldSet = (mySetPositionAllowFlags.HasFlag(UI.setNextWindowPositionCondition));
+            if (shouldSet && (UI.setNextWindowPositionValue != UI.theInvalidVec2))
             {
-               setPosition(ImGui.setNextWindowPositionValue, ImGui.setNextWindowPositionCondition);
-               ImGui.setNextWindowPositionCondition = 0;
-               ImGui.setNextWindowPositionValue = ImGui.theInvalidVec2;
+               setPosition(UI.setNextWindowPositionValue, UI.setNextWindowPositionCondition);
+               UI.setNextWindowPositionCondition = 0;
+               UI.setNextWindowPositionValue = UI.theInvalidVec2;
             }
          }
 
-         if (ImGui.setNextWindowSizeCondition != 0)
+         if (UI.setNextWindowSizeCondition != 0)
          {
-            bool shouldSet = (mySetSizeAllowFlags.HasFlag(ImGui.setNextWindowSizeCondition));
-            if (shouldSet && (ImGui.setNextWindowSizeValue != ImGui.theInvalidVec2))
+            bool shouldSet = (mySetSizeAllowFlags.HasFlag(UI.setNextWindowSizeCondition));
+            if (shouldSet && (UI.setNextWindowSizeValue != UI.theInvalidVec2))
             {
-               setSize(ImGui.setNextWindowSizeValue, ImGui.setNextWindowSizeCondition);
-               ImGui.setNextWindowSizeCondition = 0;
-               ImGui.setNextWindowSizeValue = ImGui.theInvalidVec2;
+               setSize(UI.setNextWindowSizeValue, UI.setNextWindowSizeCondition);
+               UI.setNextWindowSizeCondition = 0;
+               UI.setNextWindowSizeValue = UI.theInvalidVec2;
             }
+         }
+
+         //setup the layout for a window
+         List<float> layoutSizes = new List<float>();
+         if (flags.HasFlag(Flags.TitleBar))
+            layoutSizes.Add(titleBarHeight);
+
+         if (flags.HasFlag(Flags.MenuBar))
+            layoutSizes.Add(menuBarHeight);
+
+         layoutSizes.Add(0);
+
+         beginLayout(Layout.Direction.Vertical, layoutSizes);
+
+         //is this the first time we've begun this window?
+         if (lastFrameActive != UI.frame)
+         {
+            lastFrameActive = UI.frame;
+            active = true;
+         }
+
+         if (UI.currentWindow != this)
+         {
+            UI.pushWindow(this);
          }
 
          //check for collapsing window
          if (flags.HasFlag(Flags.TitleBar) && flags.HasFlag(Flags.Collapsable))
          {
             Rect r = titleBarRect;
-            if (ImGui.myHoveredWindow == this && r.containsPoint(ImGui.mouse.pos) && ImGui.mouse.buttonDoubleClicked[(int)MouseButton.Left])
+            if (UI.myHoveredWindow == this && r.containsPoint(UI.mouse.pos) && UI.mouse.buttons[(int)MouseButton.Left].doubleClicked)
             {
                myIsCollapsed = !myIsCollapsed;
             }
@@ -259,20 +196,20 @@ namespace UI
          }
 
          //check for moving window
-         ImGui.keepAliveId(moveId);
-         if (ImGui.activeId == moveId)
+         UI.keepAliveId(moveId);
+         if (UI.activeId == moveId)
          {
-            if (ImGui.mouse.buttonDown[(int)MouseButton.Middle] == true)
+            if (UI.mouse.buttonIsDown(MouseButton.Middle) == true)
             {
                if (flags.HasFlag(Flags.Movable) == true)
                {
-                  myPosition += ImGui.mouse.posDelta;
+                  myPosition += UI.mouse.delta;
                }
-               ImGui.focusWindow(this);
+               UI.focusWindow(this);
             }
             else
             {
-               ImGui.activeId = 0;
+               UI.activeId = 0;
             }
          }
 
@@ -280,19 +217,27 @@ namespace UI
 
          skipItems = myIsCollapsed;
 
+         drawWindowForeground();
          return true;
       }
 
       public bool end()
       {
-         drawWindowForeground();
          canvas.popClipRect();
+
+         if (flags.HasFlag(Flags.AutoResize))
+         {
+            //new size for next frame
+            size = myLayoutStack.Peek().mySize + UI.style.window.padding;
+         }
+
+         myLayoutStack.Clear();
          return true;
       }
 
       public bool mouseOverTitle()
       {
-         return titleBarRect.containsPoint(ImGui.mouse.pos);
+         return titleBarRect.containsPoint(UI.mouse.pos);
       }
 
       public void getRenderCommands(ref List<RenderCommand> cmds)
@@ -300,73 +245,73 @@ namespace UI
          if (active == true)
             canvas.generateCommands(ref cmds);
 
-         if (siblingWindow != null)
+         if (sibling != null)
          {
-            siblingWindow.getRenderCommands(ref cmds);
+            sibling.getRenderCommands(ref cmds);
          }
 
-         if (childWindow != null)
+         if (child != null)
          {
-            childWindow.getRenderCommands(ref cmds);
+            child.getRenderCommands(ref cmds);
          }
       }
 
       public void addChild(Window win)
       {
          //remove any previous relationships (if they existed)
-         win.parentWindow = this;
-         win.siblingWindow = null;
+         win.parent = this;
+         win.sibling = null;
 
          //I ain't got no children, so add it
-         if (childWindow == null)
+         if (child == null)
          {
-            childWindow = win;
+            child = win;
             return;
          }
 
          //add this window to linked list of children
-         Window temp = childWindow;
-         while (temp.siblingWindow != null)
+         Window temp = child;
+         while (temp.sibling != null)
          {
-            temp = temp.siblingWindow;
+            temp = temp.sibling;
          }
 
-         temp.siblingWindow = win;
+         temp.sibling = win;
       }
 
       public void remove()
       {
-         if (parentWindow == null)
+         if (parent == null)
          {
             return;
          }
 
          //I'm the parents first child
-         if (parentWindow.childWindow == this)
+         if (parent.child == this)
          {
-            parentWindow.childWindow = siblingWindow;
+            parent.child = sibling;
          }
          else
          {
-            Window temp = parentWindow.childWindow;
-            while (temp.siblingWindow != null)
+            Window temp = parent.child;
+            while (temp.sibling != null)
             {
-               if (temp.siblingWindow == this)
+               if (temp.sibling == this)
                {
-                  temp.siblingWindow = siblingWindow;
+                  temp.sibling = sibling;
                   break;
                }
 
-               temp = temp.siblingWindow;
+               temp = temp.sibling;
             }
          }
       }
 
       public void makeLastSibling()
       {
-         if (parentWindow != null && siblingWindow != null)
+         if (parent != null && sibling != null)
          {
-            Window p = parentWindow;
+            Window p = parent;
             remove();
             p.addChild(this);
          }
@@ -375,19 +320,23 @@ namespace UI
       void drawWindowBackground()
       {
          canvas.reset();
-         canvas.setScreenResolution(ImGui.displaySize);
+         canvas.setScreenResolution(UI.displaySize);
          //canvas.setScale(1.0f);
 
-         float alpha = ImGui.style.alpha;
+         float alpha = UI.style.window.backgroundColor.A;
 
          if (flags.HasFlag(Flags.Root))
          {
             canvas.pushClipRectFullscreen();
-            ImGui.style.pushStyleVar(StyleVar.WindowRounding, 0.0f);
+            UI.styleStacks.floats.Push(UI.style.window.rounding);
+            UI.style.window.rounding = 0.0f;
          }
          else
          {
-            canvas.pushClipRect(rect);
+            Rect clip = rect; //add 1 since we want to include that last pixel
+            clip.width += 1;
+            clip.height += 1;
+            canvas.pushClipRect(clip);
          }
 
          if (!myIsCollapsed)
@@ -395,45 +344,62 @@ namespace UI
             //window background
             if(flags.HasFlag(Flags.Background) == true)
             {
-               canvas.addRectFilled(rect, ImGui.style.getColor(ElementColor.WindowBg, myBackgroundAlpha), ImGui.style.windowRounding);
+               StyleItem background = UI.style.window.background;
+               switch (background.type)
+               {
+                  case StyleItem.Type.COLOR:
+                     canvas.addRectFilled(rect, background.color, UI.style.window.rounding);
+                     break;
+                  case StyleItem.Type.IMAGE:
+                     canvas.addImage(background.image, rect);
+                     break;
+                  case StyleItem.Type.SPRITE:
+                     canvas.addImage(background.sprite, rect);
+                     break;
+                  case StyleItem.Type.NINEPATCH:
+                     canvas.addImage(background.patch, rect);
+                     break;
+               }
             }
          }
    
          //pop root special style
          if (flags.HasFlag(Flags.Root))
          {
-            ImGui.style.popStyleVar(1);
+            UI.style.window.rounding = UI.styleStacks.floats.Pop();
          }
       }
 
       void drawWindowForeground()
       {
-         float alpha = ImGui.style.alpha;
+         float alpha = UI.style.window.borderColor.A;
 
          if (flags.HasFlag(Flags.Root))
          {
-            ImGui.style.pushStyleVar(StyleVar.WindowRounding, 0.0f);
+            UI.styleStacks.floats.Push(UI.style.window.rounding);
+            UI.style.window.rounding = 0.0f;
          }
 
          if (myIsCollapsed)
          {
             //title bar only
-            canvas.addRectFilled(titleBarRect, ImGui.style.getColor(ElementColor.TitleBgCollapsed, alpha), ImGui.style.windowRounding, Canvas.Corners.ALL);
-            canvas.addText(titleBarRect, ImGui.style.getColor(ElementColor.Text), name, Alignment.Middle);
+            canvas.addRectFilled(titleBarRect, UI.style.window.header.active.color, UI.style.window.rounding, Canvas.Corners.ALL);
+            canvas.addText(titleBarRect, UI.style.window.header.labelNormal, name, Alignment.Middle);
          }
          else
          {
             //title bar
             if (flags.HasFlag(Flags.TitleBar) == true)
             {
-               canvas.addRectFilled(titleBarRect, ImGui.style.getColor(ElementColor.TitleBg, alpha), ImGui.style.windowRounding, Canvas.Corners.TOP);
-               canvas.addText(titleBarRect, ImGui.style.getColor(ElementColor.Text), name, Alignment.Middle);
+               canvas.addRectFilled(titleBarRect, UI.style.window.header.active.color, UI.style.window.rounding, Canvas.Corners.TOP);
+               canvas.addText(titleBarRect, UI.style.window.header.labelNormal, name, Alignment.Middle);
+               addItem(titleBarRect.size);
             }
 
             //menu bar
             if (flags.HasFlag(Flags.MenuBar) == true)
             {
-               canvas.addRectFilled(menuBarRect, ImGui.style.getColor(ElementColor.MenuBarBg, alpha));
+               canvas.addRectFilled(menuBarRect, UI.style.window.menuBorderColor);
             }
             //scroll bars
 
@@ -443,12 +409,26 @@ namespace UI
             if (flags.HasFlag(Flags.Borders) == true)
             {
 
-               canvas.addRect(Rect.fromPosSize(position + Vector2.One, size), ImGui.style.getColor(ElementColor.BorderShadow), ImGui.style.windowRounding, Canvas.Corners.ALL);
-               canvas.addRect(Rect.fromPosSize(position, size - Vector2.One), ImGui.style.getColor(ElementColor.Border), ImGui.style.windowRounding, Canvas.Corners.ALL);
-
+               StyleItem border = UI.style.window.border;
+               switch (border.type)
+               {
+                  case StyleItem.Type.COLOR:
+                     canvas.addRectFilled(rect, border.color, UI.style.window.rounding, Canvas.Corners.ALL);
+                     break;
+                  case StyleItem.Type.IMAGE:
+                     canvas.addImage(border.image, rect);
+                     break;
+                  case StyleItem.Type.SPRITE:
+                     canvas.addImage(border.sprite, rect);
+                     break;
+                  case StyleItem.Type.NINEPATCH:
+                     canvas.addImage(border.patch, rect);
+                     break;
+               }
+               
                if (flags.HasFlag(Flags.TitleBar) == false)
                {
-                  canvas.addLine(titleBarRect.NW + new Vector2(1, 0), titleBarRect.NE - new Vector2(1, 0), ImGui.style.getColor(ElementColor.Border));
+                  canvas.addLine(titleBarRect.NW + new Vector2(1, 0), titleBarRect.NE - new Vector2(1, 0), UI.style.window.borderColor);
                }
             }
          }
@@ -456,7 +436,7 @@ namespace UI
          //pop root special style
          if (flags.HasFlag(Flags.Root))
          {
-            ImGui.style.popStyleVar(1);
+            UI.style.window.rounding = UI.styleStacks.floats.Pop();
          }
       }
       public void setPosition(Vector2 pos, SetCondition cond)
@@ -481,68 +461,58 @@ namespace UI
          size = sz;
       }
 
-      public void setLayout(Layout layout)
+      public void setLayout(Layout.Direction layout)
       {
-         myGroupStack.Peek().myLayout = layout;
+         myLayoutStack.Peek().myDirection = layout;
       }
 
-      public void pushMenuDrawSettings(Vector2 newCursor, Layout layout)
+      public Layout currentLayout
       {
-         Group g = new Group();
-         g.myPos = newCursor;
-         g.myLayout = layout;
-         myGroupStack.Push(g);
-      }
+         get {
+            if (myLayoutStack.Count == 0)
+            {
+               return null;
+            }
 
-      public void popMenuDrawSettings()
-      {
-         Group g = myGroupStack.Pop();
+            return myLayoutStack.Peek();
+         }
       }
 
       public void addItem(Vector2 itemSize)
       {
-         Group g = myGroupStack.Peek();
-         g.mySize.X = Math.Max(g.mySize.X, g.myCursorPos.X + itemSize.X);
-         g.mySize.Y = Math.Max(g.mySize.Y, g.myCursorPos.Y + itemSize.Y);
-
-         switch (g.myLayout)
-         {
-            case Layout.Horizontal:
-               {
-                  g.myCursorPos.X += itemSize.X;
-                  break;
-               }
-            case Layout.Vertical:
-               {
-                  g.myCursorPos.Y += itemSize.Y;
-                  break;
-               }
-         }
+         Layout l = myLayoutStack.Peek();
+         l.addItem(itemSize);
       }
 
       public void nextLine()
       {
-         Group g = myGroupStack.Peek();
-         g.myCursorPos.X = ImGui.style.framePadding.X;
-         g.myCursorPos.Y = g.mySize.Y;
+         Layout l = myLayoutStack.Peek();
+         l.nextLine();
       }
 
-      public void beginGroup()
+      public void beginLayout(Layout.Direction layout, List<float> spacing = null)
       {
-         Group g = new Group();
-         g.myPos = myGroupStack.Peek().myCursorPos;
-         g.mySize = Vector2.Zero;
-         g.myCursorPos = Vector2.Zero;
-         g.myLayout = myGroupStack.Peek().myLayout;
+         Vector2 pos = Vector2.Zero;
+         if (myLayoutStack.Count > 0)
+         {
+            pos = cursorPosition;
+         }
 
-         myGroupStack.Push(g);
+         Layout l = new Layout(this, layout, pos, spacing);
+         myLayoutStack.Push(l);
       }
 
-      public void endGroup()
+      public void beginLayout(Vector2 position, Layout.Direction layout, List<float> spacing = null)
       {
-         Group g = myGroupStack.Pop();
+         Layout l = new Layout(this, layout, position, spacing);
+         myLayoutStack.Push(l);
+      }
 
-         addItem(g.mySize);
+      public void endLayout()
+      {
+         Layout l = myLayoutStack.Pop();
+
+         addItem(l.mySize);
       }
    }
 }

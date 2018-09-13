@@ -7,14 +7,13 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
 using Graphics;
-using UI;
 using Util;
 
-namespace UI
+namespace GUI
 {
-   public static partial class ImGui
+   public static partial class UI
    {
-
+      #region widget
       public static bool checkbox(String label, ref bool selected)
       {
          Window win = currentWindow;
@@ -23,17 +22,24 @@ namespace UI
             return false;
          }
 
-         Vector2 labelSize = style.textSize(label);
-         float width = win.menuColums.declareColumns(labelSize.X, 0, style.currentFontSize * 1.2f);
+         win.addItem(style.checkbox.padding);
 
-         bool pressed = selectable(label, ref selected, new Vector2(width, 0), SelectableFlags.HasToggle);
+         Vector2 labelSize = style.font.size(label);
+         win.beginLayout(Layout.Direction.Horizontal, new List<float>() { 0.0f, style.font.fontSize });;
+         
+         bool pressed = selectable(label, ref selected, new Vector2(labelSize.X, 0), SelectableFlags.HasToggle);
 
-         Rect iconRect = Rect.fromPosSize(new Vector2(win.menuColums.positions[2], win.cursorPosition.Y + style.framePadding.Y) + win.position, new Vector2(style.currentFontSize, style.currentFontSize));
-         win.canvas.addIcon(selected ? Canvas.Icons.CHECKBOX_CHECKED : Canvas.Icons.CHECKBOX_UNCHECKED, iconRect);
-
-         win.addItem(new Vector2(width, style.currentFontSize + style.framePadding.Y));
+         icon(selected ? Icons.CHECKBOX_CHECKED : Icons.CHECKBOX_UNCHECKED);
 
          return pressed;
       }
+      #endregion
+
+      #region behavior
+      #endregion
+
+      #region drawing
+
+      #endregion
    }
 }

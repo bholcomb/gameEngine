@@ -10,17 +10,8 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
-namespace UI
+namespace GUI
 {
-   public class Glyph
-   {
-      public Vector2 minTexCoord;
-      public Vector2 maxTexCoord;
-      public Vector2 size;             // size inside the Texture, in pixels
-      public Vector2 offset;           // offset from the top-left corner of the pen to the glyph image
-      public Vector2 advance;          // tells us how much we should advance the pen after drawing this glyph
-   };
-
    //used for UI rendering
    [StructLayout(LayoutKind.Sequential)]
    public struct V2T2B4
@@ -33,22 +24,18 @@ namespace UI
 
       public static int stride { get { return theStride; } }
 
-      public static void bindVertexAttribute(String fieldName, int id)
+      static Dictionary<string, BufferBinding> theBindings = null;
+      public static Dictionary<string, BufferBinding> bindings()
       {
-         switch (fieldName)
+         if(theBindings == null)
          {
-            case "position":
-               GL.VertexAttribFormat(id, 2, VertexAttribType.Float, false, 0);
-               break;
-            case "uv":
-               GL.VertexAttribFormat(id, 2, VertexAttribType.Float, false, 8);
-               break;
-            case "color":
-               GL.VertexAttribFormat(id, 4, VertexAttribType.UnsignedByte, true, 16);
-               break;
-            default:
-               throw new Exception(String.Format("Unknown attribute field: {0}", fieldName));
-         }
+            theBindings = new Dictionary<string, BufferBinding>();
+            theBindings["position"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 2, offset = 0};
+            theBindings["uv"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 2, offset = 8};
+            theBindings["color"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.UnsignedByte, normalize = true, numElements = 4, offset = 16};
+         } 
+
+         return theBindings;
       }
    }
 
@@ -63,16 +50,16 @@ namespace UI
       {
          thePipelineState = new PipelineState();
          thePipelineState.blending.enabled = true;
-         thePipelineState.shaderState.shaderProgram = UI.Canvas.theShader;
+         thePipelineState.shaderState.shaderProgram = Canvas.theShader;
          thePipelineState.blending.enabled = true;
          thePipelineState.culling.enabled = false;
          thePipelineState.depthTest.enabled = false;
          thePipelineState.vaoState.vao = new VertexArrayObject();
-         thePipelineState.vaoState.vao.bindVertexFormat<V2T2B4>(UI.Canvas.theShader);
+         thePipelineState.vaoState.vao.bindVertexFormat(Canvas.theShader, V2T2B4.bindings());
          thePipelineState.generateId();
       }
 
-      public UiRenderCommand(DrawCmd drawCmd, Matrix4 modelmatrix, VertexBufferObject<V2T2B4> vbo, IndexBufferObject ibo)
+      public UiRenderCommand(DrawCmd drawCmd, Matrix4 modelmatrix, VertexBufferObject vbo, IndexBufferObject ibo)
          : base()
       {
          myElementCount = (int)drawCmd.elementCount;
@@ -117,32 +104,97 @@ namespace UI
          texture = null;
          userRenderCommand = null;
       }
+   };
+
+   public class Sprite
+   {
+      public Texture myTexture;
+      public Vector2 myMinUv;
+      public Vector2 myMaxUv;
+
+      public Sprite(Texture texture, Vector2 minUv, Vector2 maxUv)
+      {
+         myTexture = texture;
+         myMinUv = minUv;
+         myMaxUv = maxUv;
+      }
+   }
+
+   public class NinePatch : Sprite
+   {
+      public Vector4 myBounds;
+      public NinePatch(Texture texture, Vector2 minUv, Vector2 maxUv, Vector4 bounds)
+         :base(texture, minUv, maxUv)
+      {
+         myBounds = bounds;
+      }
+
+      public Vector2[] generateVerts(Rect r)
+      {
+         Vector2[] verts = new Vector2[16];
+
+         Vector2 rp = r.position;
+         Vector2 re = r.position + r.size;
+         float[] xp = new float[] { rp.X, rp.X + myBounds[0], re.X - myBounds[1], re.X };
+         float[] yp = new float[] { rp.Y, rp.Y + myBounds[2], re.Y - myBounds[3], re.Y };
+
+         //generate 16 verts
+         int vertCount = 0;
+         for (int i = 0; i < 4; i++)
+         {
+            for (int j = 0; j < 4; j++)
+            {
+               verts[vertCount] = new Vector2(xp[j], yp[i]);
+               vertCount++;
+            }
+         }
+
+         return verts;
+      }
+
+      public Vector2[] generateUvs()
+      {
+         Vector2[] uvs = new Vector2[16];
+
+         //scale pixels to texels
+         Vector2 scale = new Vector2(1.0f / (float)myTexture.width, 1.0f / (float)myTexture.height);
+
+         float[] xp = new float[] { myMinUv.X, myMinUv.X + (myBounds[0] * scale.X), myMaxUv.X - (myBounds[1] * scale.X), myMaxUv.X };
+         float[] yp = new float[] { myMinUv.Y, myMinUv.Y + (myBounds[2] * scale.Y), myMaxUv.Y - (myBounds[3] * scale.Y), myMaxUv.Y };
+
+         //generate 16 uvs
+         int vertCount = 0;
+         for (int i = 0; i < 4; i++)
+         {
+            for (int j = 0; j < 4; j++)
+            {
+               uvs[vertCount] = new Vector2(xp[j], yp[i]);
+               vertCount++;
+            }
+         }
+
+         return uvs;
+      }
    }
 
    public class Canvas
    {
       [Flags]
       public enum Corners { NONE = 0, LL = 1, LR = 2, UR = 4, UL = 8, TOP = UL | UR, BOTTOM = LL | LR, LEFT = LL | UL, RIGHT = LR | UR, ALL = LL | LR | UL | UR }
-      public enum Icons
-      {
-         CHECKBOX_UNCHECKED = 256, //start of the icons in the built in texture
-         CHECKBOX_CHECKED
-      };
 
       public static readonly Vector4 theNullClipRect = new Vector4(0.0f, 0.0f, +8192.0f, +8192.0f);
-      public static readonly Vector2 uv_zero = new Vector2(0, 0);
-      public static readonly Vector2 uv_one = new Vector2(1, 1);
+      public static readonly Vector2 uv_zero = new Vector2(0, 1);
+      public static readonly Vector2 uv_one = new Vector2(1, 0);
       public static readonly Color4 col_white = new Color4(255, 255, 255, 255);
 
       public static ShaderProgram theShader;
-      public VertexBufferObject<V2T2B4> myVbo = new VertexBufferObject<V2T2B4>(BufferUsageHint.DynamicDraw);
+      public VertexBufferObject myVbo = new VertexBufferObject(BufferUsageHint.DynamicDraw);
       public IndexBufferObject myIbo = new IndexBufferObject(BufferUsageHint.DynamicDraw);
       Vector2 myScreenSize;
       float myScale = 1.0f;
       Matrix4 myModelMatrix;
 
       public static Texture theDefaultTexture;
-      static List<Glyph> theGlyphs;
 
       const int MAX_ELEMENTS = 65536;
       internal V2T2B4[] myVerts = new V2T2B4[MAX_ELEMENTS];
@@ -167,27 +219,16 @@ namespace UI
          ShaderProgramDescriptor desc = new ShaderProgramDescriptor("UI.shaders.ui-vs.glsl", "UI.shaders.ui-ps.glsl");
          theShader = Renderer.resourceManager.getResource(desc) as ShaderProgram;
 
-         //we're expecting a sheet that is 32x32 glyphs each 32pix x 32pix in size. (1024 x 1024 texture)
-         theDefaultTexture = Graphics.Util.getEmbeddedTexture("UI.data.fontIconSheet.png");
-         theDefaultTexture.setMinMagFilters(TextureMinFilter.NearestMipmapNearest, TextureMagFilter.Nearest);
-
-         theGlyphs = new List<Glyph>(1024);
-         float width = theDefaultTexture.width;
-         float height = theDefaultTexture.height;
-         float step = 1.0f / 32.0f;
-         for (int i = 0; i < 1024; i++)
+         //a single white pixel
+         Texture.PixelData pd = new Texture.PixelData()
          {
-            float cx = (float)(i % 32) / 32.0f;					// X Position Of Current Character
-            float cy = (float)(i / 32) / 32.0f;					// Y Position Of Current Character
-            Glyph g = new Glyph();
-            g.size = new Vector2(32, 32);
-            g.minTexCoord.X = cx;
-            g.minTexCoord.Y = 1 - cy - step;
-            g.maxTexCoord.X = cx + step;
-            g.maxTexCoord.Y = 1 - cy;
-            g.advance = g.size * 0.6f;
-            theGlyphs.Add(g);
-         }
+            pixelFormat = PixelFormat.Rgba,
+            dataType = PixelType.UnsignedByte,
+            data = new byte[] {255, 255, 255, 255}
+         };
+         theDefaultTexture = new Texture(1, 1, PixelInternalFormat.Rgba8, pd);
+         theDefaultTexture.setMinMagFilters(TextureMinFilter.Linear, TextureMagFilter.Linear);
+         theDefaultTexture.setWrapping(TextureWrapMode.Repeat, TextureWrapMode.Repeat, TextureWrapMode.Repeat);
       }
 
       public Canvas()
@@ -338,35 +379,32 @@ namespace UI
             pathStroke(col, true);
       }
 
-      public void addText(Rect r, Color4 col, String text, Alignment align, float size = 0.0f)
-      {
-         Vector2 pos = r.SW;
-         Vector2 textSize = ImGui.style.textSize(text);
-         if (align.HasFlag(Alignment.HCenter) == true) pos.X = Math.Max(pos.X, (r.SW.X + r.NE.X - textSize.X) * 0.5f);
-         if (align.HasFlag(Alignment.Right) == true) pos.X = Math.Max(pos.X, r.NE.X - textSize.X);
-         if (align.HasFlag(Alignment.VCenter) == true) pos.Y = Math.Max(pos.Y, (r.SW.Y + r.NE.Y - textSize.Y) * 0.5f);
-
-         addText(pos, col, text, size);
-      }
-
-      public void addText(Vector2 pos, Color4 col, String text, float size = 0.0f)
+      public void addText(Rect r, Color4 col, String text, Alignment align = Alignment.Default)
       {
          if (col.A == 0.0)
             return;
 
-         if (size == 0)
-            size = ImGui.style.currentFontSize;
+         Vector2 pos = r.SW;
+         Vector2 textSize = UI.style.font.size(text);
+         if (align.HasFlag(Alignment.HCenter) == true) pos.X = Math.Max(pos.X, pos.X + (r.width - textSize.X) * 0.5f);
+         if (align.HasFlag(Alignment.Right) == true) pos.X = Math.Max(pos.X, r.right - textSize.X);
+         if (align.HasFlag(Alignment.VCenter) == true) pos.Y = Math.Max(pos.Y, pos.Y + (r.height - textSize.Y) * 0.5f);         
 
-         primativeText(size, pos, col, text);
+         addText(UI.style.font, pos, col, text, textSize.Y);
       }
 
-      //       public void addText(Font font, float size, Vector2 pos, Color4 col, String text, float wrap_width = 0.0f)
-      //       {
-      //          if (col.A == 0.0)
-      //             return;
-      // 
-      //          addCustomRenderCommand(new RenderFontCommand(font, text, col, pos.X + myPosition.X, pos.Y + myPosition.Y));
-      //       }
+      public void addText(Font font, Vector2 pos, Color4 col, String text, float textHeight = 0.0f)
+      {
+         if(textHeight == 0.0f)
+         {
+            textHeight = font.fontSize;
+         }
+         
+         //modify position for screen coordinates, not window coords
+         pos.Y = myScreenSize.Y - pos.Y - textHeight;
+
+         addCustomRenderCommand(new RenderFontCommand(font, pos, text, col));
+      }
 
       public void addIcon(Icons icon, Rect r)
       {
@@ -375,8 +413,18 @@ namespace UI
 
       public void addIcon(Icons icon, Vector2 a, Vector2 b)
       {
-         Glyph g = theGlyphs[(int)icon];
-         addImage(theDefaultTexture, a, b, g.minTexCoord, g.maxTexCoord, Color4.White);
+         //Glyph g = theGlyphs[(int)icon];
+         addImage(theDefaultTexture, a, b, uv_zero, uv_one, Color4.White);
+      }
+
+      public void addImage(Texture tex, Rect r)
+      {
+         addImage(tex, r, uv_zero, uv_one, Color4.White);
+      }
+
+      public void addImage(Sprite s, Rect r)
+      {
+         addImage(s.myTexture, r, s.myMinUv, s.myMaxUv, Color4.White);
       }
 
       public void addImage(Texture tex, Rect r, Vector2 uv0, Vector2 uv1, Color4 col)
@@ -401,11 +449,77 @@ namespace UI
          if (pushTex)
             popTexture();
       }
+      public void addImage(NinePatch p, Rect r)
+      {
+         bool pushTex = shouldPushTexture(p.myTexture);
+         if (pushTex)
+            pushTexture(p.myTexture);
+
+         UInt32 cl = Color4.White.toUInt();
+         Vector2[] verts = p.generateVerts(r);
+         Vector2[] uvs = p.generateUvs();
+
+         UInt16 startVertex = (UInt16)myVertCount;
+
+         //generate 16 verts
+         int index = 0;
+         for (int i = 0; i<4; i++)
+         {
+            for(int j = 0; j<4; j++)
+            {
+               myVerts[myVertCount].Position = verts[index];
+               myVerts[myVertCount].TexCoord = uvs[index];
+               myVerts[myVertCount].Color = cl;
+               myVertCount++;
+               index++;
+            }
+         }
+
+         //indexes in verts
+         writeIndex((UInt16)(startVertex + 0)); writeIndex((UInt16)(startVertex + 4)); writeIndex((UInt16)(startVertex + 1));
+         writeIndex((UInt16)(startVertex + 1)); writeIndex((UInt16)(startVertex + 4)); writeIndex((UInt16)(startVertex + 5));
+
+         writeIndex((UInt16)(startVertex + 1)); writeIndex((UInt16)(startVertex + 5)); writeIndex((UInt16)(startVertex + 2));
+         writeIndex((UInt16)(startVertex + 2)); writeIndex((UInt16)(startVertex + 5)); writeIndex((UInt16)(startVertex + 6));
+
+         writeIndex((UInt16)(startVertex + 2)); writeIndex((UInt16)(startVertex + 6)); writeIndex((UInt16)(startVertex + 3));
+         writeIndex((UInt16)(startVertex + 3)); writeIndex((UInt16)(startVertex + 6)); writeIndex((UInt16)(startVertex + 7));
+
+
+
+         writeIndex((UInt16)(startVertex + 4)); writeIndex((UInt16)(startVertex + 8)); writeIndex((UInt16)(startVertex + 5));
+         writeIndex((UInt16)(startVertex + 5)); writeIndex((UInt16)(startVertex + 8)); writeIndex((UInt16)(startVertex + 9));
+
+         writeIndex((UInt16)(startVertex + 5)); writeIndex((UInt16)(startVertex + 9)); writeIndex((UInt16)(startVertex + 6));
+         writeIndex((UInt16)(startVertex + 6)); writeIndex((UInt16)(startVertex + 9)); writeIndex((UInt16)(startVertex + 10));
+
+         writeIndex((UInt16)(startVertex + 6)); writeIndex((UInt16)(startVertex + 10)); writeIndex((UInt16)(startVertex + 7));
+         writeIndex((UInt16)(startVertex + 7)); writeIndex((UInt16)(startVertex + 10)); writeIndex((UInt16)(startVertex + 11));
+
+
+
+         writeIndex((UInt16)(startVertex + 8)); writeIndex((UInt16)(startVertex + 12)); writeIndex((UInt16)(startVertex + 9));
+         writeIndex((UInt16)(startVertex + 9)); writeIndex((UInt16)(startVertex + 12)); writeIndex((UInt16)(startVertex + 13));
+
+         writeIndex((UInt16)(startVertex + 9)); writeIndex((UInt16)(startVertex + 13)); writeIndex((UInt16)(startVertex + 10));
+         writeIndex((UInt16)(startVertex + 10)); writeIndex((UInt16)(startVertex + 13)); writeIndex((UInt16)(startVertex + 14));
+
+         writeIndex((UInt16)(startVertex + 10)); writeIndex((UInt16)(startVertex + 14)); writeIndex((UInt16)(startVertex + 11));
+         writeIndex((UInt16)(startVertex + 11)); writeIndex((UInt16)(startVertex + 14)); writeIndex((UInt16)(startVertex + 15));
+
+
+         if (pushTex)
+         {
+            popTexture();
+         }
+      }
 
       public void addPolyline(List<Vector2> points, Color4 col, bool closed, float thickness)
       {
          if (points.Count < 2)
+         {
             return;
+         }
 
          Vector2 uv = uv_zero;
 
@@ -650,62 +764,7 @@ namespace UI
          myVerts[myVertCount].Position = c; myVerts[myVertCount].TexCoord = uvc; myVerts[myVertCount].Color = cl; myVertCount++;
          myVerts[myVertCount].Position = d; myVerts[myVertCount].TexCoord = uvd; myVerts[myVertCount].Color = cl; myVertCount++;
       }
-      void primativeText(float size, Vector2 pos, Color4 col, String text)
-      {
-         float x = (float)(int)pos.X;
-         float y = (float)(int)pos.Y;
 
-         //the built in font is 32 pixels high
-         float scale = size / 32.0f;
-         float lineHeight = 32.0f * scale;
-
-         foreach (Char c in text)
-         {
-            if (c < 32)
-            {
-               if (c == '\n')
-               {
-                  x = pos.X;
-                  y -= lineHeight;
-                  continue;
-               }
-
-               if (c == '\r')
-               {
-                  continue;
-               }
-            }
-
-            float charWidth = 0.0f;
-            Glyph g = theGlyphs[c];
-            if (g != null)
-            {
-               charWidth = g.size.X * scale;
-
-               if ((c != ' ') && (c != '\t'))
-               {
-                  float x1 = x + g.offset.X * scale;
-                  float y1 = y + g.offset.Y * scale;
-                  float x2 = x + g.size.Y * scale;
-                  float y2 = y + g.size.Y * scale;
-
-                  //these seem backwards but only because we're doing some crazy inversion thing with UI screen space to window space
-                  Vector2 uv1 = new Vector2(g.minTexCoord.X, g.maxTexCoord.Y);
-                  Vector2 uv2 = new Vector2(g.maxTexCoord.X, g.minTexCoord.Y);
-
-                  primativeRectUv(new Vector2(x1, y1), new Vector2(x2, y2), uv1, uv2, col);
-
-                  //keep the letters a little closer together than needed
-                  x += g.advance.X * scale;
-               }
-               else
-               {
-                  if (c == ' ') x += g.advance.X * scale;
-                  if (c == '\t') x += g.advance.X * scale * 3;
-               }
-            }
-         }
-      }
       void primativeVert(Vector2 pos, Vector2 uv, Color4 col)
       {
          writeIndex((UInt16)myVertCount);

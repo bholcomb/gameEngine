@@ -7,12 +7,11 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
 using Graphics;
-using UI;
 using Util;
 
-namespace UI
+namespace GUI
 {
-   public static partial class ImGui
+   public static partial class UI
    {
       public static void separator()
       {
@@ -25,9 +24,39 @@ namespace UI
          Vector2 a = win.cursorScreenPosition + new Vector2(1, 2);
          Vector2 b = win.cursorScreenPosition + new Vector2(win.size.X - 1, 2);
 
-         win.canvas.addLine(a, b, style.colors[(int)ElementColor.Border], 1);
+         win.canvas.addLine(a, b, style.window.borderColor, 1);
 
          win.addItem(size);
+      }
+
+      public static void spacer(float x)
+      {
+         Window win = currentWindow;
+         if (win.skipItems)
+            return;
+
+         Vector2 space;
+         if(win.currentLayout.myDirection == Layout.Direction.Horizontal)
+         {
+            space = new Vector2(x, 0);
+         }
+         else
+         {
+            space = new Vector2(0, x);
+         }
+
+         win.addItem(space);
+      }
+
+      public static float percent(float p, Layout.Direction dir)
+      {
+         Window win = currentWindow;
+         if (win.skipItems)
+            return 0.0f;
+
+         float size = win.size[(int)dir];
+
+         return p * (size / 100.0f);
       }
    }
 }

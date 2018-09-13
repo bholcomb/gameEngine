@@ -24,7 +24,7 @@ namespace GUI
 	{
       public static readonly Vector2 theInvalidVec2 = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
       public static readonly Vector2 theZeroVec2 = new Vector2(0, 0);
-      public static bool initialzied = false;
+      public static bool initialized = false;
       public static IdStack idStack;
 
       //frame timing

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using OpenTK;
 using OpenTK.Graphics;
@@ -8,12 +7,11 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
 using Graphics;
-using UI;
 using Util;
 
-namespace UI
+namespace GUI
 {
-   public static partial class ImGui
+   public static partial class UI
    {
       public static bool beginWindow(String name, Window.Flags flags = Window.Flags.DefaultWindow)
       {
@@ -37,11 +35,22 @@ namespace UI
       public static bool endWindow()
       {
          Window win = currentWindow;
+         if(win == null)
+         {
+            return false;
+         }
 			
          bool ret = win.end();
          popWindow(win);
          return ret;
       }
+
+      public static Vector2 setNextWindowPositionValue { get; set; }
+      public static Vector2 setNextWindowSizeValue { get; set; }
+      public static bool setNextWindowFocused { get; set; }
+      public static SetCondition setNextWindowPositionCondition { get; set; }
+      public static SetCondition setNextWindowSizeCondition { get; set; }
+      public static SetCondition setNextWindowFocusCondition { get; set; }
 
       public static void setWindowPosition(Vector2 pos, SetCondition cond = SetCondition.Always)
       {
@@ -77,28 +86,28 @@ namespace UI
 
       public static void setNextWindowPosition(Vector2 pos, SetCondition cond = SetCondition.Always)
       {
-         ImGui.setNextWindowPositionValue = pos;
-         ImGui.setNextWindowPositionCondition = cond;
+         setNextWindowPositionValue = pos;
+         setNextWindowPositionCondition = cond;
       }
 
       public static void setNextWindowSize(Vector2 size, SetCondition cond = SetCondition.Always)
       {
-         ImGui.setNextWindowSizeValue = size;
-         ImGui.setNextWindowSizeCondition = cond;
+         setNextWindowSizeValue = size;
+         setNextWindowSizeCondition = cond;
       }
 
       public static void setNextWindowFocus()
       {
-         ImGui.setNextWindowFocused = true;
+         setNextWindowFocused = true;
       }
 
-      public static void setWindowLayout(Window.Layout layout)
+      public static void setWindowLayout(Layout.Direction layout)
       {
          Window win = currentWindow;
          win.setLayout(layout);
       }
 
-      public static void setWindowLayout(String winName, Window.Layout layout)
+      public static void setWindowLayout(String winName, Layout.Direction layout)
       {
          Window win = findWindow(winName);
          if (win != null)
@@ -112,16 +121,16 @@ namespace UI
             focusWindow(win);
       }
 
-      public static void beginGroup()
+      public static void beginLayout(Layout.Direction layout, List<float> spacing = null)
       {
          Window win = currentWindow;
-         win.beginGroup();
+         win.beginLayout(layout, spacing);
       }
 
-      public static void endGroup()
+      public static void endLayout()
       {
          Window win = currentWindow;
-         win.endGroup();
+         win.endLayout();
       }
 
       public static Vector2 cursorPosition()

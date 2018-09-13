@@ -8,10 +8,9 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
 using Graphics;
-using UI;
 using Util;
 
-namespace UI
+namespace GUI
 {
    [Flags]
    public enum SelectableFlags
@@ -26,7 +25,7 @@ namespace UI
    }
 
 
-   public static partial class ImGui
+   public static partial class UI
    {
       public static bool selectable(String label, ref bool selected, Vector2 sizeArg, SelectableFlags flags = 0)
       {
@@ -36,16 +35,12 @@ namespace UI
             return false;
          }
 
-         UInt32 id = win.getChildId(label);
-         Vector2 labelSize = style.textSize(label);
-         Vector2 size = new Vector2(sizeArg.X != 0 ? sizeArg.X : labelSize.X, sizeArg.Y != 0 ? sizeArg.Y : labelSize.Y);
-         Vector2 rectPos = win.cursorScreenPosition + style.framePadding;
-         Rect r = Rect.fromPosSize(rectPos, size);
+         win.addItem(style.selectable.padding);
 
-         if (flags.HasFlag(SelectableFlags.HasToggle) == false) //only move the draw cursor after the toggle is drawn
-         {
-            win.addItem(size);
-         }
+         UInt32 id = win.getChildId(label);
+         Vector2 labelSize = style.font.size(label);
+         Vector2 size = new Vector2(sizeArg.X != 0 ? sizeArg.X : labelSize.X, sizeArg.Y != 0 ? sizeArg.Y : labelSize.Y);
+         Rect r = Rect.fromPosSize(win.cursorScreenPosition, size);
 
          bool hovered;
          bool held;
@@ -58,11 +53,11 @@ namespace UI
 
          if (hovered)
          {
-            Color4 col = style.getColor((hovered == true ? ElementColor.HeaderHovered : ElementColor.Header));
+            Color4 col = style.selectable.textHoverActive;
             win.canvas.addRectFilled(r, col);
          }
 
-         win.canvas.addText(r, style.getColor(ElementColor.Text), label, Alignment.Default);
+         win.canvas.addText(r, style.selectable.textNormal, label, style.selectable.textAlignment);
 
          //close popups
          if (pressed && flags.HasFlag(SelectableFlags.DontClosePopups) == false && win.flags.HasFlag(Window.Flags.Popup))
@@ -74,6 +69,9 @@ namespace UI
          {
             selected = !selected;
          }
+
+         
+         win.addItem(size);
 
          return pressed;
       }
