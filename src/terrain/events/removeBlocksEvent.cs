@@ -1,8 +1,11 @@
-/*********************************************************************************
+/****************************************************************************** 
 
-Copyright (c) 2014 Bionic Dog Studios LLC
+Copyright (c) 2018 Apexica LLC 
+All rights reserved. 
 
-*********************************************************************************/
+Author: Robert C. Holcomb Jr.
+
+******************************************************************************/
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!This is an auto-generated file.  Any changes will be destroyed!!!!!!!!!!!
@@ -17,33 +20,36 @@ using System.Collections.Generic;
 
 
 using Util;
-using Events;
+using Engine;
 
 
 namespace Terrain
 {
 	public class RemoveBlocksEvent : Event
 	{
-		static EventName theName;
+		public static EventId theId;
+		public static String theName;
 
 		UInt64 myChunkId;
 		List<NodeLocation> myBlocks=new List<NodeLocation>();
 
-		public RemoveBlocksEvent(): base() { myName=theName; }
-		public RemoveBlocksEvent(UInt64 chunkId, List<NodeLocation> blocks) : this(chunkId, blocks, TimeSource.defaultClock.currentTime(), 0.0) { }
+		public RemoveBlocksEvent(): base() { myName = theName; myId = theId; }
+      public RemoveBlocksEvent(UInt64 chunkId, List<NodeLocation> blocks) : this(chunkId, blocks, TimeSource.defaultClock.currentTime(), 0.0) { }
 		public RemoveBlocksEvent(UInt64 chunkId, List<NodeLocation> blocks, double timeStamp) : this(chunkId, blocks, timeStamp, 0.0) { }
 		public RemoveBlocksEvent(UInt64 chunkId, List<NodeLocation> blocks, double timeStamp, double delay)
-		: base(timeStamp, delay)
+         : base(timeStamp, delay)
 		{
 			myName = theName;
+			myId = theId;
 			myChunkId=chunkId;
 			myBlocks=blocks;
 		}
+   
 
 		static RemoveBlocksEvent()
 		{
-			theName = new EventName("terrain.edit.removeBlocks");
-			
+			theName = "terrain.edit.removeBlocks";
+			theId = new EventId("terrain.edit.removeBlocks");
 		}
 
 
@@ -57,8 +63,6 @@ namespace Terrain
 			get { return myBlocks;}
 		}
 	
-
-
 
 
 

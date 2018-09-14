@@ -1,8 +1,11 @@
-/*********************************************************************************
+/****************************************************************************** 
 
-Copyright (c) 2014 Bionic Dog Studios LLC
+Copyright (c) 2018 Apexica LLC 
+All rights reserved. 
 
-*********************************************************************************/
+Author: Robert C. Holcomb Jr.
+
+******************************************************************************/
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!This is an auto-generated file.  Any changes will be destroyed!!!!!!!!!!!
@@ -17,31 +20,34 @@ using System.Collections.Generic;
 
 
 using Util;
-using Events;
+using Engine;
 
 
 namespace Terrain
 {
 	public class ResetBlockEvent : Event
 	{
-		static EventName theName;
+		public static EventId theId;
+		public static String theName;
 
 		NodeLocation myBlock=new NodeLocation();
 
-		public ResetBlockEvent(): base() { myName=theName; }
-		public ResetBlockEvent(NodeLocation block) : this(block, TimeSource.defaultClock.currentTime(), 0.0) { }
+		public ResetBlockEvent(): base() { myName = theName; myId = theId; }
+      public ResetBlockEvent(NodeLocation block) : this(block, TimeSource.defaultClock.currentTime(), 0.0) { }
 		public ResetBlockEvent(NodeLocation block, double timeStamp) : this(block, timeStamp, 0.0) { }
 		public ResetBlockEvent(NodeLocation block, double timeStamp, double delay)
-		: base(timeStamp, delay)
+         : base(timeStamp, delay)
 		{
 			myName = theName;
+			myId = theId;
 			myBlock=block;
 		}
+   
 
 		static ResetBlockEvent()
 		{
-			theName = new EventName("terrain.edit.resetBlock");
-			
+			theName = "terrain.edit.resetBlock";
+			theId = new EventId("terrain.edit.resetBlock");
 		}
 
 
@@ -50,8 +56,6 @@ namespace Terrain
 			get { return myBlock;}
 		}
 	
-
-
 
 
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using OpenTK;
 using Util;
-using Noise;
+using GpuNoise;
 
 namespace Terrain
 {

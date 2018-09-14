@@ -1,3 +1,12 @@
+/****************************************************************************** 
+
+Copyright (c) 2018 Apexica LLC 
+All rights reserved. 
+
+Author: Robert C. Holcomb Jr.
+
+******************************************************************************/
+
 using System;
 
 namespace Audio

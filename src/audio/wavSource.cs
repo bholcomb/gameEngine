@@ -1,3 +1,12 @@
+/****************************************************************************** 
+
+Copyright (c) 2018 Apexica LLC 
+All rights reserved. 
+
+Author: Robert C. Holcomb Jr.
+
+******************************************************************************/
+
 using System;
 using System.IO;
 
@@ -13,7 +22,7 @@ namespace Audio
       {
       }
 
-      public override IResource create()
+      public override IResource create(ResourceManager mgr)
       {
          WavSource w = new WavSource(this);
          if(w.load()==false)

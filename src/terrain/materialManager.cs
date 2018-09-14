@@ -160,7 +160,7 @@ namespace Terrain
 
       public static void loadMaterials()
       {
-         string [] files=System.IO.Directory.GetFiles("../data/materials");
+         string [] files=System.IO.Directory.GetFiles("../data/terrain/materials");
          foreach(string s in files)
          {
             if (System.IO.Path.GetExtension(s) == ".json")

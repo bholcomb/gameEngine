@@ -1532,6 +1532,34 @@ namespace Terrain
          return myMaterial.side;
       }
 
+      public int visibleFaceCount()
+      {
+         int count = 0;
+
+         if(isLeaf == true)
+         {
+            if(isVisible() == false)
+            {
+               return 0;
+            }
+
+            for(int i = 0; i < 6; i++)
+            {
+               if(faceVisible(i) == true)
+                  count++;
+            }
+         }
+         else
+         {
+            for (int i = 0; i < 8; i++)
+            {
+               count += myChildren[i].visibleFaceCount();
+            }
+         }
+
+         return count;
+      }
+
 //       public void renderOutline(ref List<RenderCommand> cmds)
 //       {
 //          if (isLeaf == false)

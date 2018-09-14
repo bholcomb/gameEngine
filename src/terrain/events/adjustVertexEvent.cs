@@ -1,8 +1,11 @@
-/*********************************************************************************
+/****************************************************************************** 
 
-Copyright (c) 2014 Bionic Dog Studios LLC
+Copyright (c) 2018 Apexica LLC 
+All rights reserved. 
 
-*********************************************************************************/
+Author: Robert C. Holcomb Jr.
+
+******************************************************************************/
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!This is an auto-generated file.  Any changes will be destroyed!!!!!!!!!!!
@@ -17,37 +20,40 @@ using System.Collections.Generic;
 
 
 using Util;
-using Events;
+using Engine;
 
 
 namespace Terrain
 {
 	public class AdjustVertexEvent : Event
 	{
-		static EventName theName;
+		public static EventId theId;
+		public static String theName;
 
 		NodeLocation myBlock=new NodeLocation();
 		Int32 myEdge;
 		Int32 myVert;
 		Int32 myAmount;
 
-		public AdjustVertexEvent(): base() { myName=theName; }
-		public AdjustVertexEvent(NodeLocation block, Int32 edge, Int32 vert, Int32 amount) : this(block, edge, vert, amount, TimeSource.defaultClock.currentTime(), 0.0) { }
+		public AdjustVertexEvent(): base() { myName = theName; myId = theId; }
+      public AdjustVertexEvent(NodeLocation block, Int32 edge, Int32 vert, Int32 amount) : this(block, edge, vert, amount, TimeSource.defaultClock.currentTime(), 0.0) { }
 		public AdjustVertexEvent(NodeLocation block, Int32 edge, Int32 vert, Int32 amount, double timeStamp) : this(block, edge, vert, amount, timeStamp, 0.0) { }
 		public AdjustVertexEvent(NodeLocation block, Int32 edge, Int32 vert, Int32 amount, double timeStamp, double delay)
-		: base(timeStamp, delay)
+         : base(timeStamp, delay)
 		{
 			myName = theName;
+			myId = theId;
 			myBlock=block;
 			myEdge=edge;
 			myVert=vert;
 			myAmount=amount;
 		}
+   
 
 		static AdjustVertexEvent()
 		{
-			theName = new EventName("terrain.edit.adjustVertex");
-			
+			theName = "terrain.edit.adjustVertex";
+			theId = new EventId("terrain.edit.adjustVertex");
 		}
 
 
@@ -71,8 +77,6 @@ namespace Terrain
 			get { return myAmount;}
 		}
 	
-
-
 
 
 

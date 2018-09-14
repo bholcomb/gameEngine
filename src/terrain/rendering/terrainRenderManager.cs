@@ -35,12 +35,12 @@ namespace Terrain
    {
 		public Dictionary<UInt64, TerrainRenderable> myRenderables = new Dictionary<ulong, TerrainRenderable>();
 
-		protected BufferMemoryManager myMemory = new BufferMemoryManager(1024 * 1024 * 1); //300MB
+		protected BufferMemoryManager myMemory = new BufferMemoryManager(1024 * 1024 * 30); //30MB
 		protected Dictionary<UInt64, DrawChunk> myLoadedChunks = new Dictionary<UInt64, DrawChunk>();
 		protected HashSet<UInt64> myRequestedIds = new HashSet<UInt64>();
 		Object myLock = new Object();
 
-		public RenderTarget myWaterRenderTarget;
+		public RenderTarget myWaterRenderTarget = null;
 		Texture myWaterDepthBuffer;
 		Texture myWaterColorBuffer;
 
@@ -49,15 +49,43 @@ namespace Terrain
 		public TerrainRenderManager(World w)
       {
 			world = w;
+         world.chunkAdded += handleChunkAdded;
+         world.chunkRemoved += handleChunkRemoved;
+         world.chunksReset += handleChunksReset;
+
+         TriangleVisualizer vis = new TriangleVisualizer(this);
+         Renderer.registerVisualizer("terrain", vis);
+
+         ShaderProgramDescriptor sd;
+         ShaderProgram sp;
+         List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
+
+         desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Terrain\\rendering\\shaders\\terrainTri-vs.glsl", ShaderDescriptor.Source.File));
+         desc.Add(new ShaderDescriptor(ShaderType.GeometryShader, "..\\src\\Terrain\\rendering\\shaders\\terrainTri-gs.glsl", ShaderDescriptor.Source.File));
+         desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Terrain\\rendering\\shaders\\terrainTri-ps.glsl", ShaderDescriptor.Source.File));
+         sd = new ShaderProgramDescriptor(desc, null, "terrain:perpixel");
+         sp = Renderer.resourceManager.getResource(sd) as ShaderProgram;
+         vis.registerEffect("forward-lighting", new PerPixelSolidEffect(sp));
+         vis.registerEffect("forward-lighting", new PerPixelTransparentEffect(sp));
+
+         desc.Clear();
+         desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Terrain\\rendering\\shaders\\terrainTri-vs.glsl", ShaderDescriptor.Source.File));
+         desc.Add(new ShaderDescriptor(ShaderType.GeometryShader, "..\\src\\Terrain\\rendering\\shaders\\terrainTri-gs.glsl", ShaderDescriptor.Source.File));
+         desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Terrain\\rendering\\shaders\\water-ps.glsl", ShaderDescriptor.Source.File));
+         sd = new ShaderProgramDescriptor(desc, null, "terrain:water");
+         sp = Renderer.resourceManager.getResource(sd) as ShaderProgram;
+         vis.registerEffect("forward-lighting", new PerPixelWaterEffect(sp));
       }
 
-		public void init()
+		public void init(Vector2 size)
 		{
-			world.chunkAdded += handleChunkAdded;
-			world.chunkRemoved += handleChunkRemoved;
-			world.chunksReset += handleChunksReset;
-
-			Vector2 size = new Vector2(1920, 1280);
+         //cleanup any previous 
+         if(myWaterRenderTarget != null)
+         {
+            myWaterRenderTarget.Dispose();
+            myWaterColorBuffer.Dispose();
+            myWaterDepthBuffer.Dispose();
+         }
 
 			myWaterColorBuffer = new Texture((int)size.X, (int)size.Y, PixelInternalFormat.Rgba8);
 			myWaterDepthBuffer = new Texture((int)size.X, (int)size.Y, PixelInternalFormat.DepthComponent32f);
@@ -66,55 +94,32 @@ namespace Terrain
 			rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.ColorAttachment0, tex = myWaterColorBuffer }); //uses an existing texture
 			rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.DepthAttachment, tex = myWaterDepthBuffer }); //uses an existing texture
 			myWaterRenderTarget = new RenderTarget((int)size.X, (int)size.Y, rtdesc);
-
-			TriangleVisualizer vis = new TriangleVisualizer(this);
-			Renderer.registerVisualizer("terrain", vis);
-
-			ShaderProgramDescriptor sd;
-			ShaderProgram sp;
-			List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
-
-			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Terrain\\rendering\\shaders\\terrainTri-vs.glsl", ShaderDescriptor.Source.File));
-			desc.Add(new ShaderDescriptor(ShaderType.GeometryShader, "..\\src\\Terrain\\rendering\\shaders\\terrainTri-gs.glsl", ShaderDescriptor.Source.File));
-			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Terrain\\rendering\\shaders\\terrainTri-ps.glsl", ShaderDescriptor.Source.File));
-			sd = new ShaderProgramDescriptor(desc, null,"terrain:perpixel");
-			sp = Renderer.resourceManager.getResource(sd) as ShaderProgram;
-			vis.registerEffect("forward-lighting", new PerPixelSolidEffect(sp));
-			vis.registerEffect("forward-lighting", new PerPixelTransparentEffect(sp));
-
-			desc.Clear();
-			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Terrain\\rendering\\shaders\\terrainTri-vs.glsl", ShaderDescriptor.Source.File));
-			desc.Add(new ShaderDescriptor(ShaderType.GeometryShader, "..\\src\\Terrain\\rendering\\shaders\\terrainTri-gs.glsl", ShaderDescriptor.Source.File));
-			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Terrain\\rendering\\shaders\\water-ps.glsl", ShaderDescriptor.Source.File));
-         sd = new ShaderProgramDescriptor(desc, null, "terrain:water");
-         sp = Renderer.resourceManager.getResource(sd) as ShaderProgram;
-         vis.registerEffect("forward-lighting", new PerPixelWaterEffect(sp));
 		}
 
       public World world { get; set; }
 
-		public void handleChunkAdded(UInt64 key)
+		public void handleChunkAdded(Chunk c)
 		{
 			TerrainRenderable r = new TerrainRenderable();
-			r.myChunk = world.chunks[key];
-			myRenderables[key] = r;
-			Renderer.renderables.Add(r);
+			r.myChunk = c;
+			myRenderables[c.key] = r;
+			Renderer.scene.renderables.Add(r);
 		}
 
-		public void handleChunkRemoved(UInt64 key)
+		public void handleChunkRemoved(Chunk c)
 		{
 			TerrainRenderable r = null;
-			if(myRenderables.TryGetValue(key, out r)== true)
+			if(myRenderables.TryGetValue(c.key, out r)== true)
 			{
-				Renderer.renderables.Remove(r);
-				myRenderables.Remove(key);
+				Renderer.scene.renderables.Remove(r);
+				myRenderables.Remove(c.key);
 			}
 		}
 
 		public void handleChunksReset()
 		{
 			foreach (TerrainRenderable r in myRenderables.Values)
-				Renderer.renderables.Remove(r);
+				Renderer.scene.renderables.Remove(r);
 
 			myRenderables.Clear();
 		}

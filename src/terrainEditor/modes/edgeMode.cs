@@ -5,8 +5,8 @@ using OpenTK;
 using OpenTK.Input;
 
 using Util;
-using UI;
-using Events;
+using GUI;
+using Engine;
 using Terrain;
 
 namespace Editor
@@ -24,24 +24,24 @@ namespace Editor
 
       public override void onGui()
       {
-         if (ImGui.hoveredWindow != null)
+         if (UI.hoveredWindow != null)
             return;
 
-         if (ImGui.mouse.wheelDelta != 0.0)
+         if (UI.mouse.wheelDelta != 0.0)
          {
             if (myEditor.context.currentEdge == -1 && myEditor.context.currentVert == -1 && myEditor.context.currentFace != Face.NONE)
             {
-               AdjustFaceCommand cmd = new AdjustFaceCommand(myEditor.context.currentLocation, myEditor.context.currentFace, (int)ImGui.mouse.wheelDelta);
+               AdjustFaceCommand cmd = new AdjustFaceCommand(myEditor.context.currentLocation, myEditor.context.currentFace, (int)UI.mouse.wheelDelta);
                myEditor.world.dispatch(cmd);
             }
             else if (myEditor.context.currentEdge != -1 && myEditor.context.currentVert == -1 && myEditor.context.currentFace != Face.NONE)
             {
-               AdjustEdgeCommand cmd = new AdjustEdgeCommand(myEditor.context.currentLocation, myEditor.context.currentEdge, myEditor.context.currentFace, (int)ImGui.mouse.wheelDelta);
+               AdjustEdgeCommand cmd = new AdjustEdgeCommand(myEditor.context.currentLocation, myEditor.context.currentEdge, myEditor.context.currentFace, (int)UI.mouse.wheelDelta);
                myEditor.world.dispatch(cmd);
             }
             else if (myEditor.context.currentEdge != -1 && myEditor.context.currentVert != -1)
             {
-               AdjustVertCommand cmd = new AdjustVertCommand(myEditor.context.currentLocation, myEditor.context.currentEdge, myEditor.context.currentVert, (int)ImGui.mouse.wheelDelta);
+               AdjustVertCommand cmd = new AdjustVertCommand(myEditor.context.currentLocation, myEditor.context.currentEdge, myEditor.context.currentVert, (int)UI.mouse.wheelDelta);
                myEditor.world.dispatch(cmd);
             }
          }

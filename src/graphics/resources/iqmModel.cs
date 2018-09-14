@@ -443,7 +443,6 @@ namespace Graphics
                temp.scale.Z = reader.ReadSingle();
                myJoints[i] = temp;
             }
-				sm.boneCount = (int)myHeader.num_joints;
 
             //read poses
             myPoses = new iqmpose[myHeader.num_poses];
@@ -479,7 +478,12 @@ namespace Graphics
                temp.flags = reader.ReadUInt32();
                myAnimataions[i] = temp;
 
-               sm.animations.Add(temp.name, new Animation(temp.name, (int)temp.first_frame, (int)temp.first_frame + (int)temp.num_frames - 1, temp.framerate, true/*((int)temp.flags & (int)AnimationFlags.IQM_LOOP) != 0*/));
+
+               Animation a = new Animation();
+               a.name = temp.name;
+               a.fps = temp.framerate;
+               a.loop = true;
+               sm.animations.Add(a.name, a);
             }
 
             //read frame data
@@ -551,6 +555,12 @@ namespace Graphics
                   baseframe[i] = baseframe[i] * baseframe[joint.parent];
                   inversebaseframe[i] = inversebaseframe[joint.parent] * inversebaseframe[i];
                }
+
+               Bone b = new Bone();
+               b.myName = myJoints[i].name;
+               b.myParent = myJoints[i].parent;
+               b.myWorldPose = baseframe[i];
+               sm.skeleton.myBones.Add(b);
             }
 
             Matrix4[] absMatrix = new Matrix4[myHeader.num_frames * myHeader.num_poses];

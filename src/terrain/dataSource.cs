@@ -21,7 +21,7 @@ namespace Terrain
 
       public TerrainSource(Initializer init, World world)
       {
-         String path = init.findDataOr("terrain.cachePath", "../data/chunks/world.chunk");
+         String path = init.findDataOr("terrain.cachePath", "../data/terrain/chunks/world.chunk");
          myChunkCache = new TerrainCache(path);
          myWorld = world;
       }

@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 using OpenTK.Graphics.OpenGL;
 
@@ -42,6 +43,22 @@ namespace Terrain
 					throw new Exception(String.Format("Unknown attribute field: {0}", fieldName));
 			}
 		}
+
+      static Dictionary<string, BufferBinding> theBindings = null;
+      public static Dictionary<string, BufferBinding> bindings()
+      {
+         if (theBindings == null)
+         {
+            theBindings = new Dictionary<string, BufferBinding>();
+            theBindings["morton"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Integer, dataFormat = (int)VertexAttribIntegerType.UnsignedInt, normalize = false, numElements = 1, offset = 0 };
+            theBindings["material"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Integer, dataFormat = (int)VertexAttribIntegerType.UnsignedInt, normalize = false, numElements = 1, offset = 4 };
+            theBindings["edge1"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Integer, dataFormat = (int)VertexAttribIntegerType.UnsignedByte, normalize = false, numElements = 4, offset = 8 };
+            theBindings["edge2"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Integer, dataFormat = (int)VertexAttribIntegerType.UnsignedByte, normalize = false, numElements = 4, offset = 12 };
+            theBindings["edge3"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Integer, dataFormat = (int)VertexAttribIntegerType.UnsignedByte, normalize = false, numElements = 4, offset = 16 };
+         }
+
+         return theBindings;
+      }
 	}
 
 	public class GeometryShaderRenderInfo : RenderInfo
@@ -157,7 +174,7 @@ namespace Terrain
             if (rq.myPipeline.vaoState.vao == null)
             {
                rq.myPipeline.vaoState.vao = new VertexArrayObject();
-               rq.myPipeline.vaoState.vao.bindVertexFormat<I1I1B12>(rq.myPipeline.shaderState.shaderProgram);
+               rq.myPipeline.vaoState.vao.bindVertexFormat(rq.myPipeline.shaderState.shaderProgram, I1I1B12.bindings());
             }
       }
 

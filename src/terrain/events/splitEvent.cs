@@ -1,8 +1,11 @@
-/*********************************************************************************
+/****************************************************************************** 
 
-Copyright (c) 2014 Bionic Dog Studios LLC
+Copyright (c) 2018 Apexica LLC 
+All rights reserved. 
 
-*********************************************************************************/
+Author: Robert C. Holcomb Jr.
+
+******************************************************************************/
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!This is an auto-generated file.  Any changes will be destroyed!!!!!!!!!!!
@@ -17,31 +20,34 @@ using System.Collections.Generic;
 
 
 using Util;
-using Events;
+using Engine;
 
 
 namespace Terrain
 {
 	public class SplitEvent : Event
 	{
-		static EventName theName;
+		public static EventId theId;
+		public static String theName;
 
 		NodeLocation myBlock=new NodeLocation();
 
-		public SplitEvent(): base() { myName=theName; }
-		public SplitEvent(NodeLocation block) : this(block, TimeSource.defaultClock.currentTime(), 0.0) { }
+		public SplitEvent(): base() { myName = theName; myId = theId; }
+      public SplitEvent(NodeLocation block) : this(block, TimeSource.defaultClock.currentTime(), 0.0) { }
 		public SplitEvent(NodeLocation block, double timeStamp) : this(block, timeStamp, 0.0) { }
 		public SplitEvent(NodeLocation block, double timeStamp, double delay)
-		: base(timeStamp, delay)
+         : base(timeStamp, delay)
 		{
 			myName = theName;
+			myId = theId;
 			myBlock=block;
 		}
+   
 
 		static SplitEvent()
 		{
-			theName = new EventName("terrain.edit.split");
-			
+			theName = "terrain.edit.split";
+			theId = new EventId("terrain.edit.split");
 		}
 
 
@@ -50,8 +56,6 @@ namespace Terrain
 			get { return myBlock;}
 		}
 	
-
-
 
 
 

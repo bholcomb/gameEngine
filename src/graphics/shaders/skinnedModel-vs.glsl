@@ -34,12 +34,14 @@ layout(binding = 0, std430) buffer modelData
 {
 	Model models[];
 };
-layout(binding = 1, std430) buffer boneData
-{
-	mat4 bones[];
-};
 
 layout(location = 0) uniform int modelDataIndex;
+
+const int MAX_BONES = 25;
+layout(std140, binding = 3) uniform skinning
+{
+   mat4 bones[MAX_BONES]; 
+};
 
 out VertexStage
 {
@@ -51,38 +53,28 @@ out VertexStage
 
 flat out vec4 activeLights;
 
-
-mat4 boneMatrix(int frame)
+vec4 calcWeightedPosition(vec4 p)
 {
-   mat4 ret=mat4(1); //identity
-
-   for(int i=0; i<4; i++)
+   vec4 wp = vec4(0,0,0,1);
+   for(int i = 0; i < 4; i++)
    {
-      int bone = int(boneId[i]);
+      int idx = int(boneId[i]);
       float weight = boneWeight[i];
-      if(bone != -1 && weight > 0)
+      if(idx != -1 && weight > 0)
       {
-         int offset = (frame * models[modelDataIndex].boneCount) + bone;
-
          //get the current bone matrix
-			mat4 boneMatrix = bones[offset];
-         ret += boneMatrix * weight;
+         mat4 bm = bones[idx];
+         wp += (bm * p) * weight;
       }
    }
-   
-   return ret;	
+
+   wp.w = 1;
+   return wp;
 }
 
 void main()
 {	
-   //get the bone matrixes
-   mat4 b1matrix = boneMatrix(models[modelDataIndex].currentFrame);
-   mat4 b2matrix = boneMatrix(models[modelDataIndex].nextFrame);
-
-   vec4 p1 = b1matrix * vec4(position, 1);
-   vec4 p2 = b2matrix * vec4(position, 1);
-   vec4 pos = mix(p1, p2, models[modelDataIndex].interpolation);
-   pos.w = 1;
+   vec4 pos = calcWeightedPosition(vec4(position, 1));
 
 	//this should be the inverse transpose, but since we're not doing any non-uniform scaling, we can just 
 	//skip the inverse/transpose steps since they cancel each other out when we have no scaling (or just uniform scaling).
@@ -90,7 +82,7 @@ void main()
 	mat4 modelMat = models[modelDataIndex].model;
 	normalMatrix = mat3(modelMat);
 	worldNormal = normalize(normalMatrix * normal);
-	worldVert = (modelMat * vec4(position, 1)).xyz;
+	worldVert = (modelMat * pos).xyz;
    
    texCoord = uv;
 

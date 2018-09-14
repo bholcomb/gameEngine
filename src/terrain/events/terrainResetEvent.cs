@@ -1,8 +1,11 @@
-/*********************************************************************************
+/****************************************************************************** 
 
-Copyright (c) 2014 Bionic Dog Studios LLC
+Copyright (c) 2018 Apexica LLC 
+All rights reserved. 
 
-*********************************************************************************/
+Author: Robert C. Holcomb Jr.
+
+******************************************************************************/
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!This is an auto-generated file.  Any changes will be destroyed!!!!!!!!!!!
@@ -16,31 +19,34 @@ using OpenTK;
 
 
 using Util;
-using Events;
+using Engine;
 
 
 namespace Terrain
 {
 	public class TerrainResetEvent : Event
 	{
-		static EventName theName;
+		public static EventId theId;
+		public static String theName;
 
 		bool myReload;
 
-		public TerrainResetEvent(): base() { myName=theName; }
-		public TerrainResetEvent(bool reload) : this(reload, TimeSource.defaultClock.currentTime(), 0.0) { }
+		public TerrainResetEvent(): base() { myName = theName; myId = theId; }
+      public TerrainResetEvent(bool reload) : this(reload, TimeSource.defaultClock.currentTime(), 0.0) { }
 		public TerrainResetEvent(bool reload, double timeStamp) : this(reload, timeStamp, 0.0) { }
 		public TerrainResetEvent(bool reload, double timeStamp, double delay)
-		: base(timeStamp, delay)
+         : base(timeStamp, delay)
 		{
 			myName = theName;
+			myId = theId;
 			myReload=reload;
 		}
+   
 
 		static TerrainResetEvent()
 		{
-			theName = new EventName("terrain.reset");
-			
+			theName = "terrain.reset";
+			theId = new EventId("terrain.reset");
 		}
 
 
@@ -49,8 +55,6 @@ namespace Terrain
 			get { return myReload;}
 		}
 	
-
-
 
 
 

@@ -24,7 +24,7 @@ namespace Terrain
       public static float theLeafRatio;
       public static UInt32 theMaxUnits; // the number of cubes to a side at max depth
       public static Vector3 theBias = Vector3.Zero; //the "origin" of the world, may change when camera is very far away from this point, rebias the world to closer to the camera
-      public static String theDataPath = "../data/chunks";
+      public static String theDataPath = "../data/terrain/chunks";
 
       static WorldParameters()
       {
@@ -57,7 +57,7 @@ namespace Terrain
    //also a centralized point for terrain generation and material parameters
    public class World
    {
-		public delegate void ChunkDelegate(UInt64 chunkKey);
+		public delegate void ChunkDelegate(Chunk chunkKey);
 		
       public Dictionary<UInt64, Chunk> myChunks = new Dictionary<UInt64, Chunk>();
       
@@ -70,8 +70,22 @@ namespace Terrain
 		public ChunkDelegate chunkRemoved;
 		public Action chunksReset;
 
-      public World(Initializer init)
+      public World()
       {
+         
+      }
+
+      public Dictionary<UInt64, Chunk> chunks { get { return myChunks; } }
+      public TerrainCache database { get { return myTerrainSource.chunkCache; } }
+      public int pendingChunks { get { return myTerrainSource.requestCount; } }
+      public TerrainSource terrainSource { get { return myTerrainSource; } }
+
+      public Int32 nodeCount { get; protected set; }
+
+      public void init(Initializer init)
+      {
+         MaterialManager.init(true);
+
          String source = init.findDataOr("terrain.source", "file");
          switch (source)
          {
@@ -87,18 +101,6 @@ namespace Terrain
          }
 
          myPager = new TerrainPager(this);
-      }
-
-      public Dictionary<UInt64, Chunk> chunks { get { return myChunks; } }
-      public TerrainCache database { get { return myTerrainSource.chunkCache; } }
-      public int pendingChunks { get { return myTerrainSource.requestCount; } }
-      public TerrainSource terrainSource { get { return myTerrainSource; } }
-
-      public Int32 nodeCount { get; protected set; }
-
-      public void init()
-      {
-         MaterialManager.init(true);   
       }
 
       public void shutdown()
@@ -167,16 +169,25 @@ namespace Terrain
          chunk.world = this;
          myChunks.Add(chunk.key, chunk);
          nodeCount += chunk.nodeCount;
-			if (chunkAdded != null)
-				chunkAdded(chunk.key);
+         if (chunkAdded != null)
+         {
+            chunkAdded(chunk);
+         }
       }
 
 		public void removeChunk(UInt64 key)
 		{
-			if (chunkRemoved != null)
-				chunkRemoved(key);
+         Chunk c = null;
+         myChunks.TryGetValue(key, out c);
+         if(c != null)
+         {
+            if (chunkRemoved != null)
+            {
+               chunkRemoved(c);
+            }
 
-			myChunks.Remove(key);
+            myChunks.Remove(key);
+         }
 		}
 
       public NodeHit getNodeIntersection(Ray r, float t0, float t1, Material.Property materialFlags=Material.Property.ALL)

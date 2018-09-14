@@ -56,6 +56,7 @@ namespace Graphics
 
                //read the registry
                LuaObject registry = data.get<LuaObject>("registry");
+               parseRegistry(registry);
 
                //read the chunks
                LuaObject chunks = data.get<LuaObject>("chunks");
@@ -106,6 +107,17 @@ namespace Graphics
             c.myVersion = data.get<UInt32>("version");
             c.myFlags = data.get<UInt32>("flags");
             c.myName = data.get<string>("name");
+
+            return true;
+         }
+
+         public bool parseRegistry(LuaObject data)
+         {
+            for(int i = 0; i < data.count(); i++)
+            {
+               LuaObject regEntry = data[i];
+               myRegistry[regEntry.get<string>("name")] = (UInt32)i;
+            }
 
             return true;
          }
@@ -262,7 +274,7 @@ namespace Graphics
          public bool parseBone(Bone b, LuaObject data)
          {
             b.myName = data.get<string>("name");
-            b.myParent = data.get<string>("parent");
+            b.myParent = data.get<int>("parent");
             b.myPose = data.get<Matrix4>("matrix");
             return true;
          }
@@ -270,7 +282,6 @@ namespace Graphics
          public bool parseSkeleton(SkeletonChunk s, LuaObject data)
          {
             parseChunkHeader(s, data);
-            s.myName = data.get<string>("name");
             LuaObject bones = data.get<LuaObject>("bones");
             for (int i = 1; i <= bones.count(); i++)
             {
@@ -285,6 +296,37 @@ namespace Graphics
          public bool parseAnimation(AnimationChunk a, LuaObject data)
          {
             parseChunkHeader(a, data);
+            a.fps = data.get<int>("framerate");
+            a.numFrames = data.get<int>("numFrames");
+            a.skeletonName = data.get<string>("skeleton");
+            a.numBones = data.get<int>("numBones");
+            LuaObject events = data["events"];
+            for(int i =0; i < events.count(); i++)
+            {
+               LuaObject e = events[i+1];
+               AnimationEvent aniEvent = new AnimationEvent();
+               aniEvent.frame = e.get<int>("frame");
+               aniEvent.name = e.get<string>("name");
+               a.events.Add(aniEvent);
+            }
+
+            
+            LuaObject poseData = data["poses"];
+            int next = 1;
+            for (int i = 0; i < a.numFrames; i++)
+            {
+               AnimationFrame frame = new AnimationFrame();
+               for (int b = 0; b < a.numBones; b++)
+               {
+                  JointPose jp = new JointPose();
+                  jp.position = new Vector3(poseData[next++], poseData[next++], poseData[next++]);
+                  jp.rotation = new Quaternion(poseData[next++], poseData[next++], poseData[next++], poseData[next++]);
+                  frame.Add(jp);
+               }
+
+               a.poses.Add(frame);
+            }
+
             return true;
          }
       }

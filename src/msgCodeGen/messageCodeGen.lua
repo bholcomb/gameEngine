@@ -11,11 +11,14 @@ outputDir="./"
 
 templates={
 	file=[[
-/*********************************************************************************
+/****************************************************************************** 
 
-Copyright (c) 2014 Bionic Dog Studios LLC
+Copyright (c) 2018 Apexica LLC 
+All rights reserved. 
 
-*********************************************************************************/
+Author: Robert C. Holcomb Jr.
+
+******************************************************************************/
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!This is an auto-generated file.  Any changes will be destroyed!!!!!!!!!!!
@@ -28,7 +31,7 @@ using System.IO;
 USING
 
 using Util;
-using Events;
+using Engine;
 
 
 namespace NAMESPACE
@@ -41,28 +44,20 @@ CLASS_DEF
 	class=[[
 	public class EVENTNAME : Event
 	{
-		static EventName theName;
+		public static EventId theId;
+		public static String theName;
 ATTRIBUTES
 
-		public EVENTNAME(): base() { myName=theName; }
-		public EVENTNAME(PARAM_DEF) : this(PARAM_VAL, TimeSource.defaultClock.currentTime(), 0.0) { }
-		public EVENTNAME(PARAM_DEF, double timeStamp) : this(PARAM_VAL, timeStamp, 0.0) { }
-		public EVENTNAME(PARAM_DEF, double timeStamp, double delay)
-		: base(timeStamp, delay)
-		{
-			myName = theName;
-PARAM_SET
-		}
+		public EVENTNAME(): base() { myName = theName; myId = theId; }
+PARAM_CONSTRUCTORS
 
 		static EVENTNAME()
 		{
-			theName = new EventName("EVENTSTRINGNAME");
-			REGISTER_ENTITY_ATTRIBUTE_CHANGE
+			theName = "EVENTSTRINGNAME";
+			theId = new EventId("EVENTSTRINGNAME");
 		}
 
 ATTRIBUTE_ACCESSOR
-
-DISPATCH_CHANGE
 
 ADDITIONAL_CODE
 
@@ -71,17 +66,17 @@ NETWORK
 	}
 	]],
 
-	dispatchChange=
-	[[
-	#region "dispatch attribute changes"
-	public static void dispatchAttributeChange(Entity e, object att)
-	{
-		EVENTNAME evt=new EVENTNAME(e.id, (PARAM)att);
-		Kernel.eventManager.queueEvent(evt);
-	}
-
-	#endregion
-	]],
+   paramConstructors = [[
+      public EVENTNAME(PARAM_DEF) : this(PARAM_VAL, TimeSource.defaultClock.currentTime(), 0.0) { }
+		public EVENTNAME(PARAM_DEF, double timeStamp) : this(PARAM_VAL, timeStamp, 0.0) { }
+		public EVENTNAME(PARAM_DEF, double timeStamp, double delay)
+         : base(timeStamp, delay)
+		{
+			myName = theName;
+			myId = theId;
+PARAM_SET
+		}
+   ]],
 
 	network=[[
 	#region "Serialize/Deserialize"
@@ -399,9 +394,10 @@ function EVENT(def)
 
 	classDef=string.gsub(classDef, "EVENTNAME", def.className)
 	classDef=string.gsub(classDef, "EVENTSTRINGNAME", def.eventName)
-	
 
-	--generate code for any additional libraries
+   local hasAttributes = (def.attributes ~= nil) and (table.getn(def.attributes) ~= 0)
+   
+   --generate code for any additional libraries
 	local usings=""
 	if(def.libs~=nil) then
 		for k,v in pairs(def.libs) do
@@ -414,7 +410,7 @@ function EVENT(def)
 
 	--generate code for the attributes definitions
 	local attribs=""
-	if(def.attributes~=nil) then
+	if(hasAttributes) then
 		for k,v in pairs(def.attributes) do
 			local att=""
 			if(needsNew(v)==true) then 
@@ -430,21 +426,13 @@ function EVENT(def)
 	end
 	classDef=string.gsub(classDef, "ATTRIBUTES", attribs)
 
-	--if this is an entity attribute change message, then add registration code
-	if(def.attributeChange==true) then
-		classDef=string.gsub(classDef, "REGISTER_ENTITY_ATTRIBUTE_CHANGE", "Entity.registerDispatcher(theName.myName, dispatchAttributeChange);")
-		local disp=templates.dispatchChange
-		disp=string.gsub(disp, "EVENTNAME", def.className)
-		disp=string.gsub(disp, "PARAM", def.attributes[2].type)
-		classDef=string.gsub(classDef, "DISPATCH_CHANGE", disp)
-	else
-		classDef=string.gsub(classDef, "REGISTER_ENTITY_ATTRIBUTE_CHANGE", "")
-		classDef=string.gsub(classDef, "DISPATCH_CHANGE", "")
-	end
-
 	--generate code for the attributes within the constructor definitions
-	local paramDefs=""
-	if(def.attributes~=nil) then
+  	--generate code for all the setting of parameters within the constructor
+	local paramConst=""
+	if(hasAttributes) then
+      local paramDefs = ""
+      local paramSets=""
+      paramConst = templates.paramConstructors
 		for k,v in pairs(def.attributes) do
 			local pdef=templates.paramDef
 			pdef=string.gsub(pdef, "PARAM_TYPE", v.type)
@@ -453,13 +441,26 @@ function EVENT(def)
 			if(k~=#def.attributes) then
 				paramDefs=paramDefs..", "
 			end
+
+         local pset=templates.paramSet
+			local upperName= v.name:gsub("^%l", string.upper)
+			pset=string.gsub(pset, "PARAM_NAME", upperName)
+			pset=string.gsub(pset, "PARAM_VALUE", v.name)
+			paramSets= paramSets..pset
+			if(k~=#def.attributes) then
+				paramSets=paramSets.."\n"
+			end
 		end
+
+      paramConst = string.gsub(paramConst, "EVENTNAME", def.className)
+      paramConst = string.gsub(paramConst, "PARAM_DEF", paramDefs)
+      paramConst = string.gsub(paramConst, "PARAM_SET", paramSets)
 	end
-	classDef=string.gsub(classDef, "PARAM_DEF", paramDefs)
+	classDef=string.gsub(classDef, "PARAM_CONSTRUCTORS", paramConst)
 
 	--generate code for the attributes within the constructor definitions
 	local paramVals=""
-	if(def.attributes~=nil) then
+	if(hasAttributes) then
 		for k,v in pairs(def.attributes) do
 			local pval=templates.paramVal
 			pval=string.gsub(pval, "PARAM_NAME", v.name)
@@ -471,25 +472,9 @@ function EVENT(def)
 	end
 	classDef=string.gsub(classDef, "PARAM_VAL", paramVals)
 
-	--generate code for all the setting of parameters within the constructor
-	local paramSets=""
-	if(def.attributes~=nil) then
-		for k,v in pairs(def.attributes) do
-			local pset=templates.paramSet
-			local upperName= v.name:gsub("^%l", string.upper)
-			pset=string.gsub(pset, "PARAM_NAME", upperName)
-			pset=string.gsub(pset, "PARAM_VALUE", v.name)
-			paramSets= paramSets..pset
-			if(k~=#def.attributes) then
-				paramSets=paramSets.."\n"
-			end
-		end
-	end
-	classDef=string.gsub(classDef, "PARAM_SET", paramSets)
-
 	--generate code for all the accessors
 	local attribAccessors=""
-	if(def.attributes~=nil) then
+	if(hasAttributes) then
 		for k,v in pairs(def.attributes) do
 			local att=templates.attributeAccessor
 			att=string.gsub(att, "ATTRIBUTE_TYPE", v.type)
@@ -513,7 +498,7 @@ function EVENT(def)
 		classDef=string.gsub(classDef, "NETWORK", templates.network)
 		--generate code for the message size
 		local attSizes=""
-		if(def.attributes~=nil) then
+		if(hasAttributes) then
 			for k,v in pairs(def.attributes) do
 				local sval=generateSize(v)
 				if(sval==nil) then print(v.name) end
@@ -527,7 +512,7 @@ function EVENT(def)
 
 		--generate code for the message serialization
 		local attWriter=""
-		if(def.attributes~=nil) then
+		if(hasAttributes) then
 			for k,v in pairs(def.attributes) do
 				local wval=generateWriter(v)
 				attWriter= attWriter..wval
@@ -540,7 +525,7 @@ function EVENT(def)
 
 		--generate code for the message deserialization
 		local attReader=""
-		if(def.attributes~=nil) then
+		if(hasAttributes) then
 			for k,v in pairs(def.attributes) do
 				local rval=generateReader(v)
 				attReader= attReader..rval

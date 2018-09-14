@@ -7,8 +7,8 @@ using OpenTK.Input;
 using Graphics;
 using Terrain;
 using Util;
-using Events;
-using UI;
+using Engine;
+using GUI;
 
 namespace Editor
 {
@@ -21,31 +21,31 @@ namespace Editor
 
       public override void onGui()
       {
-         if (ImGui.hoveredWindow != null)
+         if (UI.hoveredWindow != null)
             return;
 
-         if (ImGui.mouse.buttonReleased[(int)MouseButton.Left] == true && ImGui.keyboard.keyPressed(Key.ShiftLeft) == false)
+         if (UI.mouse.buttons[(int)MouseButton.Left].released == true && UI.keyboard.keyPressed(Key.ShiftLeft) == false)
          {
             createBlock();
          }
 
-         else if (ImGui.mouse.buttonReleased[(int)MouseButton.Left] == true && ImGui.keyboard.keyPressed(Key.ShiftLeft) == true)
+         else if (UI.mouse.buttons[(int)MouseButton.Left].released == true && UI.keyboard.keyPressed(Key.ShiftLeft) == true)
          {
             removeBlock();
          }
 
-         else if (ImGui.mouse.buttonReleased[(int)MouseButton.Left] == true &&
-            ImGui.keyboard.keyPressed(Key.ShiftLeft) == true && 
-            ImGui.keyboard.keyPressed(Key.ControlLeft) == true)
+         else if (UI.mouse.buttons[(int)MouseButton.Left].released == true &&
+            UI.keyboard.keyPressed(Key.ShiftLeft) == true && 
+            UI.keyboard.keyPressed(Key.ControlLeft) == true)
          {
             resetBlock();
          }
 
-         if (ImGui.mouse.wheelDelta != 0.0f)
+         if (UI.mouse.wheelDelta != 0.0f)
          {
-            if (ImGui.keyboard.keyPressed(Key.ControlLeft) == true)
+            if (UI.keyboard.keyPressed(Key.ControlLeft) == true)
             {
-               if (ImGui.mouse.wheelDelta > 0)
+               if (UI.mouse.wheelDelta > 0)
                   splitBlock();
                else
                   joinBlock();
@@ -53,7 +53,7 @@ namespace Editor
             else
             {
 
-					myEditor.cursorDepth += ImGui.mouse.wheelDelta < 0 ? -1 : 1;
+					myEditor.cursorDepth += UI.mouse.wheelDelta < 0 ? -1 : 1;
                if (myEditor.cursorDepth < 0) myEditor.cursorDepth = 0;
                if (myEditor.cursorDepth > WorldParameters.theMaxDepth) myEditor.cursorDepth = WorldParameters.theMaxDepth;
 

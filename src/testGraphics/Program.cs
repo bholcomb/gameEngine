@@ -59,7 +59,7 @@ namespace testRenderer
 
          myCameraEventHandler = new GameWindowCameraEventHandler(myCamera, this);
 
-         Keyboard.KeyUp += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardUp);
+         this.KeyUp += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardUp);
 
          this.VSync = VSyncMode.Off;
 
@@ -124,10 +124,10 @@ namespace testRenderer
 
          DebugRenderer.enabled = true;
 
-         myWorld = new World(myInitializer);
-         myWorld.init();
+         myWorld = new World();
+         myWorld.init(myInitializer);
          myTerrainRenderManager = new TerrainRenderManager(myWorld);
-         myTerrainRenderManager.init();
+         myTerrainRenderManager.init(new Vector2(this.Width, this.Height));
          myWorld.newWorld();
 
          windowScale = this.Width / (float)theWidth; // derive current DPI scale factor
@@ -280,7 +280,7 @@ namespace testRenderer
          //setup the rendering scene
          Graphics.View v = new Graphics.View("Main View", myCamera, myViewport);
 
-         Pass p = new Pass("environment", "skybox");
+         Pass p = new Pass("environment", "sky");
          p.renderTarget = myRenderTarget;
          p.filter = new TypeFilter(new List<String>() { "skybox" });
          p.clearTarget = true; //false is default setting
@@ -327,7 +327,7 @@ namespace testRenderer
          SkyboxRenderable skyboxRenderable = new SkyboxRenderable();
          SkyBoxDescriptor sbmd = new SkyBoxDescriptor("../data/skyboxes/interstellar/interstellar.json");
          skyboxRenderable.model = Renderer.resourceManager.getResource(sbmd) as SkyBox;
-         Renderer.renderables.Add(skyboxRenderable);
+         Renderer.scene.renderables.Add(skyboxRenderable);
 
          //create a tree instance
          Random rand = new Random(230877);
@@ -339,50 +339,50 @@ namespace testRenderer
             if (i % 2 == 0)
             {
                ObjModelDescriptor mdesc = new ObjModelDescriptor("../data/models/vegetation/birch/birch_01_a.obj");
-               smr.model = Renderer.resourceManager.getResource(mdesc) as StaticModel;
+               smr.model = Renderer.resourceManager.getResource(mdesc) as Model;
             }
             else
             {
-               BobStaticModelDescriptor mdesc = new BobStaticModelDescriptor("../data/models/props/rocks_3_by_nobiax-d6s8l2b/rocks_03.bob");
+               BobModelDescriptor mdesc = new BobModelDescriptor("../data/models/props/rocks_3_by_nobiax-d6s8l2b/rocks_03.bob");
                //ObjModelDescriptor mdesc = new ObjModelDescriptor("../data/models/props/rocks_3_by_nobiax-d6s8l2b/rocks_03-blend.obj");
-               smr.model = Renderer.resourceManager.getResource(mdesc) as StaticModel;
+               smr.model = Renderer.resourceManager.getResource(mdesc) as Model;
             }
 
             smr.setPosition(new Vector3((rand.Next() % size) - halfSize, 0, (rand.Next() % size) - halfSize));
             //for(int j=0; j< smr.model.myMeshes.Count; j++)
             //   smr.model.myMeshes[j].material.myFeatures = Graphics.Material.Feature.DiffuseMap; //turn off lighting
-            Renderer.renderables.Add(smr);
+            Renderer.scene.renderables.Add(smr);
          }
 
          //create a test cube
          StaticModelRenderable testRenderable = new StaticModelRenderable();
          ObjModelDescriptor testDesc;
          testDesc = new ObjModelDescriptor("../data/models/props/testCube/testCube.obj");
-         testRenderable.model = Renderer.resourceManager.getResource(testDesc) as StaticModel;
-         Renderer.renderables.Add(testRenderable);
+         testRenderable.model = Renderer.resourceManager.getResource(testDesc) as Model;
+         Renderer.scene.renderables.Add(testRenderable);
          testRenderable.setPosition(new Vector3(0, 1, 0));
 
          //create a skinned model instance
          mySkinnedModel = new SkinnedModelRenderable();
          //MS3DModelDescriptor skmd = new MS3DModelDescriptor("../data/models/characters/zombie/zombie.json");
          //IQModelDescriptor skmd = new IQModelDescriptor("../data/models/characters/mrFixIt/mrFixIt.json");
-         BobSkinnedModelDescriptor skmd = new BobSkinnedModelDescriptor("../data/models/characters/boxKnight/mini_knight.bob");
+         BobModelDescriptor skmd = new BobModelDescriptor("../data/models/characters/testSkinning/testSkinning.bob");
          mySkinnedModel.model = Renderer.resourceManager.getResource(skmd) as SkinnedModel;
          mySkinnedModel.controllers.Add(new AnimationController(mySkinnedModel));
-         Renderer.renderables.Add(mySkinnedModel);
+         Renderer.scene.renderables.Add(mySkinnedModel);
          mySkinnedModel.setPosition(new Vector3(5, 0, 0));
-         //(mySkinnedModel.findController("animation") as AnimationController).startAnimation("idle");
+         (mySkinnedModel.findController("animation") as AnimationController).startAnimation("wiggle");
 
          //create a particle system
          myParticleSystem = ParticleManager.loadDefinition("../data/particleSystems/ringOfFire.json");
-         Renderer.renderables.Add(myParticleSystem);
+         Renderer.scene.renderables.Add(myParticleSystem);
 
          //add a sun for light
          mySun = new LightRenderable();
          mySun.myLightType = LightRenderable.Type.DIRECTIONAL;
          mySun.color = Color4.White;
          mySun.position = new Vector3(5, 5, 5);
-         Renderer.renderables.Add(mySun);
+         Renderer.scene.renderables.Add(mySun);
 
          //add a point light
          myPoint1 = new LightRenderable();
@@ -392,7 +392,7 @@ namespace testRenderer
          myPoint1.size = 10;
          myPoint1.linearAttenuation = 1.0f;
          myPoint1.quadraticAttenuation = 0.5f;
-         Renderer.renderables.Add(myPoint1);
+         Renderer.scene.renderables.Add(myPoint1);
 
          //add another point light
          myPoint2 = new LightRenderable();
@@ -402,7 +402,7 @@ namespace testRenderer
          myPoint2.size = 10;
          myPoint2.linearAttenuation = 1.0f;
          myPoint2.quadraticAttenuation = 0.25f;
-         Renderer.renderables.Add(myPoint2);
+         Renderer.scene.renderables.Add(myPoint2);
 
          //add a callback in case the window size changes
          myViewport.notifier += new Viewport.ViewportNotifier(handleViewportChanged);

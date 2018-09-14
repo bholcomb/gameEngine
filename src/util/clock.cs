@@ -20,8 +20,8 @@ namespace Util
          myTimeScale = 1.0;
          myIsPaused = false;
          myPauseTime = 0.0;
-         myCurrentTime = TimeSource.defaultClock.currentTime();
-         myFrameTime = TimeSource.timeThisFrame();
+         myCurrentTime = 0.0;
+         myFrameTime = 0.0;
       }
 
       internal Clock(double setTime)
@@ -30,7 +30,16 @@ namespace Util
          myIsPaused = false;
          myPauseTime = 0.0;
          myCurrentTime = setTime;
-         myFrameTime = TimeSource.timeThisFrame();
+         myFrameTime = 0.0;
+      }
+
+      public void reset()
+      {
+         myTimeScale = 1.0;
+         myIsPaused = false;
+         myPauseTime = 0.0;
+         myCurrentTime = 0.0;
+         myFrameTime = 0.0;
       }
 
       public double currentTime()
@@ -72,13 +81,15 @@ namespace Util
          return myIsPaused;
       }
 
+      #region timers
+
       public Timer newTimer()
       {
          Timer t = new Timer(0.0, false, this);
          myTimers.Add(t);
          return t;
       }
-
+      
       public Timer newTimer(double countdownTime)
       {
          Timer t = new Timer(countdownTime, false, this);
@@ -97,6 +108,8 @@ namespace Util
       {
          myReleaseTimers.Add(t);
       }
+      
+      #endregion
 
       public void notify()
       {

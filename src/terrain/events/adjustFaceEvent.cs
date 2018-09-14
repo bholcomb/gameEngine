@@ -1,8 +1,11 @@
-/*********************************************************************************
+/****************************************************************************** 
 
-Copyright (c) 2014 Bionic Dog Studios LLC
+Copyright (c) 2018 Apexica LLC 
+All rights reserved. 
 
-*********************************************************************************/
+Author: Robert C. Holcomb Jr.
+
+******************************************************************************/
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!This is an auto-generated file.  Any changes will be destroyed!!!!!!!!!!!
@@ -17,35 +20,38 @@ using System.Collections.Generic;
 
 
 using Util;
-using Events;
+using Engine;
 
 
 namespace Terrain
 {
 	public class AdjustFaceEvent : Event
 	{
-		static EventName theName;
+		public static EventId theId;
+		public static String theName;
 
 		NodeLocation myBlock=new NodeLocation();
 		Int32 myFace;
 		Int32 myAmount;
 
-		public AdjustFaceEvent(): base() { myName=theName; }
-		public AdjustFaceEvent(NodeLocation block, Int32 face, Int32 amount) : this(block, face, amount, TimeSource.defaultClock.currentTime(), 0.0) { }
+		public AdjustFaceEvent(): base() { myName = theName; myId = theId; }
+      public AdjustFaceEvent(NodeLocation block, Int32 face, Int32 amount) : this(block, face, amount, TimeSource.defaultClock.currentTime(), 0.0) { }
 		public AdjustFaceEvent(NodeLocation block, Int32 face, Int32 amount, double timeStamp) : this(block, face, amount, timeStamp, 0.0) { }
 		public AdjustFaceEvent(NodeLocation block, Int32 face, Int32 amount, double timeStamp, double delay)
-		: base(timeStamp, delay)
+         : base(timeStamp, delay)
 		{
 			myName = theName;
+			myId = theId;
 			myBlock=block;
 			myFace=face;
 			myAmount=amount;
 		}
+   
 
 		static AdjustFaceEvent()
 		{
-			theName = new EventName("terrain.edit.adjustFace");
-			
+			theName = "terrain.edit.adjustFace";
+			theId = new EventId("terrain.edit.adjustFace");
 		}
 
 
@@ -64,8 +70,6 @@ namespace Terrain
 			get { return myAmount;}
 		}
 	
-
-
 
 
 

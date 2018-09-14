@@ -46,7 +46,6 @@ namespace Graphics
 			m.mesh.material = new Material(name);
 			m.mesh.material.myFeatures |= Material.Feature.Skybox;
          m.mesh.material.myTextures[(int)Material.TextureId.Skybox] = new TextureAttribute("skybox", tex);
-         m.mesh.material.addAttribute(new ValueAttribute("intensity", 1.0f));
          return m;
       }
    }

@@ -25,7 +25,7 @@ namespace Util
       {
       }
 
-      public void getModifiers(KeyboardDevice ks)
+      public void getModifiers(KeyboardState ks)
       {
          if (ks[Key.RShift]) myModifiers |= (int)Modifiers.RSHIFT;
          if (ks[Key.RControl]) myModifiers |= (int)Modifiers.RCTRL;

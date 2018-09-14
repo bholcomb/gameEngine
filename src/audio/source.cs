@@ -1,3 +1,12 @@
+/****************************************************************************** 
+
+Copyright (c) 2018 Apexica LLC 
+All rights reserved. 
+
+Author: Robert C. Holcomb Jr.
+
+******************************************************************************/
+
 using System;
 using System.Collections.Generic;
 
@@ -14,7 +23,7 @@ namespace Audio
          streaming = stream;
       }
 
-      public override IResource create() { return null; }
+      public override IResource create(ResourceManager mgr) { return null; }
 
       public bool streaming { get; set; }
       public bool is3d { get; set; }
@@ -48,35 +57,39 @@ namespace Audio
 
       public virtual void Dispose()
       {
+         foreach(AudioBuffer ab in myBuffers)
+         {
+            ab.Dispose();
+         }
+         myBuffers.Clear();
       }
       
       public abstract bool load();
       public abstract bool unLoad();
 
-      public bool isLoaded()
+      public bool isLoaded
       {
-         return myIsLoaded;
+         get { return myIsLoaded; }
       }
 
-
-      public String filename()
+      public String filename
       {
-         return myFilename;
+         get { return myFilename; }
       }
 
-      public bool isStreaming()
+      public bool isStreaming
       {
-         return myIsStreaming;
+         get { return myIsStreaming; }
       }
 
-      public SourceState state()
+      public SourceState state
       {
-         return myState;
+         get { return myState; }
       }
 
-      public int channels()
+      public int channels
       {
-         return myNumChannels;
+         get { return myNumChannels; }
       }
 
       public List<AudioBuffer> buffers()

@@ -1,8 +1,11 @@
-/*********************************************************************************
+/****************************************************************************** 
 
-Copyright (c) 2014 Bionic Dog Studios LLC
+Copyright (c) 2018 Apexica LLC 
+All rights reserved. 
 
-*********************************************************************************/
+Author: Robert C. Holcomb Jr.
+
+******************************************************************************/
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!This is an auto-generated file.  Any changes will be destroyed!!!!!!!!!!!
@@ -17,31 +20,34 @@ using System.Collections.Generic;
 
 
 using Util;
-using Events;
+using Engine;
 
 
 namespace Terrain
 {
 	public class JoinEvent : Event
 	{
-		static EventName theName;
+		public static EventId theId;
+		public static String theName;
 
 		NodeLocation myBlock=new NodeLocation();
 
-		public JoinEvent(): base() { myName=theName; }
-		public JoinEvent(NodeLocation block) : this(block, TimeSource.defaultClock.currentTime(), 0.0) { }
+		public JoinEvent(): base() { myName = theName; myId = theId; }
+      public JoinEvent(NodeLocation block) : this(block, TimeSource.defaultClock.currentTime(), 0.0) { }
 		public JoinEvent(NodeLocation block, double timeStamp) : this(block, timeStamp, 0.0) { }
 		public JoinEvent(NodeLocation block, double timeStamp, double delay)
-		: base(timeStamp, delay)
+         : base(timeStamp, delay)
 		{
 			myName = theName;
+			myId = theId;
 			myBlock=block;
 		}
+   
 
 		static JoinEvent()
 		{
-			theName = new EventName("terrain.edit.join");
-			
+			theName = "terrain.edit.join";
+			theId = new EventId("terrain.edit.join");
 		}
 
 
@@ -50,8 +56,6 @@ namespace Terrain
 			get { return myBlock;}
 		}
 	
-
-
 
 
 

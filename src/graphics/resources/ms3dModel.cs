@@ -49,7 +49,11 @@ namespace Graphics
          for (int i = 0; i < animations.count(); i++)
          {
             JsonObject ani = animations[i];
-            m.animations.Add((string)ani["name"], new Animation((string)ani["name"], (int)ani["start"], (int)ani["end"], loader.fps, (bool)ani["loop"]));
+            Animation a = new Animation();
+            a.name = (string)ani["name"];
+            a.fps = loader.fps;
+            a.loop = (bool)ani["loop"];
+            m.animations.Add(a.name, a);
          }
 
          return m;
@@ -399,6 +403,8 @@ namespace Graphics
                msJoints[i].position.X = reader.ReadSingle();
                msJoints[i].position.Y = reader.ReadSingle();
                msJoints[i].position.Z = reader.ReadSingle();
+
+               //read the keyframes
                msJoints[i].numRotationKeyframes = reader.ReadUInt16();
                msJoints[i].numPositionKeyframes = reader.ReadUInt16();
                msJoints[i].rotationKeyframes = new MilkshapeKeyframe[msJoints[i].numRotationKeyframes];
@@ -443,7 +449,7 @@ namespace Graphics
             #endregion
 
             #region "setup joints"
-
+            Skeleton skeleton = new Skeleton();
             for (int i = 0; i < msJoints.Length; i++)
             {
                msJoints[i].local = Matrix4.CreateRotationX(msJoints[i].rotation.X) * Matrix4.CreateRotationY(msJoints[i].rotation.Y) * Matrix4.CreateRotationZ(msJoints[i].rotation.Z);
@@ -457,6 +463,13 @@ namespace Graphics
 
                //initialize the final position of the joint to the default position
                msJoints[i].final = msJoints[i].absolute;
+
+               //create the skeleton
+               Bone b = new Bone();
+               b.myName = msJoints[i].name;
+               b.myParent = msJoints[i].parentIndex;
+               b.myWorldPose = msJoints[i].final;
+               skeleton.myBones.Add(b);
             }
 
             #endregion
@@ -475,6 +488,7 @@ namespace Graphics
 
             //push all the stuff onto the graphics card
             SkinnedModel sm = bufferData();
+            sm.skeleton = skeleton;            
             sm.size = (findMax() - findMin()).Length / 2.0f;
 
             return sm;
@@ -576,7 +590,6 @@ namespace Graphics
          sm.myVbos.Add(vbo);
          sm.myIbo.setData(indexes);
          sm.myFrames.setData(boneData);
-         sm.boneCount = boneCount;
 
          return sm;
       }

@@ -7,8 +7,8 @@ using OpenTK.Input;
 using Graphics;
 using Terrain;
 using Util;
-using UI;
-using Events;
+using GUI;
+using Engine;
 using Physics;
 
 namespace Editor
@@ -97,36 +97,36 @@ namespace Editor
          if (myIsActive == false)
             return;
 
-         ImGui.label(String.Format("Active Mode: {0}", activeMode), ImGui.width / 2 - 100, 10);
-         ImGui.label(String.Format("Undo Memory Usage: {0}", Formatter.bytesHumanReadable(myWorld.undoUsage), ImGui.width / 2 - 100, 35));
+         //UI.label(String.Format("Active Mode: {0}", activeMode), UI.width / 2 - 100, 10);
+         UI.label(String.Format("Undo Memory Usage: {0}", Formatter.bytesHumanReadable(myWorld.undoUsage), UI.displaySize.X / 2 - 100, 35));
 
          mySelectionManager.onGui();
 
-         if (ImGui.keyboard.keyReleased(Key.F1))
+         if (UI.keyboard.keyReleased(Key.F1))
          {
             activateMode("Block Mode");
          }
 
-         if (ImGui.keyboard.keyReleased(Key.F2))
+         if (UI.keyboard.keyReleased(Key.F2))
          {
             activateMode("Edge Mode");
          }
 
-         if (ImGui.keyboard.keyReleased(Key.F3))
+         if (UI.keyboard.keyReleased(Key.F3))
          {
             activateMode("Face Mode");
          }
 
-         if (ImGui.keyboard.keyReleased(Key.F4))
+         if (UI.keyboard.keyReleased(Key.F4))
          {
             activateMode("Material Mode");
          }
 
-         if (ImGui.keyboard.keyReleased(Key.F5))
+         if (UI.keyboard.keyReleased(Key.F5))
          {
-            if (ImGui.keyboard.keyPressed(Key.ControlLeft))
+            if (UI.keyboard.keyPressed(Key.ControlLeft))
             {
-               if (ImGui.keyboard.keyPressed(Key.ShiftLeft))
+               if (UI.keyboard.keyPressed(Key.ShiftLeft))
                   world.reset();
 //                else
 //                   myTerrainRenderer.renderManager.clear();
@@ -135,7 +135,7 @@ namespace Editor
                world.regenCurrentChunk();
          }
 
-         if (ImGui.keyboard.keyReleased(Key.Z) && ImGui.keyboard.keyPressed(Key.ControlLeft))
+         if (UI.keyboard.keyReleased(Key.Z) && UI.keyboard.keyPressed(Key.ControlLeft))
          {
             world.undoLastCommand();
          }

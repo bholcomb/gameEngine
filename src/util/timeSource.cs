@@ -141,10 +141,10 @@ namespace Util
 
          //check for very long waits (as in debugging)
 #if DEBUG
-         if (myFrameTime > 0.33)
+         if (myFrameTime > 0.5)
          {
             //debug << "Excessive lag in TimeSource frame update using acceptable time" << endl;
-            myFrameTime = 0.16;
+            myFrameTime = 0.016;
          }
 #endif
 

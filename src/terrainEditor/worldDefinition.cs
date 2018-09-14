@@ -5,7 +5,7 @@ using OpenTK;
 
 using Terrain;
 using Util;
-using Noise;
+using GpuNoise;
 
 namespace Editor
 {

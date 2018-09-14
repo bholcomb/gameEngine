@@ -15,9 +15,9 @@ namespace Terrain
    {
       static UInt32 theMiddle = 2147483136; //when converted to chunk and node key, this represents 0,0,0 in the world
       
-      public UInt32 nx=theMiddle;
-      public UInt32 ny=theMiddle;
-      public UInt32 nz=theMiddle;
+      public UInt32 nx = theMiddle;
+      public UInt32 ny = theMiddle;
+      public UInt32 nz = theMiddle;
 
       ChunkKey myChunk;
       NodeKey myNode;
@@ -168,6 +168,11 @@ namespace Terrain
 
          // Return true if the fields match:
          return (nx==p.nx && ny==p.ny && nz==p.nz);
+      }
+
+      public override int GetHashCode()
+      {
+         return base.GetHashCode();
       }
    }
 

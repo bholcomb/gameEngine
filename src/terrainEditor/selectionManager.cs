@@ -9,8 +9,8 @@ using OpenTK.Graphics.OpenGL;
 using Graphics;
 using Terrain;
 using Util;
-using Events;
-using UI;
+using Engine;
+using GUI;
 
 namespace Editor
 {
@@ -209,22 +209,22 @@ namespace Editor
       {
          if (myDebug)
          {
-            ImGui.beginWindow("Selection Manager");
-            ImGui.setWindowPosition(new Vector2(10, 10), SetCondition.FirstUseEver);
-            ImGui.setWindowSize(new Vector2(400, 300), SetCondition.FirstUseEver);
-            ImGui.label("Hit: {0}", myCurrentHit == null ? Vector3.Zero : myCurrentHit.location);
-            ImGui.label("Depth: {0}", myEditor.cursorDepth);
-            ImGui.label("hit node: {0}", myCurrentHit == null ? Vector3.Zero : myCurrentHit.node.location.worldLocation());
-            ImGui.label("Node Key: {0}", myCurrentHit == null ? 0 : myCurrentHit.node.myKey.myValue);
-            ImGui.label("Clamped Node Key: {0}", myCurrentHit == null ? 0 : myClampedLocation.node.myValue);
-            ImGui.label("clamped hit: {0}", myCurrentHit == null ? Vector3.Zero : myClampedLocation.node.location);
-            ImGui.label("Face: {0}", myCurrentHit == null ? Face.NONE : myCurrentHit.face);
-            ImGui.label("Edge: {0}", myCurrentHit == null ? -1 : myCurrentHit.edge);
-            ImGui.label("Vertex: {0}", myCurrentHit == null ? -1 : myCurrentHit.vert);
-            ImGui.label("Visible Faces {0}", myCurrentHit == null ? "None" : Node.visiblityFlagsString(myCurrentHit.node.myFaceVisibilty));
-            ImGui.label("Multiselect: {0}", myMultiSelect);
-            ImGui.label("Selected Cubes: {0}", mySelectedNodes.Count);
-            ImGui.endWindow();
+            UI.beginWindow("Selection Manager");
+            UI.setWindowPosition(new Vector2(10, 10), SetCondition.FirstUseEver);
+            UI.setWindowSize(new Vector2(400, 300), SetCondition.FirstUseEver);
+            UI.label("Hit: {0}", myCurrentHit == null ? Vector3.Zero : myCurrentHit.location);
+            UI.label("Depth: {0}", myEditor.cursorDepth);
+            UI.label("hit node: {0}", myCurrentHit == null ? Vector3.Zero : myCurrentHit.node.location.worldLocation());
+            UI.label("Node Key: {0}", myCurrentHit == null ? 0 : myCurrentHit.node.myKey.myValue);
+            UI.label("Clamped Node Key: {0}", myCurrentHit == null ? 0 : myClampedLocation.node.myValue);
+            UI.label("clamped hit: {0}", myCurrentHit == null ? Vector3.Zero : myClampedLocation.node.location);
+            UI.label("Face: {0}", myCurrentHit == null ? Face.NONE : myCurrentHit.face);
+            UI.label("Edge: {0}", myCurrentHit == null ? -1 : myCurrentHit.edge);
+            UI.label("Vertex: {0}", myCurrentHit == null ? -1 : myCurrentHit.vert);
+            UI.label("Visible Faces {0}", myCurrentHit == null ? "None" : Node.visiblityFlagsString(myCurrentHit.node.myFaceVisibilty));
+            UI.label("Multiselect: {0}", myMultiSelect);
+            UI.label("Selected Cubes: {0}", mySelectedNodes.Count);
+            UI.endWindow();
          }
 
          handleInput();
@@ -254,7 +254,7 @@ namespace Editor
       #region event handlers
       public void handleInput()
       {
-         if (ImGui.hoveredWindow == null)
+         if (UI.hoveredWindow == null)
          {
             handleMouseMove();
             handleButtonDown();
@@ -267,8 +267,8 @@ namespace Editor
       public void handleMouseMove()
       {
          int x, y;
-         x = (int)ImGui.mouse.pos.X;
-         y = (int)ImGui.mouse.pos.Y;
+         x = (int)UI.mouse.pos.X;
+         y = (int)UI.mouse.pos.Y;
 
          myClampedLocation = getMouseOverLocation(x, y);
          switch (mySelectMode)
@@ -292,7 +292,7 @@ namespace Editor
 
       public void handleButtonDown()
       {
-         if (ImGui.mouse.buttonClicked[(int)MouseButton.Left] == true)
+         if (UI.mouse.isButtonClicked(MouseButton.Left) == true)
          {
             if (myMultiSelect == false)
             {
@@ -302,12 +302,12 @@ namespace Editor
             mySelectMode = SelectMode.ADD;
          }
 
-         if (ImGui.mouse.buttonClicked[(int)MouseButton.Middle] == true)
+         if (UI.mouse.isButtonClicked(MouseButton.Middle) == true)
          {
             mySelectMode = SelectMode.REMOVE;
          }
 
-         if(ImGui.mouse.buttonClicked[(int)MouseButton.Right] == true)
+         if(UI.mouse.isButtonClicked(MouseButton.Right)== true)
          {
             if (myCurrentHit != null)
             {
@@ -318,12 +318,12 @@ namespace Editor
 
       public void handleButtonUp()
       {
-         if (ImGui.mouse.buttonReleased[(int)MouseButton.Left] == true)
+         if (UI.mouse.buttons[(int)MouseButton.Left].released == true)
          {
             addCurrentNode();
             mySelectMode = SelectMode.NONE;
          }
-         if (ImGui.mouse.buttonReleased[(int)MouseButton.Middle] == true)
+         if (UI.mouse.buttons[(int)MouseButton.Middle].released == true)
          {
             removeCurrentNode();
             mySelectMode = SelectMode.NONE;
@@ -332,7 +332,7 @@ namespace Editor
 
       public void handleKeyDown()
       {
-         if (ImGui.keyboard.keyPressed(Key.ShiftLeft) == true)
+         if (UI.keyboard.keyPressed(Key.ShiftLeft) == true)
          {
             myMultiSelect = true;
          }
@@ -341,17 +341,17 @@ namespace Editor
       public void handleKeyUp()
       {
          //cancel selection
-         if(ImGui.keyboard.keyReleased(Key.Space)==true)
+         if(UI.keyboard.keyReleased(Key.Space)==true)
          {
             mySelectedNodes.Clear();
          }
 
-         if(ImGui.keyboard.keyReleased(Key.ShiftLeft)==true)
+         if(UI.keyboard.keyReleased(Key.ShiftLeft)==true)
          {
             myMultiSelect = false;
          }
                
-         if(ImGui.keyboard.keyReleased(Key.Plus)==true)
+         if(UI.keyboard.keyReleased(Key.Plus)==true)
          {
             myEditor.cursorDepth++;
             if (myEditor.cursorDepth > WorldParameters.theMaxDepth)
@@ -360,7 +360,7 @@ namespace Editor
             }
          }
 
-         if(ImGui.keyboard.keyReleased(Key.Minus)==true)
+         if(UI.keyboard.keyReleased(Key.Minus)==true)
          {
             myEditor.cursorDepth--;
             if (myEditor.cursorDepth < 0)
@@ -369,7 +369,7 @@ namespace Editor
             }
          }
 
-         if(ImGui.keyboard.keyReleased(Key.F12) == true)
+         if(UI.keyboard.keyReleased(Key.F12) == true)
          {
             myDebug = !myDebug;
          }
@@ -410,7 +410,7 @@ namespace Editor
 
       public NodeLocation getMouseOverLocation(int x, int y)
       {
-         Ray r = myEditor.camera.getPickRay(x, (int)ImGui.displaySize.Y - y);
+         Ray r = myEditor.camera.getPickRay(x, (int)UI.displaySize.Y - y);
          myCurrentHit = myEditor.world.getNodeIntersection(r, myEditor.camera.near, myEditor.camera.far);
          myClampedLocation = null;
 

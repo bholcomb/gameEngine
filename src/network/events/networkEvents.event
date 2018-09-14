@@ -1,0 +1,42 @@
+--[[/*********************************************************************************
+
+Copyright (c) 2018 Apexica LLC
+
+*********************************************************************************/]]--
+
+EVENT{
+	fileName="networkBeacon";
+	eventName="network.beacon";
+	className="NetworkBeaconEvent";
+   namespace="Engine";
+   libs={};
+	serialize=true;
+	attributes={
+		{type="String", name="address"};
+		{type="Int32", name="pubPort"};
+	}
+}
+
+EVENT{
+	fileName="networkConnected";
+	eventName="network.connected";
+	className="NetworkConnectedEvent";
+   namespace="Engine";
+   libs={};
+	serialize=true;
+	attributes={
+		{type="String", name="peer"};
+	}
+}
+
+EVENT{
+	fileName="networkForward";
+	eventName="network.forward";
+	className="NetworkForwardEvent";
+   namespace="Engine";
+   libs={};
+	serialize=true;
+	attributes={
+		{type="String", name="message"};
+	}
+}

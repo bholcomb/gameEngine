@@ -10,7 +10,7 @@ using OpenTK;
 using OpenTK.Graphics;
 
 using Util;
-using Noise;
+using GpuNoise;
 using Graphics;
 
 namespace Terrain

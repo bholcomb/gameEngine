@@ -57,7 +57,7 @@ namespace Graphics
       {
          Model model = null;
          Skeleton skel = null;
-         Dictionary<string, Animation> anims;
+         Dictionary<string, Animation> anims = new Dictionary<string, Animation>();
          foreach(Bob.Chunk c in tf.chunks)
          {
             switch(c.myType)
@@ -66,18 +66,11 @@ namespace Graphics
                   skel = loadSkeleton(c as Bob.SkeletonChunk);
                   break;
                case Bob.ChunkType.ANIMATION:
-                  anims = (model as SkinnedModel).animations;
                   Animation a = loadAnimation(c as Bob.AnimationChunk);
                   anims[a.name] = a;
                   break;
                case Bob.ChunkType.MODEL:
-                  Bob.ModelChunk mc = c as Bob.ModelChunk;
-                  model = createModel(mc);
-                  loadMaterials(model, mc);
-                  loadVerts(model, mc);
-                  loadIndexes(model, mc);
-                  loadMeshes(model, mc);
-                  model.size = findSize(mc);
+                  model = loadModel(c as Bob.ModelChunk);
                   break;
             }
          }
@@ -85,6 +78,13 @@ namespace Graphics
          if(model is SkinnedModel)
          {
             (model as SkinnedModel).skeleton = skel;
+            (model as SkinnedModel).createNullAnimation();
+            
+            foreach(KeyValuePair<string, Animation> anim in anims)
+            {
+               anim.Value.skeleton = skel;
+               (model as SkinnedModel).animations.Add(anim.Key, anim.Value);
+            }
          }
 
          return model;
@@ -99,14 +99,17 @@ namespace Graphics
          {
             Bone bb = new Bone();
             bb.myName = b.myName;
-            bb.myPose = b.myPose;
+            bb.myWorldPose = b.myPose;
+            bb.myInvWorldPose = b.myPose.Inverted();
+            bb.myParent = b.myParent;
 
-            for(int i =0; i < s.myBones.Count; i++)
+            if(b.myParent == -1)
             {
-               if(s.myBones[i].myName == b.myParent)
-               {
-                  bb.myParent = i;
-               }
+               bb.myLocalPose = bb.myWorldPose;
+            }
+            else
+            {
+               bb.myLocalPose = s.myBones[bb.myParent].myInvWorldPose * bb.myWorldPose;
             }
 
             s.myBones.Add(bb);
@@ -119,27 +122,36 @@ namespace Graphics
       {
          Animation a = new Animation();
          a.name = ac.myName;
-         a.startFrame = 0;
-         a.endFrame = ac.numFrames;
-         a.fps = ac.framerate;
+         a.loop = ac.loop;
+         a.fps = ac.fps;
+         a.loop = ac.loop;
          a.events = ac.events;
          a.poses = ac.poses;
          return a;
       }
 
-      Model createModel(Bob.ModelChunk mc)
+      Model loadModel(Bob.ModelChunk mc)
       {
+         Model model = null;
          if(mc.animated == true)
          {
-            return new SkinnedModel();
+            model = new SkinnedModel();
          }
          else
          {
-            return new Model();
+            model = new Model();
          }
+
+         loadMaterials(model, mc);
+         loadVerts(model, mc);
+         loadIndexes(model, mc);
+         loadMeshes(model, mc);
+         model.size = findSize(mc);
+
+         return model;
       }
 
-      public Material findMaterial(string matName)
+      Material findMaterial(string matName)
       {
          foreach (Material m in myMaterials)
          {
@@ -150,7 +162,7 @@ namespace Graphics
          return null;
       }
 
-      public void loadMaterials(Model m, Bob.ModelChunk bmc)
+      void loadMaterials(Model m, Bob.ModelChunk bmc)
       {
          foreach (Bob.Material bm in bmc.myMaterials)
          {
@@ -205,7 +217,7 @@ namespace Graphics
          }
       }
 
-      protected Texture getTexture(string filepath)
+      Texture getTexture(string filepath)
       {
          Texture t = null;
 
@@ -221,7 +233,7 @@ namespace Graphics
          return t;
       }
 
-      public void loadVerts(Model m, Bob.ModelChunk bmc)
+      void loadVerts(Model m, Bob.ModelChunk bmc)
       {
          VertexBufferObject vbo = new VertexBufferObject(BufferUsageHint.StaticDraw);
          if (bmc.animated == false)
@@ -260,7 +272,7 @@ namespace Graphics
          m.myVbos.Add(vbo);
       }
 
-      public void loadIndexes(Model m, Bob.ModelChunk bmc)
+      void loadIndexes(Model m, Bob.ModelChunk bmc)
       {
          if (bmc.indexType == Bob.ModelChunk.IndexFormat.USHORT)
          {
@@ -272,7 +284,7 @@ namespace Graphics
          }
       }
 
-      public void loadMeshes(Model m, Bob.ModelChunk bmc)
+      void loadMeshes(Model m, Bob.ModelChunk bmc)
       {
          foreach (Bob.Mesh bm in bmc.myMeshes)
          {
@@ -285,7 +297,7 @@ namespace Graphics
          }
       }
 
-      public float findSize(Bob.ModelChunk bmc)
+      float findSize(Bob.ModelChunk bmc)
       {
          Vector3 min = new Vector3(float.MaxValue);
          Vector3 max = new Vector3(float.MinValue);

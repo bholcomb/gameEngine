@@ -21,7 +21,8 @@ namespace Util
       public string type { get; protected set; }
       public string path { get; protected set; }
       public JsonObject descriptor { get; protected set; }
+      public int size { get; protected set; }
 
-      public abstract IResource create();
+      public abstract IResource create(ResourceManager mgr);
    }
 }

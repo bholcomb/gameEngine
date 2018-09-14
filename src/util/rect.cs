@@ -239,8 +239,8 @@ namespace Util
       {
          left -= amount.X / 2.0f;
          bottom -= amount.Y / 2.0f;
-         width += amount.X;
-         height += amount.Y;
+         width += amount.X / 2.0f;
+         height += amount.Y / 2.0f;
       }
 
       public virtual void transpose()

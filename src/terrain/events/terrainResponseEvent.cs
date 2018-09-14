@@ -1,8 +1,11 @@
-/*********************************************************************************
+/****************************************************************************** 
 
-Copyright (c) 2014 Bionic Dog Studios LLC
+Copyright (c) 2018 Apexica LLC 
+All rights reserved. 
 
-*********************************************************************************/
+Author: Robert C. Holcomb Jr.
+
+******************************************************************************/
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!This is an auto-generated file.  Any changes will be destroyed!!!!!!!!!!!
@@ -17,33 +20,36 @@ using System.Collections.Generic;
 
 
 using Util;
-using Events;
+using Engine;
 
 
 namespace Terrain
 {
 	public class TerrainResponseEvent : Event
 	{
-		static EventName theName;
+		public static EventId theId;
+		public static String theName;
 
 		UInt64 myChunkId;
 		List<byte> myData=new List<byte>();
 
-		public TerrainResponseEvent(): base() { myName=theName; }
-		public TerrainResponseEvent(UInt64 chunkId, List<byte> data) : this(chunkId, data, TimeSource.defaultClock.currentTime(), 0.0) { }
+		public TerrainResponseEvent(): base() { myName = theName; myId = theId; }
+      public TerrainResponseEvent(UInt64 chunkId, List<byte> data) : this(chunkId, data, TimeSource.defaultClock.currentTime(), 0.0) { }
 		public TerrainResponseEvent(UInt64 chunkId, List<byte> data, double timeStamp) : this(chunkId, data, timeStamp, 0.0) { }
 		public TerrainResponseEvent(UInt64 chunkId, List<byte> data, double timeStamp, double delay)
-		: base(timeStamp, delay)
+         : base(timeStamp, delay)
 		{
 			myName = theName;
+			myId = theId;
 			myChunkId=chunkId;
 			myData=data;
 		}
+   
 
 		static TerrainResponseEvent()
 		{
-			theName = new EventName("terrain.chunk.response");
-			
+			theName = "terrain.chunk.response";
+			theId = new EventId("terrain.chunk.response");
 		}
 
 
@@ -57,8 +63,6 @@ namespace Terrain
 			get { return myData;}
 		}
 	
-
-
 
 
 

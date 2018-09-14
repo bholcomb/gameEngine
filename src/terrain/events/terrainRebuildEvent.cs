@@ -1,8 +1,11 @@
-/*********************************************************************************
+/****************************************************************************** 
 
-Copyright (c) 2014 Bionic Dog Studios LLC
+Copyright (c) 2018 Apexica LLC 
+All rights reserved. 
 
-*********************************************************************************/
+Author: Robert C. Holcomb Jr.
+
+******************************************************************************/
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!This is an auto-generated file.  Any changes will be destroyed!!!!!!!!!!!
@@ -16,31 +19,34 @@ using OpenTK;
 
 
 using Util;
-using Events;
+using Engine;
 
 
 namespace Terrain
 {
 	public class TerrainRebuildEvent : Event
 	{
-		static EventName theName;
+		public static EventId theId;
+		public static String theName;
 
 		UInt64 myChunkId;
 
-		public TerrainRebuildEvent(): base() { myName=theName; }
-		public TerrainRebuildEvent(UInt64 chunkId) : this(chunkId, TimeSource.defaultClock.currentTime(), 0.0) { }
+		public TerrainRebuildEvent(): base() { myName = theName; myId = theId; }
+      public TerrainRebuildEvent(UInt64 chunkId) : this(chunkId, TimeSource.defaultClock.currentTime(), 0.0) { }
 		public TerrainRebuildEvent(UInt64 chunkId, double timeStamp) : this(chunkId, timeStamp, 0.0) { }
 		public TerrainRebuildEvent(UInt64 chunkId, double timeStamp, double delay)
-		: base(timeStamp, delay)
+         : base(timeStamp, delay)
 		{
 			myName = theName;
+			myId = theId;
 			myChunkId=chunkId;
 		}
+   
 
 		static TerrainRebuildEvent()
 		{
-			theName = new EventName("terrain.chunk.rebuild");
-			
+			theName = "terrain.chunk.rebuild";
+			theId = new EventId("terrain.chunk.rebuild");
 		}
 
 
@@ -49,8 +55,6 @@ namespace Terrain
 			get { return myChunkId;}
 		}
 	
-
-
 
 
 

@@ -10,28 +10,90 @@ using Util;
 
 namespace Graphics
 {
+   public struct JointPose
+   {
+      public Vector3 position;
+      public Quaternion rotation;
+   }
+
+   public class AnimationFrame : List<JointPose>
+   {
+      public AnimationFrame() : base()
+      {
+      }
+   }
+
+
    public class Animation
    {
       //animation parameters
       public String name { get; set; }
-      public int startFrame { get; set; }
-      public int endFrame { get; set; }
+      public Skeleton skeleton { get; set; }
+      public int numFrames { get { return poses.Count; } }
       public float fps { get; set; }
       public bool loop { get; set; }
+
       public List<AnimationEvent> events = new List<AnimationEvent>();
-      public List<List<Matrix4>> poses = new List<List<Matrix4>>();
+      public List<AnimationFrame> poses = new List<AnimationFrame>();
 
       public Animation()
       {
       }
 
-      public Animation(string animName, int start, int end, float framesPerSecond, bool isLooping)
+      public List<Matrix4> buildAnimationFrame(int currentFrame, int nextFrame, float interpolation)
       {
-         name = animName;
-         startFrame = start;
-         endFrame = end;
-         fps = framesPerSecond;
-         loop = isLooping;
+         List<Matrix4> frame = new List<Matrix4>(skeleton.boneCount);
+
+         for (int i = 0; i < skeleton.boneCount; i++)
+         {
+            JointPose jp1 = poses[currentFrame][i];
+            JointPose jp2 = poses[nextFrame][i];
+
+            Vector3 pos = Vector3.Lerp(jp1.position, jp2.position, interpolation); // Vector3.Zero; //
+            Quaternion ori = Quaternion.Slerp(jp1.rotation, jp2.rotation, interpolation); //Quaternion.Identity; //
+
+            Matrix4 rel = Matrix4.CreateFromQuaternion(ori) * Matrix4.CreateTranslation(pos);
+            Matrix4 final = Matrix4.Identity;
+
+            Bone b = skeleton.myBones[i];
+            if(b.myParent == -1)
+            {
+               final =  rel * b.myLocalPose;
+            }
+            else
+            {
+               final = rel * b.myLocalPose * frame[b.myParent];
+            }
+
+            frame.Add(final);
+         }
+
+         for (int i = 0; i < skeleton.boneCount; i++)
+         {
+            frame[i] = skeleton.myBones[i].myInvWorldPose * frame[i];
+         }
+
+         return frame;
+      }
+
+      public void debugDraw(List<Matrix4> pose, Vector3 pos, Quaternion ori)
+      {
+         List<Matrix4> untxBones = new List<Matrix4>();
+         for(int i = 0; i< skeleton.boneCount; i++)
+         {
+            Bone b = skeleton.myBones[i];
+            untxBones.Add(b.myWorldPose * pose[i] );
+            
+            Vector3 p = pos + Vector3.Transform(untxBones[i].ExtractTranslation(), ori);
+            DebugRenderer.addSphere(p, 0.05f, Color4.Green, Fill.TRANSPARENT, false, 0.0f);
+
+            if (b.myParent != -1)
+            {
+               Vector3 p1 = pos + Vector3.Transform(untxBones[i].ExtractTranslation(), ori);
+               Vector3 p2 = pos + Vector3.Transform(untxBones[b.myParent].ExtractTranslation(), ori);
+               DebugRenderer.addLine(p1, p2, Color4.Blue, Fill.WIREFRAME, false, 0.0f);
+            }
+         }
       }
    }
 
@@ -56,8 +118,8 @@ namespace Graphics
 
       public void reset()
       {
-         currentFrame = animation.startFrame;
-         nextFrame = animation.startFrame + 1;
+         currentFrame = 0;
+         nextFrame = 1;
          interpolation = 0;
          isDone = false;
       }
@@ -72,19 +134,24 @@ namespace Graphics
             interpolation -= 1.0f;
             currentFrame = nextFrame;
             nextFrame += 1;
-            if (nextFrame > animation.endFrame)
+            if (nextFrame == animation.numFrames)
             {
                if (animation.loop == true)
                {
-                  nextFrame = animation.startFrame;
+                  nextFrame = 0;
                }
                else
                {
-                  nextFrame = animation.endFrame;
+                  nextFrame = animation.numFrames - 1;
                   isDone = true;
                }
             }
          }
+      }
+
+      public List<Matrix4> skinningMatrix()
+      {
+         return animation.buildAnimationFrame(currentFrame, nextFrame, interpolation);
       }
    }
 
@@ -99,9 +166,6 @@ namespace Graphics
          myFrames = new ShaderStorageBufferObject(BufferUsageHint.StaticDraw);
          animations = new Dictionary<String, Animation>();
          skeleton = new Skeleton();
-
-         //insert the null animation
-         animations["null"] = new Animation("null", 0, 0, 0, false);
       }
 
       public new void Dispose()
@@ -120,6 +184,28 @@ namespace Graphics
          }
 
          return new AnimationState(ani);
+      }
+
+      public void createNullAnimation()
+      {
+         //insert the null animation
+         Animation nullAni = new Animation();
+         nullAni.name = "null";
+         nullAni.fps = 0;
+         nullAni.loop = false;
+         nullAni.skeleton = skeleton;
+
+         AnimationFrame frame = new AnimationFrame();
+         for(int i=0; i< skeleton.boneCount; i++)
+         {
+            JointPose jp = new JointPose();
+            jp.position = Vector3.Zero;
+            jp.rotation = Quaternion.Identity;
+            frame.Add(jp);
+         }
+
+         nullAni.poses.Add(frame);
+         animations["null"] = nullAni;
       }
    }
 }

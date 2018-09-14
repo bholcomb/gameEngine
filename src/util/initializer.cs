@@ -6,107 +6,15 @@ using Lua;
 
 namespace Util
 {
-   /*  old version using json files instead of lua
-   public class Initializer
-   {
-      JsonObject myData = null;
-      String myConfigFilename;
-
-      public Initializer(String[] args)
-      {
-         if (args.Length >= 1)
-         {
-            myConfigFilename = args[0];
-         }
-         else
-         {
-            myConfigFilename = "../data/config.json";
-         }
-
-         if (System.IO.File.Exists(myConfigFilename) == false)
-         {
-            myConfigFilename = Environment.GetCommandLineArgs()[0];
-            myConfigFilename = System.IO.Path.ChangeExtension(myConfigFilename, "json");
-            if (System.IO.File.Exists(myConfigFilename) == false)
-            {
-               //throw new InvalidOperationException("Cannot find config file " + myConfigFilename);
-               Warn.print("Cannot find config file {0}", myConfigFilename);
-            }
-         }
-
-         loadConfigScript();
-
-         FilePrintSink filePrinter = new FilePrintSink(System.IO.Path.ChangeExtension(myConfigFilename, "log"));
-         Printer.addPrintSink("logFile", filePrinter);
-      }
-
-      public bool hasField(String name)
-      {
-         if (myData == null)
-         {
-            return false;
-         }
-
-         String[] tokens = name.Split('.');
-         JsonObject temp=myData;
-
-         foreach (string s in tokens)
-         {
-            if (temp.contains(s) == false)
-            {
-               return false;
-            }
-            temp = temp[s];
-         }
-
-         return true;
-      }
-
-      public T findData<T>(String name)
-      {
-         if (hasField(name))
-         {
-            String[] tokens = name.Split('.');
-            JsonObject temp = myData;
-            foreach (String s in tokens)
-            {
-               temp = temp[s];
-            }
-
-            return (T)Convert.ChangeType(temp.raw, typeof(T));
-         }
-
-         return default(T);
-      }
-
-      public JsonObject findData(String name)
-      {
-         return findData<JsonObject>(name);
-      }
-
-      public T findDataOrDefault<T>(String name, T def)
-      {
-         if (hasField(name))
-         {
-            return findData<T>(name);
-         }
-
-         return def;
-      }
-
-      protected bool loadConfigScript()
-      {
-         myData = JsonObject.loadFile(myConfigFilename);
-         return true;
-      }
-   }
-
-   */
-
-   public class InitTable : LuaObject
+    public class InitTable : LuaObject
    {
       public InitTable(LuaState state, int index)
          :base(state, index)
+      {
+      }
+
+      public InitTable(LuaObject obj)
+         :base(obj)
       {
       }
 
@@ -120,6 +28,7 @@ namespace Util
          return contains(index);
       }
 
+      #region generic lookup functions for plain data types
       public T findData<T>(String name)
       {
          if (contains(name) == false)
@@ -182,6 +91,48 @@ namespace Util
 
          return get<T>(index);
       }
+
+      #endregion
+
+      #region specialization for init tables
+      public InitTable findData(string name)
+      {
+         LuaObject obj = findData<LuaObject>(name);
+         InitTable it = new InitTable(obj);
+         return it;
+      }
+
+      public InitTable findData(int index)
+      {
+         LuaObject obj = findData<LuaObject>(index);
+         InitTable it = new InitTable(obj);
+         return it;
+      }
+
+      public InitTable findDataOr(String name, InitTable def)
+      {
+         LuaObject obj = findDataOr<LuaObject>(name, null);
+         if (obj == null)
+         {
+            return def;
+         }
+
+         InitTable it = new InitTable(obj);
+         return it;
+      }
+
+      public InitTable findDataOr(int index, InitTable def)
+      {
+         LuaObject obj = findDataOr<LuaObject>(index, null);
+         if (obj == null)
+         {
+            return def;
+         }
+
+         InitTable it = new InitTable(obj);
+         return it;
+      }
+      #endregion
    }
     
    public class Initializer
@@ -241,6 +192,12 @@ namespace Util
          createGlobalTable();
       }
 
+      void createGlobalTable()
+      {
+         LuaDLL.lua_getglobal(myVm.statePtr, "_G");
+         myGlobalTable = new InitTable(myVm, -1);
+      }
+
       public bool addConfigScript(String filename)
       {
          if (myVm.doFile(filename) == false)
@@ -258,6 +215,7 @@ namespace Util
          return myGlobalTable.contains(name);
       }
 
+      #region generic lookup for basic data types
       public T findData<T>(String name)
       {
          return myGlobalTable.findData<T>(name);
@@ -277,12 +235,47 @@ namespace Util
       {
          return myGlobalTable.findDataOr<T>(index, def);
       }
+      #endregion
 
-      void createGlobalTable()
+      #region specialization for init tables
+      public InitTable findData(string name)
       {
-         LuaDLL.lua_getglobal(myVm.statePtr, "_G");
-         myGlobalTable = new InitTable(myVm, -1);
+         LuaObject obj = findData<LuaObject>(name);
+         InitTable it = new InitTable(obj);
+         return it;
       }
+
+      public InitTable findData(int index)
+      {
+         LuaObject obj = findData<LuaObject>(index);
+         InitTable it = new InitTable(obj);
+         return it;
+      }
+
+      public InitTable findDataOr(String name, InitTable def)
+      {
+         LuaObject obj = findDataOr<LuaObject>(name, null);
+         if (obj == null)
+         {
+            return def;
+         }
+
+         InitTable it = new InitTable(obj);
+         return it;
+      }
+
+      public InitTable findDataOr(int index, InitTable def)
+      {
+         LuaObject obj = findDataOr<LuaObject>(index, null);
+         if (obj == null)
+         {
+            return def;
+         }
+
+         InitTable it = new InitTable(obj);
+         return it;
+      }
+      #endregion
    }
 }
 

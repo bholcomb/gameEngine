@@ -85,24 +85,20 @@ namespace Terrain
 			return bytes;
 		}
 
-		public static void bindVertexAttribute(String fieldName, int id)
-		{
-			switch (fieldName)
-			{
-				case "position":
-					GL.VertexAttribFormat(id, 4, VertexAttribType.UnsignedInt2101010Rev, false, 0);
-					break;
-				case "uv":
-					GL.VertexAttribFormat(id, 2, VertexAttribType.UnsignedShort, false, 4);
-					break;
-				case "texIndex":
-					GL.VertexAttribIFormat(id, 1, VertexAttribIntegerType.UnsignedShort, 8);
-					break;
-				default:
-					throw new Exception(String.Format("Unknown attribute field: {0}", fieldName));
-			}
-		}
-	}
+      static Dictionary<string, BufferBinding> theBindings = null;
+      public static Dictionary<string, BufferBinding> bindings()
+      {
+         if (theBindings == null)
+         {
+            theBindings = new Dictionary<string, BufferBinding>();
+            theBindings["position"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.UnsignedInt2101010Rev, normalize = false, numElements = 4, offset = 0 };
+            theBindings["uv"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.UnsignedShort, normalize = false, numElements = 2, offset = 4 };
+            theBindings["texIndex"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Integer, dataFormat = (int)VertexAttribIntegerType.UnsignedShort, normalize = false, numElements = 1, offset = 8 };
+         }
+
+         return theBindings;
+      }
+   }
 
 	public class TriangleVisualizer : TerrainVisualizer
 	{ 
@@ -264,7 +260,7 @@ namespace Terrain
             if (rq.myPipeline.vaoState.vao == null)
             {
                rq.myPipeline.vaoState.vao = new VertexArrayObject();
-               rq.myPipeline.vaoState.vao.bindVertexFormat<TerrainVertex>(rq.myPipeline.shaderState.shaderProgram);
+               rq.myPipeline.vaoState.vao.bindVertexFormat(rq.myPipeline.shaderState.shaderProgram, TerrainVertex.bindings());
             }
          }
       }

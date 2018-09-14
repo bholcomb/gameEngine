@@ -95,6 +95,8 @@ namespace Util
       {
          if (Printer.verboseLevel >= Printer.VerboseLevel.Error)
          {
+            txt = "Error: " + txt;
+            System.Console.ForegroundColor = ConsoleColor.Red;
             Printer.print(String.Format(txt, objs));
          }
       }
@@ -103,6 +105,8 @@ namespace Util
       {
          if (Printer.verboseLevel >= Printer.VerboseLevel.Error)
          {
+            txt = "Error: " + txt;
+            System.Console.ForegroundColor = ConsoleColor.Red;
             Printer.print(txt);
          }
       }
@@ -114,6 +118,8 @@ namespace Util
       {
          if (Printer.verboseLevel >= Printer.VerboseLevel.Debug)
          {
+            txt = "Debug: " + txt;
+            System.Console.ForegroundColor = ConsoleColor.Blue;
             Printer.print(String.Format(txt, objs));
          }
       }
@@ -122,6 +128,8 @@ namespace Util
       {
          if (Printer.verboseLevel >= Printer.VerboseLevel.Debug)
          {
+            txt = "Debug: " + txt;
+            System.Console.ForegroundColor = ConsoleColor.Blue;
             Printer.print(txt);
          }
       }
@@ -133,6 +141,8 @@ namespace Util
       {
          if (Printer.verboseLevel >= Printer.VerboseLevel.Info)
          {
+            txt = "Info: " + txt;
+            System.Console.ForegroundColor = ConsoleColor.White;
             Printer.print(String.Format(txt, objs));
          };
       }
@@ -141,6 +151,8 @@ namespace Util
       {
          if (Printer.verboseLevel >= Printer.VerboseLevel.Info)
          {
+            txt = "Info: " + txt;
+            System.Console.ForegroundColor = ConsoleColor.White;
             Printer.print(txt);
          }
       }
@@ -152,6 +164,8 @@ namespace Util
       {
          if (Printer.verboseLevel >= Printer.VerboseLevel.Warn)
          {
+            txt = "Warn: " + txt;
+            System.Console.ForegroundColor = ConsoleColor.Yellow;
             Printer.print(String.Format(txt, objs));
          }
       }
@@ -160,6 +174,8 @@ namespace Util
       {
          if (Printer.verboseLevel >= Printer.VerboseLevel.Warn)
          {
+            txt = "Warn: " + txt;
+            System.Console.ForegroundColor = ConsoleColor.Yellow;
             Printer.print(txt);
          }
       }

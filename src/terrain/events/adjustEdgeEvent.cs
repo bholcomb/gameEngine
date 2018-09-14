@@ -1,8 +1,11 @@
-/*********************************************************************************
+/****************************************************************************** 
 
-Copyright (c) 2014 Bionic Dog Studios LLC
+Copyright (c) 2018 Apexica LLC 
+All rights reserved. 
 
-*********************************************************************************/
+Author: Robert C. Holcomb Jr.
+
+******************************************************************************/
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!This is an auto-generated file.  Any changes will be destroyed!!!!!!!!!!!
@@ -17,37 +20,40 @@ using System.Collections.Generic;
 
 
 using Util;
-using Events;
+using Engine;
 
 
 namespace Terrain
 {
 	public class AdjustEdgeEvent : Event
 	{
-		static EventName theName;
+		public static EventId theId;
+		public static String theName;
 
 		NodeLocation myBlock=new NodeLocation();
 		Int32 myEdge;
 		Int32 myFace;
 		Int32 myAmount;
 
-		public AdjustEdgeEvent(): base() { myName=theName; }
-		public AdjustEdgeEvent(NodeLocation block, Int32 edge, Int32 face, Int32 amount) : this(block, edge, face, amount, TimeSource.defaultClock.currentTime(), 0.0) { }
+		public AdjustEdgeEvent(): base() { myName = theName; myId = theId; }
+      public AdjustEdgeEvent(NodeLocation block, Int32 edge, Int32 face, Int32 amount) : this(block, edge, face, amount, TimeSource.defaultClock.currentTime(), 0.0) { }
 		public AdjustEdgeEvent(NodeLocation block, Int32 edge, Int32 face, Int32 amount, double timeStamp) : this(block, edge, face, amount, timeStamp, 0.0) { }
 		public AdjustEdgeEvent(NodeLocation block, Int32 edge, Int32 face, Int32 amount, double timeStamp, double delay)
-		: base(timeStamp, delay)
+         : base(timeStamp, delay)
 		{
 			myName = theName;
+			myId = theId;
 			myBlock=block;
 			myEdge=edge;
 			myFace=face;
 			myAmount=amount;
 		}
+   
 
 		static AdjustEdgeEvent()
 		{
-			theName = new EventName("terrain.edit.adjustEdge");
-			
+			theName = "terrain.edit.adjustEdge";
+			theId = new EventId("terrain.edit.adjustEdge");
 		}
 
 
@@ -71,8 +77,6 @@ namespace Terrain
 			get { return myAmount;}
 		}
 	
-
-
 
 
 

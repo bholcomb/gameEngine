@@ -16,17 +16,25 @@ namespace Graphics
    {
       public class AnimationChunk : Chunk
       {
-         public int framerate;
+         [Flags]
+         public enum AnimationFlags
+         {
+            Looping = 0x01
+         };
+
+         public int fps;
          public int numFrames;
          public string skeletonName;
+         public int numBones;
          public List<AnimationEvent> events = new List<AnimationEvent>();
-         public List<List<Matrix4>> poses = new List<List<Matrix4>>();
-
+         public List<AnimationFrame> poses = new List<AnimationFrame>();
          public AnimationChunk()
             : base()
          {
             myType = ChunkType.ANIMATION;
          }
+
+         public bool loop { get { return ((AnimationFlags)myFlags & AnimationFlags.Looping) != 0; } }
       }
    }
 }

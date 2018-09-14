@@ -14,11 +14,11 @@ namespace Graphics
    public class SkinnedModelRenderable : Renderable
    {
       public SkinnedModel model;
+      public UniformBufferObject mySkinningBuffer = new UniformBufferObject(BufferUsageHint.DynamicDraw);
 
       public SkinnedModelRenderable()
          : base("skinnedModel")
       {
-
       }
 
       public override bool isVisible(Camera c)

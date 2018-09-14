@@ -1,3 +1,12 @@
+/****************************************************************************** 
+
+Copyright (c) 2018 Apexica LLC 
+All rights reserved. 
+
+Author: Robert C. Holcomb Jr.
+
+******************************************************************************/
+
 using System;
 
 using OpenTK;
@@ -10,11 +19,15 @@ namespace Audio
 {
    public class SoundDescriptor
    {
-      public string filename;
-      public Source source;
-      public bool is3d;
-      public bool isLooping;
-      public AbstractAudio.Priority priority;
+      public String filename = "";
+      public Source source = null;
+      public bool is3d = false;
+      public bool isLooping = false;
+      public bool isRelative = true;
+      public Vector3 position = new Vector3();
+      public Vector3 velocity = new Vector3();
+      public float falloffDistance = 10.0f;
+      public AbstractAudio.Priority priority = AbstractAudio.Priority.BACKGROUND_FX;
    };
 
 
@@ -32,6 +45,8 @@ namespace Audio
       public float maxFalloffDistance { get; set; }
       public bool relativePosition { get; set; }
 
+      public Source source { get { return mySource; } }
+
       Source mySource;
       int myNextBufferIndex;
 
@@ -40,19 +55,17 @@ namespace Audio
       public Sound(SoundDescriptor desc)
          : base()
       {
-         myNextBufferIndex = 0;
          is3d = desc.is3d;
          isLooping = desc.isLooping;
-         myVoice = null;
-         relativePosition = false;
-         referenceDistance = 1.0f;
-
-         if (desc.source != null)
-            mySource = desc.source;
-       
-         position = new Vector3();
-         velocity = new Vector3();
+         position = desc.position;
+         velocity = desc.velocity;
          coneOrientation = new Vector3();
+         referenceDistance = desc.falloffDistance;
+         relativePosition = desc.isRelative;
+         mySource = desc.source;
+         priority = desc.priority;
+
+         myVoice = null;
          myNextBufferIndex = 0;
       }
 
@@ -78,7 +91,7 @@ namespace Audio
             return false;
          }
 
-         if (mySource.state() == Source.SourceState.FAILED)
+         if (mySource.state == Source.SourceState.FAILED)
          {
             Warn.print("cannot play a sound with a failed source");
             stop();
@@ -177,7 +190,6 @@ namespace Audio
          }
 
          myAudioManager.stopUpdating(this);
-
          myNextBufferIndex = 0;
 
          return true;
@@ -197,7 +209,7 @@ namespace Audio
             return;
          }
 
-         if (mySource.state() == Source.SourceState.UNLOADED || mySource.state() == Source.SourceState.LOADING)
+         if (mySource.state == Source.SourceState.UNLOADED || mySource.state == Source.SourceState.LOADING)
          {
             //gotta wait for the sound to finish loading
             return;
@@ -227,7 +239,7 @@ namespace Audio
 
          //remove any finished buffers.  Tell the source in case it's streaming
          int finishedBuffer = myVoice.finishedBuffer();
-         while (finishedBuffer != -1)
+         while (finishedBuffer != 0)
          {
             mySource.finishedBuffer(finishedBuffer);
             finishedBuffer = myVoice.finishedBuffer();
@@ -261,7 +273,7 @@ namespace Audio
 
          //no more buffers to play so we must be done, 
          //unless we are streaming, in which case we'll wait for more data and an explicit stop
-         if (myVoice.queuedBuffers() == 0 && myVoice.isPlaying() == false && mySource.state() != Source.SourceState.STREAMING)
+         if (myVoice.queuedBuffers() == 0 && myVoice.isPlaying() == false && mySource.state != Source.SourceState.STREAMING)
          {
             stop();
          }

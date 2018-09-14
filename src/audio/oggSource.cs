@@ -1,3 +1,12 @@
+/****************************************************************************** 
+
+Copyright (c) 2018 Apexica LLC 
+All rights reserved. 
+
+Author: Robert C. Holcomb Jr.
+
+******************************************************************************/
+
 using System;
 
 using Util;
@@ -13,7 +22,7 @@ namespace Audio
       {
       }
 
-      public override IResource create()
+      public override IResource create(ResourceManager mgr)
       {
          OggSource w = new OggSource(this);
          if (w.load() == false)
@@ -45,32 +54,34 @@ namespace Audio
 
       public override bool load()
       {
-         float[] readSampleBuffer=new float[AudioBuffer.MAX_BUFFER_SIZE];
-         short[] convBuffer =new short[AudioBuffer.MAX_BUFFER_SIZE];
+         float[] readSampleBuffer = new float[AudioBuffer.MAX_BUFFER_SIZE];
+         short[] convBuffer = new short[AudioBuffer.MAX_BUFFER_SIZE];
 
          myState = SourceState.LOADING;
-         myReader = new VorbisReader(myFilename);
-
-         myNumChannels=myReader.Channels;
-         mySampleRate = myReader.SampleRate;
-         long sampleCount = myReader.TotalSamples * myNumChannels;
-
-         int numBuffers = (int)Math.Ceiling((double)sampleCount / (double)AudioBuffer.MAX_BUFFER_SIZE);
-
-         for (int i = 0; i < numBuffers; i++)
+         using (myReader = new VorbisReader(myFilename))
          {
-            AudioBuffer buffer = new AudioBuffer(myNumChannels == 1 ? AudioBuffer.AudioFormat.MONO16 : AudioBuffer.AudioFormat.STEREO16, mySampleRate);
-            int samplesRead = myReader.ReadSamples(readSampleBuffer, 0, AudioBuffer.MAX_BUFFER_SIZE);
-            buffer.size = samplesRead;
-            castBuffer(readSampleBuffer, buffer.data, samplesRead);
 
-            //put it in the audio system
-            buffer.buffer();
-            myBuffers.Add(buffer);
+            myNumChannels = myReader.Channels;
+            mySampleRate = myReader.SampleRate;
+            long sampleCount = myReader.TotalSamples * myNumChannels;
+
+            int numBuffers = (int)Math.Ceiling((double)sampleCount / (double)AudioBuffer.MAX_BUFFER_SIZE);
+
+            for (int i = 0; i < numBuffers; i++)
+            {
+               AudioBuffer buffer = new AudioBuffer(myNumChannels == 1 ? AudioBuffer.AudioFormat.MONO16 : AudioBuffer.AudioFormat.STEREO16, mySampleRate);
+               int samplesRead = myReader.ReadSamples(readSampleBuffer, 0, AudioBuffer.MAX_BUFFER_SIZE);
+               buffer.size = samplesRead;
+               castBuffer(readSampleBuffer, buffer.data, samplesRead);
+
+               //put it in the audio system
+               buffer.buffer();
+               myBuffers.Add(buffer);
+            }
+
+            myState = Source.SourceState.LOADED;
+            Debug.print("Loaded audio file: {0}", myFilename);
          }
-
-         myState = Source.SourceState.LOADED;
-         Debug.print("Loaded audio file: {0}", myFilename);
          return true;
       }
 

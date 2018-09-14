@@ -19,7 +19,7 @@ namespace Graphics
 		vec4 activeLights;
 		int boneCount;
 		int currentFrame;
-		int nextFrame;C:\source\gameEngine\src\graphics\visualizers\lightVisualizer.cs
+		int nextFrame;
 		float interpolation;
 	};
 */
@@ -49,6 +49,8 @@ namespace Graphics
    {
 		ShaderStorageBufferObject myModelBuffer = new ShaderStorageBufferObject(BufferUsageHint.DynamicDraw);
 		List<SkinnedModelUniformData> myModelData = new List<SkinnedModelUniformData>();
+      UniformBufferObject mySkinningBuffer = new UniformBufferObject(BufferUsageHint.DynamicDraw);
+
 
 		public SkinnedModelVisualizer() 
          : base("skinnedModel")
@@ -57,7 +59,19 @@ namespace Graphics
 
       #region prepare phase
       //public override void prepareFrameBegin() { }
-      //public override void preparePerFrame(Renderable r) { }
+      public override void preparePerFrame(Renderable r)
+      {
+         SkinnedModelRenderable smr = r as SkinnedModelRenderable;
+         List<Matrix4> skinningMatrix = (smr.findController("animation") as AnimationController).animation.skinningMatrix();
+         smr.mySkinningBuffer.setData(skinningMatrix);
+
+#if DEBUG
+         Vector3 pos = smr.modelMatrix.ExtractTranslation();
+         Quaternion ori = smr.modelMatrix.ExtractRotation();
+         (smr.findController("animation") as AnimationController).animation.animation.debugDraw(skinningMatrix, pos, ori);
+         (smr.findController("animation") as AnimationController).animation.animation.skeleton.debugDraw(pos, ori);
+#endif
+      }
       //public override void preparePerViewBegin(View v) { }
       //public override void preparePerView(Renderable r, View v) { }
       //public override void preparePerViewFinalize(View v) { }
@@ -67,6 +81,7 @@ namespace Graphics
       public override void preparePerPass(Renderable r, Pass p)
 		{
 			SkinnedModelRenderable smr = r as SkinnedModelRenderable;
+         
 
 			SkinnedModelUniformData modelData = new SkinnedModelUniformData();
 			modelData.modelMatrix = smr.model.myInitialTransform * smr.modelMatrix;
@@ -113,14 +128,14 @@ namespace Graphics
 
 				info.renderState.setUniform(new UniformData(0, Uniform.UniformType.Int, modelDataIndex));
 				info.renderState.setStorageBuffer(myModelBuffer.id, 0);
-				info.renderState.setStorageBuffer(smr.model.myFrames.id, 1);
+            info.renderState.setUniformBuffer(smr.mySkinningBuffer.id, 3);
 				info.renderState.setVertexBuffer(smr.model.myVbos[0].id, 0, 0, V3N3T2B4W4.stride);
 				info.renderState.setIndexBuffer(smr.model.myIbo.id);
 
 				info.sortId = getSortId(info);
-			}
-		}
-      
+         }
+      }
+
       //public override void preparePerPassFinalize(Pass p) { }
 
       public override void prepareFrameFinalize()

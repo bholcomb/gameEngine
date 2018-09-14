@@ -1,0 +1,31 @@
+--[[/*********************************************************************************
+
+Copyright (c) 2018 Apexica LLC
+
+*********************************************************************************/]]--
+
+EVENT{
+	fileName="windowClose";
+	eventName="window.close";
+	className="WindowCloseEvent";
+	namespace="Engine";
+	libs={"OpenTK.Input"};
+	serialize=false;
+	attributes={
+		{type="Window", name="window"};
+	}
+}
+
+EVENT{
+	fileName="windowResize";
+	eventName="window.resize";
+	className="WindowResizeEvent";
+	namespace="Engine";
+	libs={"OpenTK.Input"};
+	serialize=false;
+	attributes={
+		{type="Window", name="window"};
+      {type ="int", name = "x"};
+      {type ="int", name = "y"};
+	}
+}

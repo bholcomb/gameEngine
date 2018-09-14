@@ -1,118 +1,8 @@
 --[[/*********************************************************************************
 
-Copyright (c) 2014 Bionic Dog Studios LLC
+Copyright (c) 2018 Apexica LLC
 
 *********************************************************************************/]]--
-
---state request
-EVENT{
-	fileName="entityStateRequestEvent";
-	eventName="entity.state.request";
-	className="EntityStateRequestMessage";
-   namespace="Sim";
-	libs={"OpenTK"};
-	attributeChange=false;	
-	serialize=true;
-	attributes={
-		{type="UInt64", name="entity"}
-	}
-}
-
---state response
-EVENT{
-	fileName="entityStateResponseEvent";
-	eventName="entity.state.response";
-	className="EntityStateResponseMessage";
-   namespace="Sim";
-	libs={"OpenTK"};
-	attributeChange=false;	
-	serialize=true;
-	attributes={
-		{type="UInt64", name="entity"};
-		{type="String", name="type"};
-		{type="Vector3", name="position"};
-		{type="Quaternion", name="orientation"};
-		{type="bool", name="dynamic"};
-		{type="String", name="state"};
-		{type="UInt64", name="parent"};
-	}
-}
-
-
---position attribute change
-EVENT{
-	fileName="entityPositionEvent";
-	eventName="entity.attribute.position";
-	className="PositionChangeEvent";
-   namespace="Sim";
-	libs={"Engine", "OpenTK"};
-	attributeChange=true;	
-	serialize=true;
-	attributes={
-		{type="UInt64", name="entity"};
-		{type="Vector3", name="position"};
-	}
-}
-
---orientation attribute change
-EVENT{
-	fileName="entityOrientationEvent";
-	eventName="entity.attribute.orientation";
-	className="OrientationChangeEvent";
-   namespace="Sim";
-	libs={"Engine", "OpenTK"};
-	attributeChange=true;	
-	serialize=true;
-	attributes={
-		{type="UInt64", name="entity"};
-		{type="Quaternion", name="orientation"};
-	}
-}
-
---dynamic attribute change
-EVENT{
-	fileName="entityDynamicEvent";
-	eventName="entity.attribute.dynamic";
-	className="DynamicChangeEvent";
-   namespace="Sim";
-	libs={"Engine"};
-	attributeChange=true;	
-	serialize=true;
-	attributes={
-		{type="UInt64", name="entity"};
-		{type="bool", name="dynamic"};
-	}
-}
-
---state parameter change
-EVENT{
-	fileName="entityStateEvent";
-	eventName="entity.attribute.state";
-	className="StateChangeEvent";
-   namespace="Sim";
-	libs={"Engine"};
-	attributeChange=true;	
-	serialize=true;
-	attributes={
-		{type="UInt64", name="entity"};
-		{type="String", name="state"};
-	}
-}
-
---parent parameter change
-EVENT{
-	fileName="entityParentEvent";
-	eventName="entity.attribute.parent";
-	className="ParentChangeEvent";
-   namespace="Sim";
-	libs={"Engine"};
-	attributeChange=true;
-	serialize=true;
-	attributes={
-		{type="UInt64", name="entity"};
-		{type="UInt64", name="parent"};
-	}
-}
 
 --entity added
 EVENT{
@@ -151,7 +41,7 @@ EVENT{
 	serialize=true;
 	attributes={
 		{type="UInt64", name="entity"};
-		{type="String", name="behavior"};
+		{type="Int32", name="behavior"};
 	}
 }
 
@@ -165,32 +55,23 @@ EVENT{
 	serialize=true;
 	attributes={
 		{type="UInt64", name="entity"};
-		{type="String", name="behavior"};
+		{type="Int32", name="behavior"};
 	}
 }
 
---start animation
+--state request
 EVENT{
-	fileName="entityAnimiationStart";
-	eventName="entity.animation.start";
-	className="EntityAnimationStartEvent";
+	fileName="entityAttributeRequestEvent";
+	eventName="entity.attribute.request";
+	className="EntityStateRequestMessage";
    namespace="Sim";
-	libs={};
+	libs={"System.Collections.Generic"};
 	serialize=true;
 	attributes={
 		{type="UInt64", name="entity"};
+      {type="List<Int32>", name = "attributes"};
 	}
 }
 
---stop animation
-EVENT{
-	fileName="entityAnimiationStop";
-	eventName="entity.animation.stop";
-	className="EntityAnimationStopEvent";
-   namespace="Sim";
-	libs={};
-	serialize=true;
-	attributes={
-		{type="UInt64", name="entity"};
-	}
-}
+
+

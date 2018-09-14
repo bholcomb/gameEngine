@@ -1,8 +1,11 @@
-/*********************************************************************************
+/****************************************************************************** 
 
-Copyright (c) 2014 Bionic Dog Studios LLC
+Copyright (c) 2018 Apexica LLC 
+All rights reserved. 
 
-*********************************************************************************/
+Author: Robert C. Holcomb Jr.
+
+******************************************************************************/
 
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!This is an auto-generated file.  Any changes will be destroyed!!!!!!!!!!!
@@ -17,33 +20,36 @@ using System.Collections.Generic;
 
 
 using Util;
-using Events;
+using Engine;
 
 
 namespace Terrain
 {
 	public class AddBlocksEvent : Event
 	{
-		static EventName theName;
+		public static EventId theId;
+		public static String theName;
 
 		UInt32 myMaterialId;
 		List<NodeLocation> myBlocks=new List<NodeLocation>();
 
-		public AddBlocksEvent(): base() { myName=theName; }
-		public AddBlocksEvent(UInt32 materialId, List<NodeLocation> blocks) : this(materialId, blocks, TimeSource.defaultClock.currentTime(), 0.0) { }
+		public AddBlocksEvent(): base() { myName = theName; myId = theId; }
+      public AddBlocksEvent(UInt32 materialId, List<NodeLocation> blocks) : this(materialId, blocks, TimeSource.defaultClock.currentTime(), 0.0) { }
 		public AddBlocksEvent(UInt32 materialId, List<NodeLocation> blocks, double timeStamp) : this(materialId, blocks, timeStamp, 0.0) { }
 		public AddBlocksEvent(UInt32 materialId, List<NodeLocation> blocks, double timeStamp, double delay)
-		: base(timeStamp, delay)
+         : base(timeStamp, delay)
 		{
 			myName = theName;
+			myId = theId;
 			myMaterialId=materialId;
 			myBlocks=blocks;
 		}
+   
 
 		static AddBlocksEvent()
 		{
-			theName = new EventName("terrain.edit.addBlocks");
-			
+			theName = "terrain.edit.addBlocks";
+			theId = new EventId("terrain.edit.addBlocks");
 		}
 
 
@@ -57,8 +63,6 @@ namespace Terrain
 			get { return myBlocks;}
 		}
 	
-
-
 
 
 

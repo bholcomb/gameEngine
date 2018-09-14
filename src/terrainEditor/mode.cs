@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using OpenTK;
 
 using Util;
-using UI;
+using GUI;
 
 namespace Editor
 {

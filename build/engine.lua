@@ -3,6 +3,6 @@ project "Engine"
    language  "C#"
    kind      "SharedLib"
    files     { "../src/engine/**.cs", "../src/engine/**.event"}
-   links     { "System", "System.Drawing",  "OpenTK", "Util", "Graphics", "Audio", "Events", "UI", "Network", "Lua"}
+   links     { "System", "System.Drawing", "OpenTK", "Util", "Lua"}
    location "engine"
    vpaths { ["*"] = "../src/engine" }

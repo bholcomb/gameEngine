@@ -5,8 +5,8 @@ using OpenTK;
 using OpenTK.Input;
 
 using Util;
-using UI;
-using Events;
+using GUI;
+using Engine;
 using Terrain;
 
 namespace Editor
@@ -20,22 +20,22 @@ namespace Editor
 
       public override void onGui()
       {
-         if (ImGui.hoveredWindow != null)
+         if (UI.hoveredWindow != null)
             return;
 
 
-         if (ImGui.mouse.wheelDelta != 0.0)
+         if (UI.mouse.wheelDelta != 0.0)
          {
-            if (ImGui.keyboard.keyPressed(Key.ShiftLeft) == true)
+            if (UI.keyboard.keyPressed(Key.ShiftLeft) == true)
             {
-               if (ImGui.mouse.wheelDelta > 0)
+               if (UI.mouse.wheelDelta > 0)
                   createMultiBlocks();
                else
                   removeMutliBlock();
             }
             else
             {
-               myEditor.cursorDepth -= (int)ImGui.mouse.wheelDelta;
+               myEditor.cursorDepth -= (int)UI.mouse.wheelDelta;
                if (myEditor.cursorDepth < 0) myEditor.cursorDepth = 0;
                if (myEditor.cursorDepth > WorldParameters.theMaxDepth) myEditor.cursorDepth = WorldParameters.theMaxDepth;
             }
