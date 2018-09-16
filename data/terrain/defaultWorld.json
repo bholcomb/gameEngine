@@ -1,0 +1,6 @@
+{
+   "name":"Default World",
+   "chunks":"../data/terrain/chunks/world.chunk",
+   "sky":"interstellar/interstellar.json",
+   "position": {"x":0, "y":0, "z":0}
+}
