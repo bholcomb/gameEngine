@@ -18,7 +18,7 @@ namespace Graphics
       {
          public string myName;
          public int myParent;
-         public Matrix4 myPose;
+         public Matrix4 myLocalMatrix;
 
          public Bone()
          {

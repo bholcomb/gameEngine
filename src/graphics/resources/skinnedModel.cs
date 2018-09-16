@@ -52,17 +52,16 @@ namespace Graphics
             Vector3 pos = Vector3.Lerp(jp1.position, jp2.position, interpolation); // Vector3.Zero; //
             Quaternion ori = Quaternion.Slerp(jp1.rotation, jp2.rotation, interpolation); //Quaternion.Identity; //
 
-            Matrix4 rel = Matrix4.CreateFromQuaternion(ori) * Matrix4.CreateTranslation(pos);
+            Matrix4 rel =  Matrix4.CreateFromQuaternion(ori) * Matrix4.CreateTranslation(pos);
             Matrix4 final = Matrix4.Identity;
-
             Bone b = skeleton.myBones[i];
             if(b.myParent == -1)
             {
-               final =  rel * b.myLocalPose;
+               final = rel;
             }
             else
             {
-               final = rel * b.myLocalPose * frame[b.myParent];
+               final =  rel * frame[b.myParent];
             }
 
             frame.Add(final);
@@ -70,7 +69,7 @@ namespace Graphics
 
          for (int i = 0; i < skeleton.boneCount; i++)
          {
-            frame[i] = skeleton.myBones[i].myInvWorldPose * frame[i];
+            frame[i] = skeleton.myBones[i].myInvWorldMatrix * frame[i];
          }
 
          return frame;
@@ -82,7 +81,7 @@ namespace Graphics
          for(int i = 0; i< skeleton.boneCount; i++)
          {
             Bone b = skeleton.myBones[i];
-            untxBones.Add(b.myWorldPose * pose[i] );
+            untxBones.Add( pose[i] * b.myWorldMatrix);
             
             Vector3 p = pos + Vector3.Transform(untxBones[i].ExtractTranslation(), ori);
             DebugRenderer.addSphere(p, 0.05f, Color4.Green, Fill.TRANSPARENT, false, 0.0f);

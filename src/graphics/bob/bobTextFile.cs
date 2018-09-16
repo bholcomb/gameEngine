@@ -275,7 +275,7 @@ namespace Graphics
          {
             b.myName = data.get<string>("name");
             b.myParent = data.get<int>("parent");
-            b.myPose = data.get<Matrix4>("matrix");
+            b.myLocalMatrix = data.get<Matrix4>("matrix");
             return true;
          }
 

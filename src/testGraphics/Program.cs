@@ -366,12 +366,15 @@ namespace testRenderer
          mySkinnedModel = new SkinnedModelRenderable();
          //MS3DModelDescriptor skmd = new MS3DModelDescriptor("../data/models/characters/zombie/zombie.json");
          //IQModelDescriptor skmd = new IQModelDescriptor("../data/models/characters/mrFixIt/mrFixIt.json");
-         BobModelDescriptor skmd = new BobModelDescriptor("../data/models/characters/testSkinning/testSkinning.bob");
+         BobModelDescriptor skmd = new BobModelDescriptor("../data/models/characters/miniKnight/miniKnight.bob");
+         //BobModelDescriptor skmd = new BobModelDescriptor("../data/models/characters/testSkinning/testSkinning.bob");
          mySkinnedModel.model = Renderer.resourceManager.getResource(skmd) as SkinnedModel;
          mySkinnedModel.controllers.Add(new AnimationController(mySkinnedModel));
          Renderer.scene.renderables.Add(mySkinnedModel);
          mySkinnedModel.setPosition(new Vector3(5, 0, 0));
-         (mySkinnedModel.findController("animation") as AnimationController).startAnimation("wiggle");
+         //mySkinnedModel.setOrientation(new Vector3(0, 45, 0));
+         (mySkinnedModel.findController("animation") as AnimationController).startAnimation("idle");
+         //(mySkinnedModel.findController("animation") as AnimationController).startAnimation("wiggle");
 
          //create a particle system
          myParticleSystem = ParticleManager.loadDefinition("../data/particleSystems/ringOfFire.json");

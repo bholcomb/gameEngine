@@ -99,18 +99,19 @@ namespace Graphics
          {
             Bone bb = new Bone();
             bb.myName = b.myName;
-            bb.myWorldPose = b.myPose;
-            bb.myInvWorldPose = b.myPose.Inverted();
             bb.myParent = b.myParent;
+            bb.myLocalMatrix = b.myLocalMatrix;
 
             if(b.myParent == -1)
             {
-               bb.myLocalPose = bb.myWorldPose;
+               bb.myWorldMatrix = bb.myLocalMatrix;
             }
             else
             {
-               bb.myLocalPose = s.myBones[bb.myParent].myInvWorldPose * bb.myWorldPose;
+               bb.myWorldMatrix = s.myBones[bb.myParent].myWorldMatrix * bb.myLocalMatrix;
+
             }
+            bb.myInvWorldMatrix = bb.myWorldMatrix.Inverted();
 
             s.myBones.Add(bb);
          }

@@ -32,7 +32,7 @@ namespace Graphics
          myTransform = Matrix4.CreateTranslation(Vector3.Zero);
          myScale = Matrix4.CreateScale(Vector3.One);
          myOrientation = Matrix4.Identity;
-         myModelMatrix = myTransform * myScale * myOrientation;
+         myModelMatrix = myScale * myOrientation * myTransform;
       }
       public String type { get { return myType; } }
 

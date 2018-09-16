@@ -468,7 +468,7 @@ namespace Graphics
                Bone b = new Bone();
                b.myName = msJoints[i].name;
                b.myParent = msJoints[i].parentIndex;
-               b.myWorldPose = msJoints[i].final;
+               b.myWorldMatrix = msJoints[i].final;
                skeleton.myBones.Add(b);
             }
 
