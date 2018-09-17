@@ -100,18 +100,18 @@ namespace Graphics
             Bone bb = new Bone();
             bb.myName = b.myName;
             bb.myParent = b.myParent;
-            bb.myLocalMatrix = b.myLocalMatrix;
+            bb.myRelativeBindMatrix = b.myRelativeBindMatrix;
 
             if(b.myParent == -1)
             {
-               bb.myWorldMatrix = bb.myLocalMatrix;
+               bb.myWorldBindMatrix = bb.myRelativeBindMatrix;
             }
             else
             {
-               bb.myWorldMatrix = s.myBones[bb.myParent].myWorldMatrix * bb.myLocalMatrix;
+               bb.myWorldBindMatrix = bb.myRelativeBindMatrix * s.myBones[bb.myParent].myWorldBindMatrix;
 
             }
-            bb.myInvWorldMatrix = bb.myWorldMatrix.Inverted();
+            bb.myInvWorldBindMatrix = bb.myWorldBindMatrix.Inverted();
 
             s.myBones.Add(bb);
          }

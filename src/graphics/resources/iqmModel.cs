@@ -559,7 +559,7 @@ namespace Graphics
                Bone b = new Bone();
                b.myName = myJoints[i].name;
                b.myParent = myJoints[i].parent;
-               b.myWorldMatrix = baseframe[i];
+               b.myWorldBindMatrix = baseframe[i];
                sm.skeleton.myBones.Add(b);
             }
 

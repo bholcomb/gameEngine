@@ -16,9 +16,9 @@ namespace Graphics
    {
       public string myName;
       public int myParent = -1;
-      public Matrix4 myWorldMatrix;
-      public Matrix4 myInvWorldMatrix;
-      public Matrix4 myLocalMatrix;
+      public Matrix4 myWorldBindMatrix;
+      public Matrix4 myInvWorldBindMatrix;
+      public Matrix4 myRelativeBindMatrix;
 
       public Bone()
       {
@@ -59,13 +59,13 @@ namespace Graphics
       {
          foreach(Bone b in myBones)
          {
-            Vector3 p = pos + Vector3.Transform(b.myWorldMatrix.ExtractTranslation(), ori);
+            Vector3 p = pos + Vector3.Transform(b.myWorldBindMatrix.ExtractTranslation(), ori);
             DebugRenderer.addSphere(p, 0.02f, Color4.Orange, Fill.TRANSPARENT, false, 0.0f);
 
             if (b.myParent != -1)
             {
-               Vector3 p1 = pos + Vector3.Transform(b.myWorldMatrix.ExtractTranslation(), ori);
-               Vector3 p2 = pos + Vector3.Transform(myBones[b.myParent].myWorldMatrix.ExtractTranslation(), ori);
+               Vector3 p1 = pos + Vector3.Transform(b.myWorldBindMatrix.ExtractTranslation(), ori);
+               Vector3 p2 = pos + Vector3.Transform(myBones[b.myParent].myWorldBindMatrix.ExtractTranslation(), ori);
                DebugRenderer.addLine(p1, p2, Color4.Red, Fill.WIREFRAME, false, 0.0f);
             }
          }

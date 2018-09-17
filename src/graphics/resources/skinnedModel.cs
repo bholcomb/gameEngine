@@ -69,7 +69,7 @@ namespace Graphics
 
          for (int i = 0; i < skeleton.boneCount; i++)
          {
-            frame[i] = skeleton.myBones[i].myInvWorldMatrix * frame[i];
+            frame[i] = skeleton.myBones[i].myInvWorldBindMatrix * frame[i];
          }
 
          return frame;
@@ -81,7 +81,7 @@ namespace Graphics
          for(int i = 0; i< skeleton.boneCount; i++)
          {
             Bone b = skeleton.myBones[i];
-            untxBones.Add( pose[i] * b.myWorldMatrix);
+            untxBones.Add( b.myWorldBindMatrix * pose[i]);
             
             Vector3 p = pos + Vector3.Transform(untxBones[i].ExtractTranslation(), ori);
             DebugRenderer.addSphere(p, 0.05f, Color4.Green, Fill.TRANSPARENT, false, 0.0f);

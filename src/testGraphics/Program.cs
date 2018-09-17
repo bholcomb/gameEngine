@@ -378,7 +378,7 @@ namespace testRenderer
 
          //create a particle system
          myParticleSystem = ParticleManager.loadDefinition("../data/particleSystems/ringOfFire.json");
-         Renderer.scene.renderables.Add(myParticleSystem);
+         //Renderer.scene.renderables.Add(myParticleSystem);
 
          //add a sun for light
          mySun = new LightRenderable();
