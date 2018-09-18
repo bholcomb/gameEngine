@@ -69,7 +69,7 @@ namespace Graphics
          Vector3 pos = smr.modelMatrix.ExtractTranslation();
          Quaternion ori = smr.modelMatrix.ExtractRotation();
          (smr.findController("animation") as AnimationController).animation.animation.debugDraw(skinningMatrix, pos, ori);
-         (smr.findController("animation") as AnimationController).animation.animation.skeleton.debugDraw(pos, ori);
+         //(smr.findController("animation") as AnimationController).animation.animation.skeleton.debugDraw(pos, ori);
 #endif
       }
       //public override void preparePerViewBegin(View v) { }
