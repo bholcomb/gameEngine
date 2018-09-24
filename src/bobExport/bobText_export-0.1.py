@@ -70,6 +70,9 @@ def getBonesInOrder(skel):
    return ret;
       
 def findBoneIndex(boneName, bonesInOrder):
+   if(boneName == ""):
+      return -1
+      
    for b in bonesInOrder:
       if(b['bone'].name == boneName):
          return b['index']
@@ -81,7 +84,7 @@ def matrixToString(mat):
    ret = ""
    for i in range(0, 4):
       for j in range(0, 4):
-         ret += str(mat[i][j])
+         ret += str(mat[j][i])
          if(i != 4 and j != 4):
             ret += ", "
 
@@ -105,6 +108,17 @@ class Settings:
         self.exportAnimations = False
         self.armObj = None
         self.skeleton = None
+
+###########################################################
+#BOB known flags for chunks
+###########################################################
+
+class ModelFlags:
+   ANIMATED = 0x01
+   
+class ActionFlags:
+   LOOP = 0x01
+
 
 ###########################################################
 #BOB chunk definitions
@@ -168,7 +182,7 @@ class BOBChunk:
       self.type=""
       self.name =""
       self.version = 1
-      self.flags = 1
+      self.flags = 0
 
    def write(self, file):
       file.write(indent(3, "type = \"{}\";".format(self.type)))
@@ -328,6 +342,7 @@ class BOBModel(BOBChunk):
       
       #get the bones for this model
       if(skeleton != None):
+         self.flags |= ModelFlags.ANIMATED
          self.skeleton = skeleton.name
          bones = getBonesInOrder(skeleton.data)
 
@@ -375,7 +390,7 @@ class BOBModel(BOBChunk):
                
                #add zero weight bone ids to fill out data struct
                while(len(bids) < 4):
-                  bids.append(0)
+                  bids.append(-1)
                   bweights.append(0)
                      
                idx = self.addVertex(Vertex(pos, nor, uv, bids, bweights))
@@ -411,7 +426,7 @@ class BOBModel(BOBChunk):
       file.write(indent(3, "indexFormat = \"UInt16\";"))
       file.write(indent(3, "vertexCount = {};".format(self.vertexCount)))
       file.write(indent(3, "indexCount = {};".format(self.indexCount)))
-      if(self.verts[0].layout == "V3N3T2B4B4"):
+      if(self.verts[0].layout == "V3N3T2B4W4"):
          file.write(indent(3, "skeleton = \"{}\";".format(self.skeleton)))
       
       file.write(indent(3, "meshes={"))
@@ -439,39 +454,39 @@ class BOBModel(BOBChunk):
 class Bone:
    __slots__ = (
       "name",
-      "parent",
+      "parentIdx",
+      "parentName",
       "matrix"
    )
 
    def __init__(self):
       self.name = ""
-      self.parent = ""
+      self.parentIdx = -1
+      self.parentName = ""
       self.matrix = []
       
    def parse(self, bone):
       self.name = bone.name
       if(bone.parent != None):
-         self.parent = bone.parent.name
+         self.parentName = bone.parent.name
       else:
-         self.parent = ""
+         self.parentName = ""
    
    def write(self, file):
       file.write(indent(4, "{"))
       file.write(indent(5, "name = \"{}\";".format(self.name)))
-      file.write(indent(5, "parent = \"{}\";".format(self.parent)))
+      file.write(indent(5, "parent = {};".format(self.parentIdx)))
       file.write(indent(5, "matrix = {{ {} }};".format(matrixToString(self.matrix))))
       file.write(indent(4, "};"))
   
 class BOBSkeleton(BOBChunk):
    __slots__ = (
-      "id",
       "bones"
    )
 
    def __init__(self):
       BOBChunk.__init__(self)
       self.type="skeleton"
-      self.id = ""
       self.bones = []
 
    def parse(self, obj, settings):
@@ -479,12 +494,19 @@ class BOBSkeleton(BOBChunk):
       arm.transform(settings.global_matrix)
 
       self.name = obj.name
-      self.id = obj.name
       bonesInOrder = getBonesInOrder(arm)
       for b in bonesInOrder:
          bone = Bone()
          bone.parse(b['bone'])
-         bone.matrix = b['bone'].matrix_local
+         bone.parentIdx = findBoneIndex(bone.parentName, bonesInOrder);
+         
+         #Get matrix of bone relative to parent
+         transform = b['bone'].matrix_local.copy()
+         parentBone = b['bone'].parent
+         if (parentBone):
+            transform = parentBone.matrix_local.inverted() * transform
+         
+         bone.matrix = transform
          self.bones.append(bone)
          
       #cleanup our copy
@@ -493,7 +515,6 @@ class BOBSkeleton(BOBChunk):
    def write(self, file):
       file.write(indent(2, "{"))
       BOBChunk.write(self, file) #call base class
-      file.write(indent(3, "id = \"{}\";".format(self.id)))
       file.write(indent(3, "bones = {"))
       for b in self.bones:
          b.write(file)
@@ -504,20 +525,17 @@ class BOBSkeleton(BOBChunk):
 class Pose():
    __slots__ = (
       "pos",
-      "ori",
-      "scale"
+      "ori"
    )
 
-   def __init__(self, pos, ori, scale):
-      self.pos = pos
-      self.ori = ori
-      self.scale = scale
+   def __init__(self, pos, ori):
+      self.pos = pos.copy()
+      self.ori = ori.copy()
    
    def __repr__(self):
-      return "{:6f}, {:6f}, {:6f},      {:6f}, {:6f}, {:6f}, {:6f}      {:6f}, {:6f}, {:6f}".format(
+      return "{:6f}, {:6f}, {:6f},      {:6f}, {:6f}, {:6f}, {:6f} ".format(
       self.pos[0], self.pos[1], self.pos[2], 
-      self.ori[0], self.ori[1], self.ori[2], self.ori[3],
-      self.scale[0], self.scale[1], self.scale[2])
+      self.ori[1], self.ori[2], self.ori[3], self.ori[0]) # w component is last
       
 class BOBAnimation(BOBChunk):
    __slots__ = (
@@ -525,9 +543,8 @@ class BOBAnimation(BOBChunk):
       "numFrames",
       "skeleton",
       "events",
-      "poses",
+      "frames",
       "numBones"
-      
    )
    
    def __init__(self):
@@ -537,21 +554,24 @@ class BOBAnimation(BOBChunk):
       self.numFrames = 0
       self.skeleton = ""
       self.events = []
-      self.poses = []
+      self.frames = []
       self.numBones = 0
       
    def parse(self, action, settings):
+      self.flags = ActionFlags.LOOP
       self.name = action.name
       scene = settings.context.scene
       self.framerate = scene.render.fps
-      self.skeleton = settings.skeleton.id
+      self.skeleton = settings.skeleton.name
       self.numBones = len(settings.skeleton.bones)
       
-      arm = settings.armObj
-      #arm = settings.armObj.copy()
-      #arm.animation_data_create()
-      #arm.transform(settings.global_matrix)
       
+      arm = settings.armObj
+      origArmData = arm.data
+      armData = arm.data.copy()
+      armData.transform(settings.global_matrix)
+      arm.data = armData
+
       #so we can restore stuff later
       oldStartFrame = scene.frame_start
       oldEndFrame = scene.frame_end
@@ -564,49 +584,71 @@ class BOBAnimation(BOBChunk):
       startframe = int(startframe)
       endframe = int(endframe)
       self.numFrames = endframe - startframe
+      print("-------------------------------------------------")
+      print("\n\n")
       print('Exporting action "%s" frames %d-%d' % (action.name, startframe, endframe))
-      
+      print("\n\n")
+      print("-------------------------------------------------")
       for frame in range(startframe, endframe):
+         print("---------------------Frame: " + str(frame) + "----------------------------")
          scene.frame_set(frame)
+         scene.update()
+         p = []
          for bone in settings.skeleton.bones:
             bName = bone.name
             poseBone = arm.pose.bones[bName]
-            poseMatrix = poseBone.matrix
-            if poseBone.parent:
-               poseMatrix = poseBone.parent.bone.matrix_local.inverted() * poseMatrix
+
+            transform = 0
+
+            boneRef = poseBone.bone.matrix_local.copy()
+            boneBasis = poseBone.matrix_basis.copy()
             
-            p = Pose(poseMatrix.to_translation(), poseMatrix.to_quaternion(), poseMatrix.to_scale())
-            self.poses.append(p)
+            parentBone = poseBone.parent
+            if(parentBone == None):
+               transform = boneRef * boneBasis
+            else:
+               parentLocal = parentBone.bone.matrix_local.copy()
+               transform = (parentLocal.inverted() * boneRef) * boneBasis
+
+            print("----------------" + bName + "----------------")
+            print("local matrix: " + str(transform))                    
+
+            parts = transform.decompose()
+            pb = Pose(parts[0], parts[1])
+            print("parts: " + str(parts))
+            p.append(pb)
+
+         self.frames.append(p)
 
       #export markers (or events)
       for m in action.pose_markers:
          self.events.append({'frame':m.frame, 'name':m.name})
+         
       #cleanup
       scene.frame_set(oldCurrentFrame)
       arm.animation_data.action = oldAction
+      arm.data = origArmData
+      del armData
       
    def write(self, file):
       file.write(indent(2, "{"))
       BOBChunk.write(self, file) #call base class
       file.write(indent(3, "framerate = {};".format(self.framerate)))
       file.write(indent(3, "numFrames = {};".format(self.numFrames)))
+      file.write(indent(3, "numBones = {};".format(self.numBones)))
       file.write(indent(3, "skeleton = \"{}\";".format(self.skeleton)))
       file.write(indent(3, "events = {"))
       for e in self.events:
-         file.write(indent(4, "[{}] = \"{}\";".format(e["frame"], e["name"])))
+         file.write(indent(4, "{{ frame = {}, name = \"{}\" }};".format(e["frame"], e["name"])))
       file.write(indent(3, "};"))
       
       file.write(indent(3, "poses = {"))
-      poseLine = 0
       frameCounter = 0
-      for p in self.poses:
-         if(poseLine == 0):
-            file.write(indent(4, "--frame {}".format(frameCounter)))
-            frameCounter += 1
-         file.write(indent(4, "{}, ".format(str(p))))
-         poseLine += 1
-         if(poseLine == self.numBones):
-            poseLine = 0
+      for frame in self.frames:
+         file.write(indent(4, "--frame {}".format(frameCounter)))
+         frameCounter += 1
+         for p in frame:
+            file.write(indent(4, "{}, ".format(str(p))))
       file.write(indent(3, "};"))
       
       file.write(indent(2, "};"))
@@ -633,7 +675,7 @@ class BOBFile:
       file.write(indent(1, "version = 1;"))
       file.write(indent(1, "registry = {"))
       for k,v in self.registry.items():
-         file.write(indent(2, "[{}] = {{name = \"{}\"; type=\"{}\"}}".format(k, v["name"], v["type"])))
+         file.write(indent(2, "[{}] = {{name = \"{}\"; type=\"{}\";}};".format(k, v["name"], v["type"]))) 
       file.write(indent(1, "};"))
       file.write(indent(1, "chunks = {"))
       
