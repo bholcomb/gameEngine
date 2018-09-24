@@ -120,7 +120,7 @@ vec3 lightIntensity(LightData light, vec3 pos)
 
 	float intensity = 1.0 / (1.0 + a*dist + b*dist*dist);
 
-	if (intensity < 0.01)
+	if (intensity < 0.001)
 		return vec3(0);
 	else
 		return intensity * light.color.rgb;

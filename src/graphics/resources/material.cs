@@ -10,20 +10,20 @@ namespace Graphics
 {
    /*
 layout(std140) uniform material {
-   uniform vec4 matAmbientReflectivity;
-   uniform vec4 matDiffuseReflectivity;
-   uniform vec4 matSpecularReflectivity;
-   uniform vec4 emmission;
-   uniform float shininess;
-   uniform float alpha;
-   uniform float alphaTest;
-   uniform float parallaxScale;
-   uniform sampler2D diffuseMapId;
-   uniform sampler2D specularMapId;
-   uniform sampler2D normalMapId;
-   uniform bool hasSpecularMap;
-   uniform bool hasNormalMap;		
-   uniform bool hasParallaxMap;
+   vec4 matAmbientReflectivity;
+   vec4 matDiffuseReflectivity;
+   vec4 matSpecularReflectivity;
+   vec4 emmission;
+   float shininess;
+   float alpha;
+   float alphaTest;
+   float parallaxScale;
+   sampler2D diffuseMapId;
+   sampler2D specularMapId;
+   sampler2D normalMapId;
+   bool hasSpecularMap;
+   bool hasNormalMap;		
+   bool hasParallaxMap;
 };
 */
    [StructLayout(LayoutKind.Sequential)]  

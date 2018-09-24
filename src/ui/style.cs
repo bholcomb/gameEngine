@@ -998,6 +998,7 @@ namespace GUI
          win.backgroundColor = table[(int)StyleColors.WINDOW];
          win.background = styleItemColor(table[(int)StyleColors.WINDOW]);
          win.borderColor = Color4.Red; // table[(int)StyleColors.BORDER];
+         win.border = styleItemColor(table[(int)StyleColors.BORDER]);
          win.popupBorderColor = table[(int)StyleColors.BORDER];
          win.comboBorderColor = table[(int)StyleColors.BORDER];
          win.contextualBorderColor = table[(int)StyleColors.BORDER];

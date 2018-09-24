@@ -25,8 +25,8 @@ BOB = {
          materials = {
             {
                name = "RockSurface";
-               ambient = { r=0.1000, g=0.1000, b=0.1000 };
-               diffuse = { r=0.6400, g=0.6400, b=0.6400 };
+               ambient = { r=0.2000, g=0.2000, b=0.2000 };
+               diffuse = { r=0.800, g=0.800, b=0.800 };
                spec = { r=0.5000, g=0.5000, b=0.5000 };
                emission = { r=0.0000, g=0.0000, b=0.0000 };
                shininess = 48.0000;

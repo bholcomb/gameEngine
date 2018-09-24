@@ -24,7 +24,7 @@ vec3 calcNormal()
 {
    vec3 a = vec3(gl_in[0].gl_Position) - vec3(gl_in[1].gl_Position);
    vec3 b = vec3(gl_in[2].gl_Position) - vec3(gl_in[1].gl_Position);
-   vec3 n= normalize(cross(a, b));
+   vec3 n = normalize(cross(a, b));
    return gs_in[0].normalMatrix * n;
 }  
 

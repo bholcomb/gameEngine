@@ -65,8 +65,7 @@ namespace Graphics
          {
             if(s == "GL_ARB_bindless_texture")
             {
-               //myBindlessTextureSupport = true;
-               myBindlessTextureSupport = false;
+               myBindlessTextureSupport = true;
                return;
             }
          }
