@@ -22,12 +22,11 @@ namespace Graphics
             Looping = 0x01
          };
 
-         public int fps;
-         public int numFrames;
+         public float duration;
          public string skeletonName;
          public int numBones;
          public List<AnimationEvent> events = new List<AnimationEvent>();
-         public List<AnimationFrame> poses = new List<AnimationFrame>();
+         public List<AnimationChannel> channels = new List<AnimationChannel>();
          public AnimationChunk()
             : base()
          {

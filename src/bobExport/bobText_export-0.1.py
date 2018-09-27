@@ -524,48 +524,48 @@ class BOBSkeleton(BOBChunk):
 
 class Pose():
    __slots__ = (
+      "time",
       "pos",
       "ori"
    )
 
-   def __init__(self, pos, ori):
+   def __init__(self, time, pos, ori):
+      self.time = time
       self.pos = pos.copy()
       self.ori = ori.copy()
    
    def __repr__(self):
-      return "{:6f}, {:6f}, {:6f},      {:6f}, {:6f}, {:6f}, {:6f} ".format(
+      return "{:6f},      {:6f}, {:6f}, {:6f},      {:6f}, {:6f}, {:6f}, {:6f} ".format(
+      self.time,
       self.pos[0], self.pos[1], self.pos[2], 
       self.ori[1], self.ori[2], self.ori[3], self.ori[0]) # w component is last
       
 class BOBAnimation(BOBChunk):
    __slots__ = (
-      "framerate",
-      "numFrames",
+      "duration",
       "skeleton",
       "events",
-      "frames",
+      "channels",
       "numBones"
    )
    
    def __init__(self):
       BOBChunk.__init__(self)
       self.type="animation"
-      self.framerate = 24
-      self.numFrames = 0
+      self.duration = 0
       self.skeleton = ""
       self.events = []
-      self.frames = []
-      self.numBones = 0
+      self.channels = {}
+      self.numBones = 0   
       
    def parse(self, action, settings):
       self.flags = ActionFlags.LOOP
       self.name = action.name
       scene = settings.context.scene
-      self.framerate = scene.render.fps
-      self.skeleton = settings.skeleton.name
+      self.skeleton = settings.skeleton
       self.numBones = len(settings.skeleton.bones)
-      
-      
+      fps = scene.render.fps
+       
       arm = settings.armObj
       origArmData = arm.data
       armData = arm.data.copy()
@@ -578,51 +578,72 @@ class BOBAnimation(BOBChunk):
       oldCurrentFrame = scene.frame_current
       oldAction = arm.animation_data.action
       
+      #find the bone keyframes
+      print("--------------------Finding Keyframes for bones-----------------------------")
+      boneKeyframes = {}
+      for bone in settings.skeleton.bones:
+         bName = bone.name 
+         boneKeyframes[bName] = []
+         self.channels[bName] = []
+         if(bName in action.groups):# are there fcurves?
+            g = action.groups[bName]  # get the group of fcurves for this bone
+            for c in g.channels: #for each fcurve
+               if(c.data_path.endswith("location") or c.data_path.endswith("rotation_quaternion")):  #is it a position/rotation key?
+                  for keyframe in c.keyframe_points:
+                     if(boneKeyframes[bName].count(keyframe.co[0]) == 0): #is it in the list already?  we want unique keyframes for this bone
+                        print("Bone %s has a unique keyframe at frame %d" %(bName, keyframe.co[0]))
+                        boneKeyframes[bName].append(int(keyframe.co[0])) # add it to the list
+         if(len(boneKeyframes[bName]) == 0): #there were no keyframes for this bone
+            boneKeyframes[bName].append(0) #add the 0 frame so we get some channel data
+               
       #setup the armature with the current action and then step over the frames getting the pose data
       arm.animation_data.action = action
       startframe, endframe = action.frame_range
       startframe = int(startframe)
       endframe = int(endframe)
-      self.numFrames = endframe - startframe
-      print("-------------------------------------------------")
-      print("\n\n")
-      print('Exporting action "%s" frames %d-%d' % (action.name, startframe, endframe))
-      print("\n\n")
-      print("-------------------------------------------------")
-      for frame in range(startframe, endframe):
-         print("---------------------Frame: " + str(frame) + "----------------------------")
+      self.duration = (endframe - startframe) / fps
+      #print("-------------------------------------------------")
+      #print("\n\n")
+      #print('Exporting action "%s" frames %d-%d' % (action.name, startframe, endframe))
+      #print("\n\n")
+      #print("-------------------------------------------------")
+      for frame in range(startframe, endframe + 1):
+         #print("---------------------Frame: " + str(frame) + "----------------------------")
          scene.frame_set(frame)
          scene.update()
-         p = []
+         
          for bone in settings.skeleton.bones:
             bName = bone.name
-            poseBone = arm.pose.bones[bName]
-
-            transform = 0
-
-            boneRef = poseBone.bone.matrix_local.copy()
-            boneBasis = poseBone.matrix_basis.copy()
             
-            parentBone = poseBone.parent
-            if(parentBone == None):
-               transform = boneRef * boneBasis
-            else:
-               parentLocal = parentBone.bone.matrix_local.copy()
-               transform = (parentLocal.inverted() * boneRef) * boneBasis
+            #does this bone have a keyframe on this frame?
+            if(boneKeyframes[bName].count(frame) > 0):
+               print("%s has a keyframe on frame %d" % (bName, frame))
+               poseBone = arm.pose.bones[bName]
 
-            print("----------------" + bName + "----------------")
-            print("local matrix: " + str(transform))                    
+               transform = 0
 
-            parts = transform.decompose()
-            pb = Pose(parts[0], parts[1])
-            print("parts: " + str(parts))
-            p.append(pb)
+               boneRef = poseBone.bone.matrix_local.copy()
+               boneBasis = poseBone.matrix_basis.copy()
+               
+               parentBone = poseBone.parent
+               if(parentBone == None):
+                  transform = boneRef * boneBasis
+               else:
+                  parentLocal = parentBone.bone.matrix_local.copy()
+                  transform = (parentLocal.inverted() * boneRef) * boneBasis
 
-         self.frames.append(p)
+               #print("----------------" + bName + "----------------")
+               #print("local matrix: " + str(transform))                    
+
+               parts = transform.decompose()
+               pb = Pose(frame/fps, parts[0], parts[1])
+               #print("parts: " + str(parts))
+
+               self.channels[bName].append(pb)
 
       #export markers (or events)
       for m in action.pose_markers:
-         self.events.append({'frame':m.frame, 'name':m.name})
+         self.events.append({'time':m.frame/fps, 'name':m.name})
          
       #cleanup
       scene.frame_set(oldCurrentFrame)
@@ -633,24 +654,22 @@ class BOBAnimation(BOBChunk):
    def write(self, file):
       file.write(indent(2, "{"))
       BOBChunk.write(self, file) #call base class
-      file.write(indent(3, "framerate = {};".format(self.framerate)))
-      file.write(indent(3, "numFrames = {};".format(self.numFrames)))
+      file.write(indent(3, "duration = {};".format(self.duration)))
       file.write(indent(3, "numBones = {};".format(self.numBones)))
-      file.write(indent(3, "skeleton = \"{}\";".format(self.skeleton)))
+      file.write(indent(3, "skeleton = \"{}\";".format(self.skeleton.name)))
       file.write(indent(3, "events = {"))
       for e in self.events:
-         file.write(indent(4, "{{ frame = {}, name = \"{}\" }};".format(e["frame"], e["name"])))
+         file.write(indent(4, "{{ time = {}, name = \"{}\" }};".format(e["time"], e["name"])))
       file.write(indent(3, "};"))
       
-      file.write(indent(3, "poses = {"))
-      frameCounter = 0
-      for frame in self.frames:
-         file.write(indent(4, "--frame {}".format(frameCounter)))
-         frameCounter += 1
-         for p in frame:
-            file.write(indent(4, "{}, ".format(str(p))))
+      file.write(indent(3, "channels = {"))
+      for bone in self.skeleton.bones:
+         bName = bone.name 
+         file.write(indent(4, "{"))
+         for p in self.channels[bName]:
+            file.write(indent(5, "{}, ".format(str(p))))
+         file.write(indent(4, "};"))
       file.write(indent(3, "};"))
-      
       file.write(indent(2, "};"))
    
 class BOBFile:

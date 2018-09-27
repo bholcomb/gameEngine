@@ -25,9 +25,6 @@ struct Model {
 	mat4 invNormal;
 	vec4 activeLights;
 	int boneCount;
-	int currentFrame;
-	int nextFrame;
-	float interpolation;
 };
 
 layout(binding = 0, std430) buffer modelData

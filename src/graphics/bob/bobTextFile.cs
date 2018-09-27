@@ -296,8 +296,7 @@ namespace Graphics
          public bool parseAnimation(AnimationChunk a, LuaObject data)
          {
             parseChunkHeader(a, data);
-            a.fps = data.get<int>("framerate");
-            a.numFrames = data.get<int>("numFrames");
+            a.duration = data.get<float>("duration");
             a.skeletonName = data.get<string>("skeleton");
             a.numBones = data.get<int>("numBones");
             LuaObject events = data["events"];
@@ -305,28 +304,32 @@ namespace Graphics
             {
                LuaObject e = events[i+1];
                AnimationEvent aniEvent = new AnimationEvent();
-               aniEvent.frame = e.get<int>("frame");
+               aniEvent.time = e.get<int>("time");
                aniEvent.name = e.get<string>("name");
                a.events.Add(aniEvent);
             }
 
-            
-            LuaObject poseData = data["poses"];
-            int next = 1;
-            for (int i = 0; i < a.numFrames; i++)
+            //create an animiation channel for each bone
+            for(int i=0; i< a.numBones;  i++)
             {
-               AnimationFrame frame = new AnimationFrame();
-               for (int b = 0; b < a.numBones; b++)
-               {
-                  JointPose jp = new JointPose();
-                  jp.position = new Vector3(poseData[next++], poseData[next++], poseData[next++]);
-                  jp.rotation = new Quaternion(poseData[next++], poseData[next++], poseData[next++], poseData[next++]);
-                  frame.Add(jp);
-               }
-
-               a.poses.Add(frame);
+               a.channels.Add(new AnimationChannel());
             }
 
+            LuaObject channels = data["channels"];
+            for (int i = 0; i < a.numBones; i++)
+            {
+               LuaObject channelData = channels[i + 1];
+               int idx = 1;
+               while (idx < channelData.count())
+               {
+                  JointPose jp = new JointPose();
+                  jp.time = (float)channelData[idx++];
+                  jp.position = new Vector3(channelData[idx++], channelData[idx++], channelData[idx++]);
+                  jp.rotation = new Quaternion(channelData[idx++], channelData[idx++], channelData[idx++], channelData[idx++]);
+                  a.channels[i].poses.Add(jp);
+               }
+            }
+            
             return true;
          }
       }

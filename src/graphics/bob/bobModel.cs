@@ -124,10 +124,10 @@ namespace Graphics
          Animation a = new Animation();
          a.name = ac.myName;
          a.loop = ac.loop;
-         a.fps = ac.fps;
+         a.duration = ac.duration;
          a.loop = ac.loop;
          a.events = ac.events;
-         a.poses = ac.poses;
+         a.channels = ac.channels;
          return a;
       }
 

@@ -31,10 +31,6 @@ namespace Graphics
 		public Matrix4 inverseNormalMatrix; //aligned 4N
 		public Vector4 activeLights;
 		public int boneCount;
-		public int currentFrame;
-		public int nextFrame;
-		public float interpolation;
-
 	};
 
 	public class SkinnedModelInfo : RenderInfo
@@ -69,7 +65,6 @@ namespace Graphics
          Vector3 pos = smr.modelMatrix.ExtractTranslation();
          Quaternion ori = smr.modelMatrix.ExtractRotation();
          (smr.findController("animation") as AnimationController).animation.animation.debugDraw(skinningMatrix, pos, ori);
-         //(smr.findController("animation") as AnimationController).animation.animation.skeleton.debugDraw(pos, ori);
 #endif
       }
       //public override void preparePerViewBegin(View v) { }
@@ -88,13 +83,6 @@ namespace Graphics
 			modelData.normalMatrix = (smr.model.myInitialTransform * smr.modelMatrix).ClearTranslation();
 			//modelData.inverseNormalMatrix = modelData.normalMatrix.Inverted();
 			modelData.activeLights = new Vector4(0, 1, 2, 3);
-         if (smr.findController("animation") != null)
-         {
-            modelData.currentFrame = (smr.findController("animation") as AnimationController).animation.currentFrame;
-            modelData.nextFrame = (smr.findController("animation") as AnimationController).animation.nextFrame;
-            modelData.interpolation = (smr.findController("animation") as AnimationController).animation.interpolation;
-         }
-
 			modelData.boneCount = smr.model.skeleton.boneCount;
 			myModelData.Add(modelData);
 

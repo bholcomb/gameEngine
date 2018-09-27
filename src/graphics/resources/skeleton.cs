@@ -28,7 +28,7 @@ namespace Graphics
 
    public class AnimationEvent
    {
-      public int frame;
+      public float time;
       public string name;
    }
 

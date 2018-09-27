@@ -12,47 +12,75 @@ namespace Graphics
 {
    public struct JointPose
    {
+      public float time;
       public Vector3 position;
       public Quaternion rotation;
    }
 
-   public class AnimationFrame : List<JointPose>
+   public class AnimationChannel
    {
-      public AnimationFrame() : base()
+      public List<JointPose> poses = new List<JointPose>();
+
+      public AnimationChannel()
       {
+
+      }
+
+      public JointPose jointAt(float time)
+      {
+         //check for single pose
+         if(poses.Count == 1)
+         {
+            return poses[0];
+         }
+
+         int idx = 0;
+         while (idx < poses.Count - 1 && time > poses[idx].time)
+         {
+            idx++;
+         }
+
+         //check for time past the last pose
+         if (time >= poses[idx].time)
+         {
+            return poses[idx];
+         }
+
+         float interpolation = (time - poses[idx - 1].time) / (poses[idx].time - poses[idx-1].time);
+
+         JointPose ret = new JointPose();
+         ret.position = Vector3.Lerp(poses[idx - 1].position, poses[idx].position, interpolation);
+         ret.rotation = Quaternion.Slerp(poses[idx -1].rotation, poses[idx].rotation, interpolation);
+
+         return ret;
       }
    }
-
 
    public class Animation
    {
       //animation parameters
       public String name { get; set; }
       public Skeleton skeleton { get; set; }
-      public int numFrames { get { return poses.Count; } }
       public float fps { get; set; }
       public bool loop { get; set; }
+      public float duration { get; set; }
 
       public List<AnimationEvent> events = new List<AnimationEvent>();
-      public List<AnimationFrame> poses = new List<AnimationFrame>();
+      public List<AnimationChannel> channels = new List<AnimationChannel>();
 
       public Animation()
       {
       }
 
-      public List<Matrix4> buildAnimationFrame(int currentFrame, int nextFrame, float interpolation)
+      public List<Matrix4> buildAnimationFrame(float time)
       {
          List<Matrix4> frame = new List<Matrix4>(skeleton.boneCount);
 
          for (int i = 0; i < skeleton.boneCount; i++)
          {
-            JointPose jp1 = poses[currentFrame][i];
-            JointPose jp2 = poses[nextFrame][i];
+            JointPose jp = channels[i].jointAt(time);
 
-            Vector3 pos = Vector3.Lerp(jp1.position, jp2.position, interpolation); // Vector3.Zero; //
-            Quaternion ori = Quaternion.Slerp(jp1.rotation, jp2.rotation, interpolation); //Quaternion.Identity; //
-
-            Matrix4 rel =  Matrix4.CreateFromQuaternion(ori) * Matrix4.CreateTranslation(pos);
+            Matrix4 rel =  Matrix4.CreateFromQuaternion(jp.rotation) * Matrix4.CreateTranslation(jp.position);
             Matrix4 final = Matrix4.Identity;
             Bone b = skeleton.myBones[i];
             if(b.myParent == -1)
@@ -102,9 +130,7 @@ namespace Graphics
       public Animation animation { get; set; }
 
       //between frame animation data
-      public float interpolation { get; set; }
-      public int currentFrame { get; set; }
-      public int nextFrame { get; set; }
+      public float time { get; set; }
       public bool isDone { get; set; }
 
       public AnimationState(Animation ani)
@@ -117,40 +143,30 @@ namespace Graphics
 
       public void reset()
       {
-         currentFrame = 0;
-         nextFrame = 1;
-         interpolation = 0;
+         time = 0.0f;
          isDone = false;
       }
 
       public void update(float dt)
       {
-         float increment = dt * animation.fps;
-         interpolation += increment;
-
-         while (interpolation >= 1.0)
+         time += dt;
+         if(time > animation.duration)
          {
-            interpolation -= 1.0f;
-            currentFrame = nextFrame;
-            nextFrame += 1;
-            if (nextFrame == animation.numFrames)
+            if(animation.loop)
             {
-               if (animation.loop == true)
-               {
-                  nextFrame = 0;
-               }
-               else
-               {
-                  nextFrame = animation.numFrames - 1;
-                  isDone = true;
-               }
+               time -= animation.duration;
+            }
+            else
+            {
+               time = animation.duration;
+               isDone = true;
             }
          }
       }
 
       public List<Matrix4> skinningMatrix()
       {
-         return animation.buildAnimationFrame(currentFrame, nextFrame, interpolation);
+         return animation.buildAnimationFrame(time);
       }
    }
 
@@ -194,16 +210,16 @@ namespace Graphics
          nullAni.loop = false;
          nullAni.skeleton = skeleton;
 
-         AnimationFrame frame = new AnimationFrame();
          for(int i=0; i< skeleton.boneCount; i++)
          {
+            AnimationChannel boneChannel = new AnimationChannel();
             JointPose jp = new JointPose();
             jp.position = Vector3.Zero;
             jp.rotation = Quaternion.Identity;
-            frame.Add(jp);
+            boneChannel.poses.Add(jp);
+            nullAni.channels.Add(boneChannel);
          }
 
-         nullAni.poses.Add(frame);
          animations["null"] = nullAni;
       }
    }
