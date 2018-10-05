@@ -121,10 +121,10 @@ namespace GUI
             focusWindow(win);
       }
 
-      public static void beginLayout(Layout.Direction layout, List<float> spacing = null)
+      public static void beginLayout(Layout.Direction layout)
       {
          Window win = currentWindow;
-         win.beginLayout(layout, spacing);
+         win.beginLayout(layout);
       }
 
       public static void endLayout()

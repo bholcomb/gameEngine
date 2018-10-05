@@ -406,15 +406,15 @@ namespace GUI
          addCustomRenderCommand(new RenderFontCommand(font, pos, text, col));
       }
 
-      public void addIcon(Icons icon, Rect r)
+      public void addIcon(int icon, Rect r)
       {
          addIcon(icon, r.SW, r.NE);
       }
 
-      public void addIcon(Icons icon, Vector2 a, Vector2 b)
+      public void addIcon(int icon, Vector2 a, Vector2 b)
       {
-         //Glyph g = theGlyphs[(int)icon];
-         addImage(theDefaultTexture, a, b, uv_zero, uv_one, Color4.White);
+         Texture t = IconFactory.findIcon(icon);
+         addImage(t, a, b, uv_zero, uv_one, Color4.White);
       }
 
       public void addImage(Texture tex, Rect r)

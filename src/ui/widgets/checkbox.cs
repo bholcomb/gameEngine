@@ -25,11 +25,13 @@ namespace GUI
          win.addItem(style.checkbox.padding);
 
          Vector2 labelSize = style.font.size(label);
-         win.beginLayout(Layout.Direction.Horizontal, new List<float>() { 0.0f, style.font.fontSize });;
+         win.beginLayout(Layout.Direction.Horizontal);
          
          bool pressed = selectable(label, ref selected, new Vector2(labelSize.X, 0), SelectableFlags.HasToggle);
 
          icon(selected ? Icons.CHECKBOX_CHECKED : Icons.CHECKBOX_UNCHECKED);
+
+         win.endLayout();
 
          return pressed;
       }

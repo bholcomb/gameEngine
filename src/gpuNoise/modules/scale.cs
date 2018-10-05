@@ -8,6 +8,7 @@ using OpenTK.Graphics.OpenGL;
 
 using Graphics;
 using Util;
+using Lua;
 
 
 namespace GpuNoise
@@ -16,8 +17,8 @@ namespace GpuNoise
    {
       ShaderProgram myShaderProgram;
 
-      public Module scale = null;
-		public Module input = null;
+      public Module source  { get { return inputs[0]; } set { inputs[0] = value; } }
+      public Module scale { get { return inputs[1]; } set { inputs[1] = value; } }
 
       public Scale(int x, int y) : base(Type.Scale, x, y)
       {
@@ -36,7 +37,7 @@ namespace GpuNoise
 			{
 				ComputeCommand cmd = new ComputeCommand(myShaderProgram, output.width / 32, output.height / 32);
 
-				cmd.addImage(input.output, TextureAccess.ReadOnly, 0);
+				cmd.addImage(source.output, TextureAccess.ReadOnly, 0);
 				cmd.addImage(scale.output, TextureAccess.ReadOnly, 1);
 				cmd.addImage(output, TextureAccess.WriteOnly, 2);
 
@@ -50,9 +51,30 @@ namespace GpuNoise
 
 		bool didChange()
 		{
-			if (input.update() || scale.update()) return true;
+			if (source.update() || scale.update()) return true;
 
 			return false;
 		}
+
+      public static Module create(ModuleTree tree, LuaObject config)
+      {
+         Scale m = new Scale(tree.size.X, tree.size.Y);
+         m.myName = config.get<String>("name");
+
+         m.scale = tree.findModule(config.get<String>("scale"));
+         m.source = tree.findModule(config.get<String>("source"));
+
+         tree.addModule(m);
+         return m;
+      }
+
+      public static void serialize(Module mm, LuaObject obj)
+      {
+         Scale m = mm as Scale;
+         obj.set(m.myType.ToString(), "type");
+         obj.set(m.myName, "name");
+         obj.set(m.scale.myName, "scale");
+         obj.set(m.source.myName, "source");
+      }
    }
 }

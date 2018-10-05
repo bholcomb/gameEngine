@@ -181,8 +181,8 @@ namespace GUI
 		public bool showButtons;
 		public StyleButton incButton;
 		public StyleButton decButton;
-		public Icons incSymbol;
-		public Icons decSymbol;
+		public int incSymbol;
+		public int decSymbol;
 	};
 
 	public class StyleProgress
@@ -232,8 +232,8 @@ namespace GUI
 		public bool showButtons;
 		public StyleButton incButton;
 		public StyleButton decButton;
-		public Icons incSymbol;
-		public Icons decSymbol;
+		public int incSymbol;
+		public int decSymbol;
 	};
 
 	public class StyleEdit
@@ -285,8 +285,8 @@ namespace GUI
 		public Color4 labelActive;
 
 		//symbols
-		public Icons symLeft;
-		public Icons symRight;
+		public int symLeft;
+		public int symRight;
 
 		// properties 
 		public float border;
@@ -332,9 +332,9 @@ namespace GUI
 
 		//button
 		public StyleButton button;
-		public Icons symNormal;
-		public Icons symHover;
-		public Icons symActive;
+		public int symNormal;
+		public int symHover;
+		public int symActive;
 
 		//properties
 		public float border;
@@ -356,8 +356,8 @@ namespace GUI
 		public StyleButton tabMinimizeButton;
 		public StyleButton nodeMaximizeButton;
 		public StyleButton nodeMinimizeButton;
-		public Icons symMinimize;
-		public Icons symMaximize;
+		public int symMinimize;
+		public int symMaximize;
 
 		//properties
 		public float border;
@@ -377,9 +377,9 @@ namespace GUI
 		//button
 		public StyleButton closeButton;
 		public StyleButton minimizeButton;
-		public Icons closeSymbol;
-		public Icons minimizeSymbol;
-		public Icons maximizeSymbol;
+		public int closeSymbol;
+		public int minimizeSymbol;
+		public int maximizeSymbol;
 
 		//title
 		public Color4 labelNormal;
@@ -662,7 +662,7 @@ namespace GUI
          select.padding = new Vector2(4.0f, 4.0f);
          select.touchPadding = new Vector2(0, 0);
          select.rounding = 0.0f;
-         select.textAlignment = Alignment.Default;
+         select.textAlignment = Alignment.Middle;
          style.selectable = select;
 
          // slider 
@@ -1007,17 +1007,17 @@ namespace GUI
          win.tooltipBorderColor = table[(int)StyleColors.BORDER];
          win.scaler = styleItemColor(table[(int)StyleColors.TEXT]);
 
-         win.rounding = 0.0f;
+         win.rounding = 4.0f;
          win.spacing = new Vector2(4, 4);
          win.scrollbarSize = new Vector2(10, 10);
          win.minSize = new Vector2(64, 64);
 
-         win.comboBorder = 1.0f;
-         win.contextualBorder = 1.0f;
-         win.menuBorder = 1.0f;
-         win.groupBorder = 1.0f;
-         win.tooltipBorder = 1.0f;
-         win.popupBorder = 1.0f;
+         win.comboBorder = 2.0f;
+         win.contextualBorder = 2.0f;
+         win.menuBorder = 2.0f;
+         win.groupBorder = 2.0f;
+         win.tooltipBorder = 2.0f;
+         win.popupBorder = 2.0f;
 
          win.padding = new Vector2(4, 4);
          win.groupPadding = new Vector2(4, 4);

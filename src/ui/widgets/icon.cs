@@ -13,12 +13,12 @@ namespace GUI
 {
    public static partial class UI
    {
-      public static void icon(Icons iconId)
+      public static void icon(int iconId)
       {
          icon(iconId, Color4.White);
       }
 
-      public static void icon(Icons iconId, Color4 col)
+      public static void icon(int iconId, Color4 col)
       {
          Window win = currentWindow;
          if (win.skipItems)

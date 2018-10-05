@@ -144,9 +144,9 @@ namespace GpuNoise
       public float lacunarity = 2.0f;
       public float gain = 1.0f;
       public float H = 1.0f;
-      public Fractal.Function function = Fractal.Function.multiFractal;
+      public Fractal2d.Method function = Fractal2d.Method.multiFractal;
 
-      Fractal myFractal;
+      Fractal2d myFractal;
       AutoCorrect myAutoCorrect;
 
       public GpuNoise2dMap(int width, int height, float seed = 0.0f)
@@ -156,7 +156,7 @@ namespace GpuNoise
          mySeed = seed;
 
          texture = new Texture(myWidth, myHeight, PixelInternalFormat.R32f);
-         myFractal = new Fractal(myWidth, myHeight);
+         myFractal = new Fractal2d(myWidth, myHeight);
          myAutoCorrect = new AutoCorrect(myWidth, myHeight);
          myAutoCorrect.source = myFractal;
 
@@ -166,14 +166,13 @@ namespace GpuNoise
       void generateTexture()
       {
          myFractal.seed = mySeed;
-         myFractal.function = function;
+         myFractal.method = function;
          myFractal.octaves = octaves;
          myFractal.frequency = frequency;
          myFractal.lacunarity = lacunarity;
          myFractal.H = H;
          myFractal.gain = gain;
          myFractal.offset = offset;
-         myFractal.face = 0;
 
          myAutoCorrect.update();
       }
@@ -200,9 +199,9 @@ namespace GpuNoise
       public float lacunarity = 2.0f;
       public float gain = 1.0f;
       public float H = 1.0f;
-      public Fractal.Function function = Fractal.Function.multiFractal;
+      public Fractal3d.Method function = Fractal3d.Method.multiFractal;
 
-      Fractal[] myFractal = new Fractal[6];
+      Fractal3d[] myFractal = new Fractal3d[6];
       AutoCorrect myAutoCorrect;
 
       public GpuNoiseCubeMap(int width, int height, float seed = 0.0f)
@@ -214,7 +213,7 @@ namespace GpuNoise
          for (int i = 0; i < 6; i++)
          {
             myTextures[i] = new Texture(myWidth, myHeight, PixelInternalFormat.R32f);
-            myFractal[i] = new Fractal(myWidth, myHeight);
+            myFractal[i] = new Fractal3d(myWidth, myHeight);
             myFractal[i].face = i;
          }
 
@@ -234,7 +233,7 @@ namespace GpuNoise
          for (int i = 0; i < 6; i++)
          {
             myFractal[i].seed = mySeed;
-            myFractal[i].function = function;
+            myFractal[i].method = function;
             myFractal[i].octaves = octaves;
             myFractal[i].frequency = frequency;
             myFractal[i].lacunarity = lacunarity;

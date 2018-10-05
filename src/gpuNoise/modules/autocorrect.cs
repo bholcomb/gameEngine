@@ -9,6 +9,7 @@ using OpenTK.Graphics.OpenGL;
 using Graphics;
 using Util;
 
+using Lua;
 
 namespace GpuNoise
 {
@@ -19,9 +20,9 @@ namespace GpuNoise
       ShaderProgram myMinMaxPass2Shader;
       ShaderProgram myAutoCorrectShader;
 
-      public Module source = null;
+      public Module source { get { return inputs[0]; } set { inputs[0] = value; } }
 
-      public AutoCorrect(int x, int y) : base(Type.AutoCorect, x, y)
+      public AutoCorrect(int x, int y) : base(Type.AutoCorrect, x, y)
       {
          output = new Texture(x, y, PixelInternalFormat.R32f);
          output.setName("AutoCorrect output");
@@ -119,6 +120,25 @@ namespace GpuNoise
          cmd.renderState.setStorageBuffer(mySSbo.id, 1);
          cmd.execute();
          GL.MemoryBarrier(MemoryBarrierFlags.ShaderImageAccessBarrierBit);
+      }
+
+      public static Module create(ModuleTree tree, LuaObject config)
+      {
+         AutoCorrect m = new AutoCorrect(tree.size.X, tree.size.Y);
+         m.myName = config.get<String>("name");
+
+         m.source = tree.findModule(config.get<String>("source"));
+
+         tree.addModule(m);
+         return m;
+      }
+
+      public static void serialize(Module mm, LuaObject obj)
+      {
+         AutoCorrect m = mm as AutoCorrect;
+         obj.set(m.myType.ToString(), "type");
+         obj.set(m.myName, "name");
+         obj.set(m.source.myName, "source");
       }
    }
 }

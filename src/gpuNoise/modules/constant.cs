@@ -8,7 +8,7 @@ using OpenTK.Graphics.OpenGL;
 
 using Graphics;
 using Util;
-
+using Lua;
 
 namespace GpuNoise
 {
@@ -50,5 +50,24 @@ namespace GpuNoise
 
 			return false;
 		}
+
+      public static Module create(ModuleTree tree, LuaObject config)
+      {
+         Constant m = new Constant(tree.size.X, tree.size.Y);
+         m.myName = config.get<String>("name");
+  
+         m.val = config.get<float>("value");
+
+         tree.addModule(m);
+         return m;
+      }
+
+      public static void serialize(Module mm, LuaObject obj)
+      {
+         Constant m = mm as Constant;
+         obj.set(m.myType.ToString(), "type");
+         obj.set(m.myName, "name");
+         obj.set(m.val, "value");
+      }
    }
 }

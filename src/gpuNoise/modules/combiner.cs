@@ -8,13 +8,13 @@ using OpenTK.Graphics.OpenGL;
 
 using Graphics;
 using Util;
+using Lua;
 
 
 namespace GpuNoise
 {
    public class Combiner : Module
    {
-		const int MAX_INPUTS = 4;
       ShaderProgram myShaderProgram;
       public enum CombinerType
       {
@@ -26,7 +26,6 @@ namespace GpuNoise
       }
 
       public CombinerType action;
-      public Module[] inputs = new Module[MAX_INPUTS]; //max inputs
 
       public Combiner(int x, int y) : base(Type.Combiner, x, y)
       {
@@ -79,5 +78,42 @@ namespace GpuNoise
 
 			return false;
 		}
+
+      public static Module create(ModuleTree tree, LuaObject config)
+      {
+         Combiner m = new Combiner(tree.size.X, tree.size.Y);
+         m.myName = config.get<String>("name");
+
+         LuaObject inputs = config["inputs"];
+         for(int i=1; i<=inputs.count(); i++)
+         {
+            m.inputs[i - 1] = tree.findModule(inputs[i]);
+         }
+
+         CombinerType action;
+         Enum.TryParse(config.get<String>("action"), out action);
+         m.action = action;
+
+         tree.addModule(m);
+         return m;
+      }
+
+      public static void serialize(Module mm, LuaObject obj)
+      {
+         Combiner m = mm as Combiner;
+         obj.set(m.myType.ToString(), "type");
+         obj.set(m.myName, "name");
+         obj.set(m.action.ToString(), "action");
+         LuaObject i = obj.state.createTable();
+         obj["inputs"] = i;
+
+         for (int j = 0; j < m.inputs.Length; j++)
+         {
+            if (m.inputs[j] != null)
+            {
+               i.set(m.inputs[j].myName, j + 1);
+            }
+         }
+      }
    }
 }

@@ -132,7 +132,7 @@ namespace GUI
       static bool sliderBehavior(Rect r, UInt32 id, ref float val, float min, float max, ref bool hovered, SliderFlags flags = 0)
       {
          Window win = currentWindow;
-         if (win != focusedWindow)
+         if (win != hoveredWindow)
          {
             return false;
          }

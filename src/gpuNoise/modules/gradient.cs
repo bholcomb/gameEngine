@@ -8,6 +8,7 @@ using OpenTK.Graphics.OpenGL;
 
 using Graphics;
 using Util;
+using Lua;
 
 
 namespace GpuNoise
@@ -74,5 +75,30 @@ namespace GpuNoise
 
 			return diff;
 		}
+
+      public static Module create(ModuleTree tree, LuaObject config)
+      {
+         Gradient m = new Gradient(tree.size.X, tree.size.Y);
+         m.myName = config.get<String>("name");
+
+         m.x0 = config.get<float>("x0");
+         m.x1 = config.get<float>("x1");
+         m.y0 = config.get<float>("y0");
+         m.y1 = config.get<float>("y1");
+
+         tree.addModule(m);
+         return m;
+      }
+
+      public static void serialize(Module mm, LuaObject obj)
+      {
+         Gradient m = mm as Gradient;
+         obj.set(m.myType.ToString(), "type");
+         obj.set(m.myName, "name");
+         obj.set(m.x0, "x0");
+         obj.set(m.x1, "x1");
+         obj.set(m.y0, "y0");
+         obj.set(m.y1, "y1");
+      }
    }
 }

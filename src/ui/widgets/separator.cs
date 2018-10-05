@@ -56,7 +56,7 @@ namespace GUI
 
          float size = win.size[(int)dir];
 
-         return p * (size / 100.0f);
+         return (p / 100.0f) * size;
       }
    }
 }

@@ -21,7 +21,7 @@ namespace GUI
    };
 
    public static partial class UI
-	{
+   {
       public static readonly Vector2 theInvalidVec2 = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
       public static readonly Vector2 theZeroVec2 = new Vector2(0, 0);
       public static bool initialized = false;
@@ -70,7 +70,7 @@ namespace GUI
       public static Context ctx;
 
       static UI()
-		{
+      {
          ctx = new Context();
 
          idStack = new IdStack();
@@ -122,7 +122,7 @@ namespace GUI
          setNextWindowSize(displaySize, SetCondition.Always);
          setNextWindowPosition(Vector2.Zero, SetCondition.Always);
          bool closed = false;
-         beginWindow("root", ref closed, Window.Flags.Root);
+         beginWindow("root", ref closed, Window.Flags.Root | Window.Flags.Inputs);
          myRootWindow = findWindow("root");
       }
 
@@ -130,7 +130,17 @@ namespace GUI
       {
          endWindow();
 
-         //check for focus and move
+         //check for focused window
+         if (myHoveredWindow != null &&
+            activeId == 0 &&
+            (mouse.isButtonClicked(MouseButton.Left) || 
+             mouse.isButtonClicked(MouseButton.Right) || 
+             mouse.isButtonClicked(MouseButton.Middle)) == true)
+         {
+            focusWindow(myHoveredWindow);
+         }
+
+         //check for window move
          if (myHoveredWindow != null &&
             activeId == 0 &&
             hoveredId == 0 &&

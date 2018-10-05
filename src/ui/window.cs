@@ -49,6 +49,7 @@ namespace GUI
 
          //common use cases
          DefaultWindow = Background | TitleBar | MenuBar | Borders | Movable | Collapsable | Resizable | Inputs | BringToFrontOnFocus | ChildWindow,
+         RootWindow = MenuBar | Inputs | Root,
       };
 
       public string name { get; set; }
@@ -91,9 +92,7 @@ namespace GUI
 
       public UInt32 getChildId(String name)
       {
-         UI.idStack.push(id);
          UInt32 childId = UI.idStack.getId(name);
-         UI.idStack.pop();
          UI.keepAliveId(childId);
          return childId;
       }
@@ -134,6 +133,13 @@ namespace GUI
 			if (closed == true)
 				return false;
 
+         UI.idStack.push(id);
+
+         if (flags.HasFlag(Flags.Modal))
+         {
+            makeLastSibling();
+         }
+
          //process the setNextWindow* functions
          if (UI.setNextWindowPositionCondition != 0)
          {
@@ -158,16 +164,7 @@ namespace GUI
          }
 
          //setup the layout for a window
-         List<float> layoutSizes = new List<float>();
-         if (flags.HasFlag(Flags.TitleBar))
-            layoutSizes.Add(titleBarHeight);
-
-         if (flags.HasFlag(Flags.MenuBar))
-            layoutSizes.Add(menuBarHeight);
-
-         layoutSizes.Add(0);
-
-         beginLayout(Layout.Direction.Vertical, layoutSizes);
+         beginLayout(Layout.Direction.Vertical);
 
          //is this the first time we've begun this window?
          if (lastFrameActive != UI.frame)
@@ -232,6 +229,7 @@ namespace GUI
          }
 
          myLayoutStack.Clear();
+         UI.idStack.pop();
          return true;
       }
 
@@ -413,7 +411,7 @@ namespace GUI
                switch (border.type)
                {
                   case StyleItem.Type.COLOR:
-                     canvas.addRectFilled(rect, border.color, UI.style.window.rounding, Canvas.Corners.ALL);
+                     canvas.addRect(rect, border.color, UI.style.window.rounding, Canvas.Corners.ALL);
                      break;
                   case StyleItem.Type.IMAGE:
                      canvas.addImage(border.image, rect);
@@ -490,7 +488,7 @@ namespace GUI
          l.nextLine();
       }
 
-      public void beginLayout(Layout.Direction layout, List<float> spacing = null)
+      public void beginLayout(Layout.Direction layout)
       {
          Vector2 pos = Vector2.Zero;
          if (myLayoutStack.Count > 0)
@@ -498,13 +496,13 @@ namespace GUI
             pos = cursorPosition;
          }
 
-         Layout l = new Layout(this, layout, pos, spacing);
+         Layout l = new Layout(this, layout, pos);
          myLayoutStack.Push(l);
       }
 
-      public void beginLayout(Vector2 position, Layout.Direction layout, List<float> spacing = null)
+      public void beginLayout(Vector2 position, Layout.Direction layout)
       {
-         Layout l = new Layout(this, layout, position, spacing);
+         Layout l = new Layout(this, layout, position);
          myLayoutStack.Push(l);
       }
 

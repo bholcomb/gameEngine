@@ -15,7 +15,7 @@ using Util;
 using Graphics;
 using Terrain;
 using Editor;
-using UI;
+using GUI;
 
 namespace testRenderer
 {
@@ -28,7 +28,7 @@ namespace testRenderer
 		Viewport myViewport;
 		Camera myCamera;
 		GameWindowCameraEventHandler myCameraEventHandler;
-		UI.GuiEventHandler myUiEventHandler;
+		GuiEventHandler myUiEventHandler;
 		RenderTarget myRenderTarget;
 		SkinnedModelRenderable mySkinnedModel;
       LightRenderable mySun;
@@ -56,7 +56,7 @@ namespace testRenderer
 
 			myCameraEventHandler = new GameWindowCameraEventHandler(myCamera, this);
 
-			Keyboard.KeyUp += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardUp);
+			this.KeyUp += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardUp);
 
 			this.VSync = VSyncMode.Off;
 		}
@@ -117,10 +117,10 @@ namespace testRenderer
 
 			initRenderTarget();
 
-         myWorld = new World(myInitializer);
-         myWorld.init();
+         myWorld = new World();
+         myWorld.init(myInitializer);
          myTerrainRenderManager = new TerrainRenderManager(myWorld);
-         myTerrainRenderManager.init();
+         myTerrainRenderManager.init(new Vector2(Width, Height));
          myWorld.newWorld();
 
          myTerrainEditor = new Editor.Editor(myWorld, myCamera);
@@ -165,50 +165,50 @@ namespace testRenderer
          //high frequency filter on avg fps
          avgFps = (0.99f * avgFps) + (0.01f * (float)TimeSource.fps());
 
-			ImGui.beginFrame();
-			if (ImGui.beginWindow("Render Stats", ref myShowRenderStats))
+			UI.beginFrame();
+			if (UI.beginWindow("Render Stats", ref myShowRenderStats))
 			{
-            ImGui.setWindowPosition(new Vector2(20, 50), SetCondition.FirstUseEver);
-            ImGui.setWindowSize(new Vector2(500, 650), SetCondition.FirstUseEver);
-            ImGui.label("FPS: {0:0.00}", avgFps);
-            ImGui.label("Camera position: {0}", myCamera.position);
-            ImGui.label("Camera view vector: {0}", myCamera.viewVector);
-            ImGui.separator();
-            ImGui.label("Frame Time: {0:0.00}ms", (Renderer.stats.cullTime + Renderer.stats.prepareTime + Renderer.stats.generateTime + Renderer.stats.executeTime) * 1000.0);
-            ImGui.label("   Cull Time: {0:0.00}ms", Renderer.stats.cullTime * 1000.0);
-            ImGui.label("   Prepare Time: {0:0.00}ms", Renderer.stats.prepareTime * 1000.0);
-            ImGui.label("   Submit Time: {0:0.00}ms", Renderer.stats.generateTime * 1000.0);
-            ImGui.label("   Execute Time: {0:0.00}ms", Renderer.stats.executeTime * 1000.0);
-            ImGui.separator();
-            ImGui.label("Camera Visible Renderables");
+            UI.setWindowPosition(new Vector2(20, 50), SetCondition.FirstUseEver);
+            UI.setWindowSize(new Vector2(500, 650), SetCondition.FirstUseEver);
+            UI.label("FPS: {0:0.00}", avgFps);
+            UI.label("Camera position: {0}", myCamera.position);
+            UI.label("Camera view vector: {0}", myCamera.viewVector);
+            UI.separator();
+            UI.label("Frame Time: {0:0.00}ms", (Renderer.stats.cullTime + Renderer.stats.prepareTime + Renderer.stats.generateTime + Renderer.stats.executeTime) * 1000.0);
+            UI.label("   Cull Time: {0:0.00}ms", Renderer.stats.cullTime * 1000.0);
+            UI.label("   Prepare Time: {0:0.00}ms", Renderer.stats.prepareTime * 1000.0);
+            UI.label("   Submit Time: {0:0.00}ms", Renderer.stats.generateTime * 1000.0);
+            UI.label("   Execute Time: {0:0.00}ms", Renderer.stats.executeTime * 1000.0);
+            UI.separator();
+            UI.label("Camera Visible Renderables");
             for (int i = 0; i < Renderer.stats.cameraVisibles.Count; i++)
             {
-               ImGui.label("Camera {0}: {1} / {2}", i, Renderer.stats.cameraVisibles[i], Renderer.stats.renderableCount);
+               UI.label("Camera {0}: {1} / {2}", i, Renderer.stats.cameraVisibles[i], Renderer.stats.renderableCount);
             }
-            ImGui.separator();
-            ImGui.label("View Stats");
+            UI.separator();
+            UI.label("View Stats");
             for (int i = 0; i < Renderer.stats.viewStats.Count; i++)
             {
-               ImGui.label("{0} {1}", i, Renderer.stats.viewStats[i].name);
-               ImGui.label("   Command List count {0}", Renderer.stats.viewStats[i].commandLists);
-               ImGui.label("   Passes {0}", Renderer.stats.viewStats[i].passStats.Count);
+               UI.label("{0} {1}", i, Renderer.stats.viewStats[i].name);
+               UI.label("   Command List count {0}", Renderer.stats.viewStats[i].commandLists);
+               UI.label("   Passes {0}", Renderer.stats.viewStats[i].passStats.Count);
                for (int j = 0; j < Renderer.stats.viewStats[i].passStats.Count; j++)
                {
                   PassStats ps = Renderer.stats.viewStats[i].passStats[j];
-                  ImGui.label("      {0} ({1})", ps.name, ps.technique);
-                  ImGui.label("         Queues: {0}", ps.queueCount);
-                  ImGui.label("         Render Commands: {0}", ps.renderCalls);
+                  UI.label("      {0} ({1})", ps.name, ps.technique);
+                  UI.label("         Queues: {0}", ps.queueCount);
+                  UI.label("         Render Commands: {0}", ps.renderCalls);
                }
             }
 
-            ImGui.endWindow();
+            UI.endWindow();
 			}
 
 			myTerrainEditor.onGui();
 
 
-			//ImGui.debug();
-			ImGui.endFrame();
+			//UI.debug();
+			UI.endFrame();
 
 
 			//get any new chunks based on the camera position
@@ -292,7 +292,7 @@ namespace testRenderer
          //add some sub-views for debug graphics and UI
          Graphics.View uiView = new Graphics.View("UI", myCamera, myViewport);
          uiView.processRenderables = false;
-         GuiPass uiPass = new GuiPass(myRenderTarget);
+         UIPass uiPass = new UIPass(myRenderTarget);
          uiView.addPass(uiPass);
          v.addSibling(uiView);
 
@@ -305,7 +305,7 @@ namespace testRenderer
 			SkyboxRenderable skyboxRenderable = new SkyboxRenderable();
 			SkyBoxDescriptor sbmd = new SkyBoxDescriptor("../data/skyboxes/interstellar/interstellar.json");
 			skyboxRenderable.model = Renderer.resourceManager.getResource(sbmd) as SkyBox;
-			Renderer.renderables.Add(skyboxRenderable);
+			Renderer.scene.renderables.Add(skyboxRenderable);
 
 			//create a tree instance
 			Random rand = new Random(230877);
@@ -320,8 +320,8 @@ namespace testRenderer
 				else
 					mdesc = new ObjModelDescriptor("../data/models/props/rocks_3_by_nobiax-d6s8l2b/rocks_3.obj");
 
-				smr.model = Renderer.resourceManager.getResource(mdesc) as StaticModel;
-				Renderer.renderables.Add(smr);
+				smr.model = Renderer.resourceManager.getResource(mdesc) as Model;
+				Renderer.scene.renderables.Add(smr);
 				smr.setPosition(new Vector3((rand.Next() % size) - halfSize, 0, (rand.Next() % size) - halfSize));
 				//smr.model.myMeshes[0].material.myFeatures = Material.Feature.DiffuseMap; //turn off lighting
 			}
@@ -332,7 +332,7 @@ namespace testRenderer
 			IQModelDescriptor skmd = new IQModelDescriptor("../data/models/characters/mrFixIt/mrFixIt.json");
 			mySkinnedModel.model = Renderer.resourceManager.getResource(skmd) as SkinnedModel;
 			mySkinnedModel.controllers.Add(new AnimationController(mySkinnedModel));
-			Renderer.renderables.Add(mySkinnedModel);
+			Renderer.scene.renderables.Add(mySkinnedModel);
 			mySkinnedModel.setPosition(new Vector3(5, 0, 0));
 			(mySkinnedModel.findController("animation") as AnimationController).startAnimation("idle");
 
@@ -341,7 +341,7 @@ namespace testRenderer
          mySun.myLightType = LightRenderable.Type.DIRECTIONAL;
          mySun.color = Color4.White;
          mySun.position = new Vector3(5, 5, 5);
-         Renderer.renderables.Add(mySun);
+         Renderer.scene.renderables.Add(mySun);
 
          //add a point light
          myPoint1 = new LightRenderable();
@@ -351,7 +351,7 @@ namespace testRenderer
          myPoint1.size = 10;
          myPoint1.linearAttenuation = 1.0f;
          myPoint1.quadraticAttenuation = 0.5f;
-         Renderer.renderables.Add(myPoint1);
+         Renderer.scene.renderables.Add(myPoint1);
 
          //add another point light
          myPoint2 = new LightRenderable();
@@ -361,7 +361,7 @@ namespace testRenderer
          myPoint2.size = 10;
          myPoint2.linearAttenuation = 1.0f;
          myPoint2.quadraticAttenuation = 0.25f;
-         Renderer.renderables.Add(myPoint2);
+         Renderer.scene.renderables.Add(myPoint2);
 
          myViewport.notifier += new Viewport.ViewportNotifier(handleViewportChanged);
 		}

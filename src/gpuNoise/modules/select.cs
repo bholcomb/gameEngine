@@ -8,6 +8,7 @@ using OpenTK.Graphics.OpenGL;
 
 using Graphics;
 using Util;
+using Lua;
 
 
 namespace GpuNoise
@@ -21,9 +22,9 @@ namespace GpuNoise
       public float falloff = 0.5f;
 		float lastFalloff = -1.0f;
 
-      public Module low;
-      public Module high;
-      public Module control;
+      public Module low { get { return inputs[0]; } set { inputs[0] = value; } }
+      public Module high { get { return inputs[1]; } set { inputs[1] = value; } }
+      public Module control { get { return inputs[2]; } set { inputs[2] = value; } }
 
       public Select(int x, int y) : base(Type.Select, x, y)
       {
@@ -74,5 +75,34 @@ namespace GpuNoise
 
 			return needsUpdate;
 		}
+
+      public static Module create(ModuleTree tree, LuaObject config)
+      {
+         Select m = new Select(tree.size.X, tree.size.Y);
+         m.myName = config.get<String>("name");
+
+         m.low = tree.findModule(config.get<String>("low"));
+         m.high = tree.findModule(config.get<String>("high"));
+         m.control = tree.findModule(config.get<String>("control"));
+
+         m.threshold = config.get<float>("threshold");
+         m.falloff = config.get<float>("falloff");
+
+         tree.addModule(m);
+         return m;
+      }
+
+      public static void serialize(Module mm, LuaObject obj)
+      {
+         Select m = mm as Select; 
+         obj.set(m.myType.ToString(), "type");
+         obj.set(m.myName, "name");
+         obj.set(m.low.myName, "low");
+         obj.set(m.high.myName, "high");
+         obj.set(m.control.myName, "control");
+         obj.set(m.threshold, "threhsold");
+         obj.set(m.falloff, "falloff");
+
+      }
    }
 }

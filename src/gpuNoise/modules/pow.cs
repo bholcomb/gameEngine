@@ -10,23 +10,25 @@ using Graphics;
 using Util;
 using Lua;
 
+
 namespace GpuNoise
 {
-	public class Bias : Module
+	public class Pow : Module
 	{
 		ShaderProgram myShaderProgram;
 
-		public float bias = 0.5f;
-		float lastBias = 0.0f;
+		public float pow = 0.5f;
+		float lastPow = 0.0f;
+
 		public Module source { get { return inputs[0]; } set { inputs[0] = value; } }
 
-		public Bias(int x, int y) : base(Type.Bias, x, y)
+      public Pow(int x, int y) : base(Type.Pow, x, y)
 		{
 			output = new Texture(x, y, PixelInternalFormat.R32f);
-         output.setName("Bias output");
+         output.setName("Pow output");
 
 			List<ShaderDescriptor> shadersDesc = new List<ShaderDescriptor>();
-			shadersDesc.Add(new ShaderDescriptor(ShaderType.ComputeShader, "GpuNoise.shaders.bias-cs.glsl"));
+			shadersDesc.Add(new ShaderDescriptor(ShaderType.ComputeShader, "GpuNoise.shaders.pow-cs.glsl"));
 			ShaderProgramDescriptor sd = new ShaderProgramDescriptor(shadersDesc);
 			myShaderProgram = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 		}
@@ -37,7 +39,7 @@ namespace GpuNoise
 			{
 				ComputeCommand cmd = new ComputeCommand(myShaderProgram, source.output.width / 32, source.output.height / 32);
 
-				cmd.renderState.setUniform(new UniformData(0, Uniform.UniformType.Float, bias));
+				cmd.renderState.setUniform(new UniformData(0, Uniform.UniformType.Float, pow));
 				cmd.addImage(source.output, TextureAccess.ReadOnly, 0);
 				cmd.addImage(output, TextureAccess.WriteOnly, 1);
 
@@ -52,9 +54,9 @@ namespace GpuNoise
 
 		bool didChange()
 		{
-			if (lastBias != bias || source.update() )
+			if (lastPow != pow || source.update() )
 			{
-				lastBias = bias;
+				lastPow = pow;
 				return true;
 			}
 
@@ -63,11 +65,11 @@ namespace GpuNoise
 
       public static Module create(ModuleTree tree, LuaObject config)
       {
-         Bias m = new Bias(tree.size.X, tree.size.Y);
+         Pow m = new Pow(tree.size.X, tree.size.Y);
          m.myName = config.get<String>("name");
 
          m.source = tree.findModule(config.get<String>("source"));
-         m.bias = config.get<float>("bias");
+         m.pow = config.get<float>("pow");
 
          tree.addModule(m);
          return m;
@@ -75,11 +77,10 @@ namespace GpuNoise
 
       public static void serialize(Module mm, LuaObject obj)
       {
-         Bias m = mm as Bias;
+         Pow m = mm as Pow;
          obj.set(m.myType.ToString(), "type");
          obj.set(m.myName, "name");
-         obj.set(m.source.myName, "source");
-         obj.set(m.bias, "bias");
+         obj.set(m.pow, "pow");
       }
    }
 }

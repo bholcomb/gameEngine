@@ -60,7 +60,7 @@ namespace GUI
          }
 
          UInt32 id = win.getChildId(label);
-         Vector2 labelSize = style.font.size(label) + style.menuButton.padding;
+         Vector2 labelSize = new Vector2(style.font.size(label).X + style.menuButton.padding.X, win.menuBarHeight);
 
          bool pressed = false;
          bool opened = isPopupOpen(id);
@@ -91,7 +91,7 @@ namespace GUI
             {
                setNextWindowPosition(popupPos);
                setNextWindowSize(new Vector2(10, 10), SetCondition.FirstUseEver);
-               opened = beginPopup(label, Window.Flags.Background | Window.Flags.Borders | Window.Flags.ChildMenu);
+               opened = beginPopup(label, Window.Flags.Inputs | Window.Flags.Background | Window.Flags.Borders | Window.Flags.ChildMenu);
             }
          }
 

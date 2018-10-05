@@ -13,7 +13,7 @@ using OpenTK.Platform;
 
 using Util;
 using Graphics;
-using UI;
+using GUI;
 using GpuNoise;
 using Terrain;
 using Editor;
@@ -47,7 +47,7 @@ namespace WorldEditor
          myViewport = new Viewport(0, 0, theWidth, theHeigth);
          myCamera = new Camera(myViewport, 60.0f, 0.1f, 2000f);
 
-         Keyboard.KeyUp += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardUp);
+         this.KeyUp += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardUp);
 
          this.VSync = VSyncMode.Off;
       }
@@ -88,7 +88,10 @@ namespace WorldEditor
          ShaderProgramDescriptor sd = new ShaderProgramDescriptor(shadersDesc);
          myDisplayBiomeShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
+         FontManager.init();
+
          initRenderer();
+
       }
 
       protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
@@ -150,105 +153,105 @@ namespace WorldEditor
       float avgFps = 0;
       private void renderUi()
       {
-         ImGui.beginFrame();
+         UI.beginFrame();
 
          //myMainWindow.onGui();
 
          bool closed= false;
-         ImGui.beginWindow("Views", ref closed);
-         ImGui.setWindowLayout(Window.Layout.Horizontal);
-         if (ImGui.button("Elevation", new Vector2(150, 20)) == true)
+         UI.beginWindow("Views", ref closed, Window.Flags.RootWindow);
+         UI.setWindowLayout(Layout.Direction.Horizontal);
+         if (UI.button("Elevation", new Vector2(150, 20)) == true)
          {
             showElevation = !showElevation;
          }
-         if (ImGui.button("Water", new Vector2(150, 20)) == true)
+         if (UI.button("Water", new Vector2(150, 20)) == true)
          {
             showWater = !showWater;
          }
-         if (ImGui.button("Heat", new Vector2(150, 20)) == true)
+         if (UI.button("Heat", new Vector2(150, 20)) == true)
          {
             showHeat = !showHeat;
          }
-         if (ImGui.button("Moisture", new Vector2(150, 20)) == true)
+         if (UI.button("Moisture", new Vector2(150, 20)) == true)
          {
             showMoisture = !showMoisture;
          }
-         if (ImGui.button("Biome", new Vector2(150, 20)) == true)
+         if (UI.button("Biome", new Vector2(150, 20)) == true)
          {
             showBiome = !showBiome;
          }
 
          if (showElevation)
          {
-            ImGui.beginWindow("Elevation Editor");
-            ImGui.setWindowSize(new Vector2(300, 400), SetCondition.Always);
-            ImGui.setWindowPosition(new Vector2(1250, 200), SetCondition.FirstUseEver);
+            UI.beginWindow("Elevation Editor");
+            UI.setWindowSize(new Vector2(300, 400), SetCondition.Always);
+            UI.setWindowPosition(new Vector2(1250, 200), SetCondition.FirstUseEver);
 
-            ImGui.slider("Function", ref myGenerator.elevation.function);
-            ImGui.slider("Octaves", ref myGenerator.elevation.octaves, 1, 10);
-            ImGui.slider("Frequency", ref myGenerator.elevation.frequency, 0.1f, 4.0f);
-            ImGui.slider("lacunarity", ref myGenerator.elevation.lacunarity, 1.0f, 3.0f);
-            ImGui.slider("Gain", ref myGenerator.elevation.gain, 0.1f, 2.0f);
-            ImGui.slider("Offset", ref myGenerator.elevation.offset, -1.0f, 1.0f);
-            ImGui.slider("H", ref myGenerator.elevation.H, 0.1f, 2.0f);
+            UI.slider("Function", ref myGenerator.elevation.function);
+            UI.slider("Octaves", ref myGenerator.elevation.octaves, 1, 10);
+            UI.slider("Frequency", ref myGenerator.elevation.frequency, 0.1f, 4.0f);
+            UI.slider("lacunarity", ref myGenerator.elevation.lacunarity, 1.0f, 3.0f);
+            UI.slider("Gain", ref myGenerator.elevation.gain, 0.1f, 2.0f);
+            UI.slider("Offset", ref myGenerator.elevation.offset, -1.0f, 1.0f);
+            UI.slider("H", ref myGenerator.elevation.H, 0.1f, 2.0f);
 
-            ImGui.endWindow();
+            UI.endWindow();
          }
 
          if (showHeat)
          {
-            ImGui.beginWindow("Heat Editor");
-            ImGui.setWindowSize(new Vector2(300, 400), SetCondition.Always);
-            ImGui.setWindowPosition(new Vector2(1250, 200), SetCondition.FirstUseEver);
+            UI.beginWindow("Heat Editor");
+            UI.setWindowSize(new Vector2(300, 400), SetCondition.Always);
+            UI.setWindowPosition(new Vector2(1250, 200), SetCondition.FirstUseEver);
 
-            ImGui.slider("Function", ref myGenerator.heat.function);
-            ImGui.slider("Octaves", ref myGenerator.heat.octaves, 1, 10);
-            ImGui.slider("Frequency", ref myGenerator.heat.frequency, 0.1f, 10.0f);
-            ImGui.slider("lacunarity", ref myGenerator.heat.lacunarity, 1.0f, 3.0f);
-            ImGui.slider("Gain", ref myGenerator.heat.gain, 0.01f, 2.0f);
-            ImGui.slider("Offset", ref myGenerator.heat.offset, 0.0f, 10.0f);
-            ImGui.slider("H", ref myGenerator.heat.H, 0.1f, 2.0f);
+            UI.slider("Function", ref myGenerator.heat.function);
+            UI.slider("Octaves", ref myGenerator.heat.octaves, 1, 10);
+            UI.slider("Frequency", ref myGenerator.heat.frequency, 0.1f, 10.0f);
+            UI.slider("lacunarity", ref myGenerator.heat.lacunarity, 1.0f, 3.0f);
+            UI.slider("Gain", ref myGenerator.heat.gain, 0.01f, 2.0f);
+            UI.slider("Offset", ref myGenerator.heat.offset, 0.0f, 10.0f);
+            UI.slider("H", ref myGenerator.heat.H, 0.1f, 2.0f);
 
-            ImGui.separator();
-            ImGui.label("South Gradient");
-            ImGui.slider("sx0", ref myGenerator.heat.sx0, 0.0f, 1.0f);
-            ImGui.slider("sx1", ref myGenerator.heat.sx1, 0.0f, 1.0f);
-            ImGui.slider("sy0", ref myGenerator.heat.sy0, 0.0f, 1.0f);
-            ImGui.slider("sy1", ref myGenerator.heat.sy1, 0.0f, 1.0f);
+            UI.separator();
+            UI.label("South Gradient");
+            UI.slider("sx0", ref myGenerator.heat.sx0, 0.0f, 1.0f);
+            UI.slider("sx1", ref myGenerator.heat.sx1, 0.0f, 1.0f);
+            UI.slider("sy0", ref myGenerator.heat.sy0, 0.0f, 1.0f);
+            UI.slider("sy1", ref myGenerator.heat.sy1, 0.0f, 1.0f);
 
-            ImGui.separator();
-            ImGui.label("North Gradient");
-            ImGui.slider("nx0", ref myGenerator.heat.nx0, 0.0f, 1.0f);
-            ImGui.slider("nx1", ref myGenerator.heat.nx1, 0.0f, 1.0f);
-            ImGui.slider("ny0", ref myGenerator.heat.ny0, 0.0f, 1.0f);
-            ImGui.slider("ny1", ref myGenerator.heat.ny1, 0.0f, 1.0f);
+            UI.separator();
+            UI.label("North Gradient");
+            UI.slider("nx0", ref myGenerator.heat.nx0, 0.0f, 1.0f);
+            UI.slider("nx1", ref myGenerator.heat.nx1, 0.0f, 1.0f);
+            UI.slider("ny0", ref myGenerator.heat.ny0, 0.0f, 1.0f);
+            UI.slider("ny1", ref myGenerator.heat.ny1, 0.0f, 1.0f);
 
-            ImGui.endWindow();
+            UI.endWindow();
          }
 
          if (showMoisture)
          {
-            ImGui.beginWindow("Moisture Editor");
-            ImGui.setWindowSize(new Vector2(300, 400), SetCondition.Always);
-            ImGui.setWindowPosition(new Vector2(1250, 200), SetCondition.FirstUseEver);
+            UI.beginWindow("Moisture Editor");
+            UI.setWindowSize(new Vector2(300, 400), SetCondition.Always);
+            UI.setWindowPosition(new Vector2(1250, 200), SetCondition.FirstUseEver);
 
-            ImGui.slider("Function", ref myGenerator.moisture.function);
-            ImGui.slider("Octaves", ref myGenerator.moisture.octaves, 1, 10);
-            ImGui.slider("Frequency", ref myGenerator.moisture.frequency, 0.1f, 10.0f);
-            ImGui.slider("lacunarity", ref myGenerator.moisture.lacunarity, 1.0f, 3.0f);
-            ImGui.slider("Gain", ref myGenerator.moisture.gain, 0.01f, 2.0f);
-            ImGui.slider("Offset", ref myGenerator.moisture.offset, 0.0f, 10.0f);
-            ImGui.slider("H", ref myGenerator.moisture.H, 0.1f, 2.0f);
+            UI.slider("Function", ref myGenerator.moisture.function);
+            UI.slider("Octaves", ref myGenerator.moisture.octaves, 1, 10);
+            UI.slider("Frequency", ref myGenerator.moisture.frequency, 0.1f, 10.0f);
+            UI.slider("lacunarity", ref myGenerator.moisture.lacunarity, 1.0f, 3.0f);
+            UI.slider("Gain", ref myGenerator.moisture.gain, 0.01f, 2.0f);
+            UI.slider("Offset", ref myGenerator.moisture.offset, 0.0f, 10.0f);
+            UI.slider("H", ref myGenerator.moisture.H, 0.1f, 2.0f);
 
-            ImGui.endWindow();
+            UI.endWindow();
          }
-         //ImGui.debug();
+         //UI.debug();
 
 
-         ImGui.endFrame();
+         UI.endFrame();
 
 
-         List<RenderCommand> cmds = ImGui.getRenderCommands();
+         List<RenderCommand> cmds = UI.getRenderCommands();
          foreach (RenderCommand rc in cmds)
          {
             StatelessRenderCommand src = rc as StatelessRenderCommand;

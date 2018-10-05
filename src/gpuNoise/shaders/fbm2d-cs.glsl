@@ -11,8 +11,8 @@
 
 #version 430
 
-//forward declared from noise2d-cs.glsl
-float snoise(vec3 v, float seed);
+//forward declared from noise3d-cs.glsl
+float snoise(vec2 v, float seed);
 
 layout(local_size_x = 32, local_size_y = 32) in;
 layout(r32f, binding = 0) uniform image2D tex;
@@ -25,9 +25,8 @@ layout(location = 4 ) uniform float lacunarity;
 layout(location = 5 ) uniform float H;
 layout(location = 6 ) uniform float gain;
 layout(location = 7 ) uniform float offset;
-layout(location = 8 ) uniform int face;
 
-float fBm(vec3 p)
+float fBm(vec2 p)
 {
    float value = 0.0;
    
@@ -41,7 +40,7 @@ float fBm(vec3 p)
 	return value;
 }
 
-float hybridmultifractal(vec3 p)
+float hybridmultifractal(vec2 p)
 {
    p *= frequency;
 
@@ -64,7 +63,7 @@ float hybridmultifractal(vec3 p)
     return result;
 }
 
-float ridgedmultifractal(vec3 p)
+float ridgedmultifractal(vec2 p)
 {
    float value = 0.0;
 
@@ -83,7 +82,7 @@ float ridgedmultifractal(vec3 p)
    return value;
 }
 
-float multifractal(vec3 p)
+float multifractal(vec2 p)
 {
    float value = 1.0;
 
@@ -98,43 +97,18 @@ float multifractal(vec3 p)
    return value;
 }
 
-vec3 generateSampleVec(int f, vec2 uv)
-{
-   //map input coord from 0..1 to -1..1
-   vec2 t = uv * 2 - 1.0;
-
-   switch(f)
-   {
-      case 0: // +x
-         return vec3(1, t.y, -t.x);
-      case 1: // -x
-         return vec3(-1, t.y, t.x);
-      case 2: // +y
-         return vec3(t.x, -1, t.y);
-      case 3: // -y
-         return vec3(t.x, 1, -t.y);
-      case 4: // +z
-         return vec3(t.x, t.y, 1);
-      case 5: // -z
-         return vec3(-t.x, t.y, -1);
-   }
-}
-
 void main()
 {
    ivec2 outPos = ivec2(gl_GlobalInvocationID.xy);
    vec2 texCoord = vec2(outPos) / vec2(imageSize(tex));
-   vec3 sampleVec = generateSampleVec(face, texCoord);
 
-   sampleVec = normalize(sampleVec);
-   
    float n = 0;
    switch (function)
    {
-      case 0: n = fBm(sampleVec); break;
-      case 1: n = multifractal(sampleVec); break;
-      case 2: n = ridgedmultifractal(sampleVec); break;
-      case 3: n = hybridmultifractal(sampleVec); break;
+      case 0: n = fBm(texCoord); break;
+      case 1: n = multifractal(texCoord); break;
+      case 2: n = ridgedmultifractal(texCoord); break;
+      case 3: n = hybridmultifractal(texCoord); break;
    }
    
    //remap to the range 0..1 vs -1..1

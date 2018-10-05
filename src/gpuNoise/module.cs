@@ -8,14 +8,15 @@ using OpenTK.Graphics.OpenGL;
 using Graphics;
 using Util;
 
-
 namespace GpuNoise
 {
    public abstract class Module
    {
-      public enum Type {Output, AutoCorect, Bias, Combiner, Constant, Fractal, Gradient, Scale, ScaleDomain, Select, Translate };
+      public const int MAX_INPUTS = 5;
+      public enum Type { AutoCorrect, Bias, Pow, Combiner, Constant, Fractal2d, Fractal3d, Gradient, Scale, ScaleDomain, Select, Translate, Function };
 
 		public Type myType;
+      public Module[] inputs = new Module[MAX_INPUTS];
 		public Texture output;
       public string myName;
 		public int myX;
@@ -35,5 +36,18 @@ namespace GpuNoise
 		{
 			output.Dispose();
 		}
+
+      public void appendList(List<Module> list)
+      {
+         for(int i= 0; i< inputs.Length; i++)
+         {
+            if(inputs[i] != null)
+            {
+               inputs[i].appendList(list);
+            }
+         }
+
+         list.Add(this);
+      }
 	}
 }

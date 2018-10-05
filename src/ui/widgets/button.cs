@@ -117,7 +117,8 @@ namespace GUI
       static bool buttonBehavior(Rect r, UInt32 id, out bool hovered, out bool held, ButtonFlags flags = 0)
       {
          Window win = currentWindow;
-         if (flags.HasFlag(ButtonFlags.Disabled) == true)
+
+         if (flags.HasFlag(ButtonFlags.Disabled) == true || win != hoveredWindow)
          {
             hovered = false;
             held = false;

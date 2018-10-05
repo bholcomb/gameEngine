@@ -33,7 +33,7 @@ namespace GUI
       public Vector2 myCursorPos;
       public Direction myDirection;
 
-      public Layout(Window win, Direction l, Vector2 pos, List<float> s = null)
+      public Layout(Window win, Direction l, Vector2 pos)
       {
          myWindow = win;
          myDirection = l;

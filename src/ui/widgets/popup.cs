@@ -33,14 +33,18 @@ namespace GUI
             return false;
          }
 
-//          style.pushStyleVar(StyleVar.WindowRounding, 0.0f);
-//          style.pushStyleVar(StyleVar.WindowFillAlpha, 1.0f);
+//         style.pushStyleVar(StyleVar.WindowRounding, 0.0f);
+//         style.pushStyleVar(StyleVar.WindowFillAlpha, 1.0f);
          Window.Flags flags = extraFlags | Window.Flags.Popup | Window.Flags.AutoResize;
 
          String name;
          if(flags.HasFlag(Window.Flags.ChildMenu)==true)
          {
             name = "menu_" + label;
+         }
+         else if(flags.HasFlag(Window.Flags.ComboBox) == true)
+         {
+            name = "combo_" + label;
          }
          else
          {
@@ -49,6 +53,7 @@ namespace GUI
 
          bool closed = false;
          bool opened = beginWindow(name, ref closed, flags);
+         currentWindow.makeLastSibling();
 
          //turn off show borders if the parent window doesn't have them
          if(win.flags.HasFlag(Window.Flags.Borders)==false)

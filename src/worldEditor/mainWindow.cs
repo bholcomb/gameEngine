@@ -6,7 +6,7 @@ using OpenTK;
 using OpenTK.Input;
 
 using Util;
-using UI;
+using GUI;
 
 namespace WorldEditor
 {
@@ -23,19 +23,19 @@ namespace WorldEditor
 
       public void onGui()
       {
-         if(ImGui.beginMenuBar()==true)
+         if(UI.beginMenuBar()==true)
          {
-            if (ImGui.beginMenu("File") == true)
+            if (UI.beginMenu("File") == true)
             {
-               if (ImGui.menuItem("Load") == true)
+               if (UI.menuItem("Load") == true)
                {
                }
 
-               if (ImGui.menuItem("Save") == true)
+               if (UI.menuItem("Save") == true)
                {
                }
 
-               if (ImGui.menuItem("Exit") == true)
+               if (UI.menuItem("Exit") == true)
                {
                   DialogResult res = MessageBox.Show("Are you sure", "Quit", MessageBoxButtons.OKCancel);
                   if (res == DialogResult.OK)
@@ -44,15 +44,15 @@ namespace WorldEditor
                   }
                }
 
-               ImGui.endMenu();
+               UI.endMenu();
             }
 
-            if (ImGui.beginMenu("Edit") == true)
+            if (UI.beginMenu("Edit") == true)
             {
-               ImGui.endMenu();
+               UI.endMenu();
             }
 
-            ImGui.endMenuBar();
+            UI.endMenuBar();
          }
 
          myLeftBar.onGui();
