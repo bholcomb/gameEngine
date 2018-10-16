@@ -16,8 +16,8 @@ namespace Terrain
 {
    public static class WorldParameters
    {
-      public static int theRegionSize = 1024;
-      public static float theMaxElevation = 255.0f;
+      public static float theRegionSize = 1024.0f;
+      public static float theMaxElevation = 512.0f; //this gives 255m above sea level and below
       public static float theNodeSize = 0.1f; //10 centimeters
       public static int theMaxDepth = 10;  //this allows for a node to be morton-key identified using 32 bits 
       public static float theChunkSize; //with a default node size of 0.1m and a depth of 10, this is 102.4m
@@ -25,12 +25,15 @@ namespace Terrain
       public static UInt32 theMaxUnits; // the number of cubes to a side at max depth
       public static Vector3 theBias = Vector3.Zero; //the "origin" of the world, may change when camera is very far away from this point, rebias the world to closer to the camera
       public static String theDataPath = "../data/terrain/chunks";
+      public static int theNodeCount = 32;
+      public static float theWorldSize;
 
       static WorldParameters()
       {
          theMaxUnits = (UInt32)(1 << theMaxDepth);
          theChunkSize = theNodeSize * theMaxUnits;
          theLeafRatio = 1.0f / theNodeSize;
+         theWorldSize = theRegionSize * theChunkSize;
       }
 
       public static float sizeAtDepth(int depth)
@@ -127,6 +130,7 @@ namespace Terrain
 		public void newWorld()
 		{
 			reset();
+         /*
 			Chunk chunk;
 
 			int numChunks = 50;
@@ -149,6 +153,7 @@ namespace Terrain
 					myTerrainSource.chunkCache.updateChunk(chunk);
 				}
 			}
+         */
 		}
 
       public TerrainPager pager { get {return myPager;} }
@@ -162,6 +167,7 @@ namespace Terrain
       {
          //tick the pager
          myPager.tick();
+         myTerrainSource.tick();
       }
 
       public void addChunk(Chunk chunk)

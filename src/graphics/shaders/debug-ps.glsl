@@ -7,6 +7,7 @@ layout(location = 22) uniform sampler2DArray array;
 layout(location = 23) uniform int textureSource;
 layout(location = 24) uniform int layer;
 layout(location = 25) uniform bool linearDepth;
+layout(location = 26) uniform bool singleChannel;
 
 layout(std140, binding = 0) uniform camera{
 	mat4 view; //aligned 4N
@@ -54,6 +55,11 @@ void main()
 	{
 		texColor = calcLinearDepth(texColor);
 	}
+
+   if(singleChannel)
+   {
+      texColor = vec4(texColor.r, texColor.r, texColor.r, 1);
+   }
 
    FragColor = texColor *  vecColor;
 }

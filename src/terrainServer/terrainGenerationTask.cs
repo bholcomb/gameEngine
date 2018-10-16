@@ -25,9 +25,9 @@ namespace TerrainServer
 
          MaterialManager.init();
 
-         Kernel.eventManager.addListener(handleTerrainRequest, "terrain.chunk.request");
-         Kernel.eventManager.addListener(handleTerrainRebuild, "terrain.chunk.rebuild");
-         Kernel.eventManager.addListener(handleTerrainReset, "terrain.reset");
+         Application.eventManager.addListener(handleTerrainRequest, "terrain.chunk.request");
+         Application.eventManager.addListener(handleTerrainRebuild, "terrain.chunk.rebuild");
+         Application.eventManager.addListener(handleTerrainReset, "terrain.reset");
 
          frequency = 10;
       }
@@ -59,7 +59,7 @@ namespace TerrainServer
             UInt64 id = tr.chunkId;
             if (myCache.containsChunk(id) == false)
             {
-               myGenerator.generateChunk(id);
+               myGenerator.requestChunk(id);
             }
             else
             {
@@ -96,7 +96,7 @@ namespace TerrainServer
          //create a response message
          List<byte> data = new List<byte>(myCache.compressedChunk(id));
          TerrainResponseEvent terrainResponse = new TerrainResponseEvent(id, data);
-         Kernel.eventManager.queueEvent(terrainResponse);
+         Application.eventManager.queueEvent(terrainResponse);
       }
    }
 }

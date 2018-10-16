@@ -26,8 +26,8 @@ namespace Graphics
 		{
 			//setup the shader
 			List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
-			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\draw-vs.glsl", ShaderDescriptor.Source.File));
-			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Graphics\\shaders\\draw-ps.glsl", ShaderDescriptor.Source.File));
+			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "Graphics.shaders.draw-vs.glsl"));
+			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "Graphics.shaders.draw-ps.glsl"));
 			ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
 			theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
@@ -55,6 +55,8 @@ namespace Graphics
 			myVerts[2].Position = new Vector3(max.X, max.Y, 0); myVerts[2].TexCoord = new Vector2(1, 1); myVerts[2].Color = new Color4(1.0f, 1.0f, 1.0f, alpha).toUInt();
 			myVerts[3].Position = new Vector3(min.X, max.Y, 0); myVerts[3].TexCoord = new Vector2(0, 1); myVerts[3].Color = new Color4(1.0f, 1.0f, 1.0f, alpha).toUInt();
 
+         bool isSingleChannel = t.pixelFormat == PixelInternalFormat.R32f;
+
 			renderState.setTexture(t.id(), 0, t.target);
 			renderState.setIndexBuffer(theIBO.id);
 			renderState.setVertexBuffer(theVBO.id, 0, 0, V3T2B4.stride);
@@ -62,6 +64,7 @@ namespace Graphics
 			renderState.setUniform(new UniformData(20, Uniform.UniformType.Int, 0));
 			renderState.setUniform(new UniformData(23, Uniform.UniformType.Int, 0));
 			renderState.setUniform(new UniformData(25, Uniform.UniformType.Bool, isDepthBuffer));
+         renderState.setUniform(new UniformData(26, Uniform.UniformType.Bool, isSingleChannel));
 
 			pipelineState = new PipelineState();
 			pipelineState.shaderState.shaderProgram = theShader;
@@ -155,8 +158,8 @@ namespace Graphics
 		{
 			//setup the shader
 			List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
-			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\draw-vs.glsl", ShaderDescriptor.Source.File));
-			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Graphics\\shaders\\draw-ps.glsl", ShaderDescriptor.Source.File));
+			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "Graphics.shaders.draw-vs.glsl"));
+			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "Graphics.shaders.draw-ps.glsl"));
 			ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
 			theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
@@ -267,8 +270,8 @@ namespace Graphics
 		{
 			//setup the shader
 			List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
-			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\draw-vs.glsl", ShaderDescriptor.Source.File));
-			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Graphics\\shaders\\draw-ps.glsl", ShaderDescriptor.Source.File));
+			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "Graphics.shaders.draw-vs.glsl"));
+			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "Graphics.shaders.draw-ps.glsl"));
 			ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
 			theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
@@ -344,8 +347,8 @@ namespace Graphics
       {
          //setup the shader
          List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
-         desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\draw-vs.glsl", ShaderDescriptor.Source.File));
-         desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Graphics\\shaders\\draw-ps.glsl", ShaderDescriptor.Source.File));
+         desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "Graphics.shaders.draw-vs.glsl"));
+         desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "Graphics.shaders.draw-ps.glsl"));
          ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
          theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
@@ -431,8 +434,8 @@ namespace Graphics
 		{
 			//setup the shader
 			List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
-			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\draw-vs.glsl", ShaderDescriptor.Source.File));
-			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Graphics\\shaders\\draw-ps.glsl", ShaderDescriptor.Source.File));
+			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "Graphics.shaders.draw-vs.glsl"));
+			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "Graphics.shaders.draw-ps.glsl"));
 			ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
 			theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
@@ -503,8 +506,8 @@ namespace Graphics
 		{
 			//setup the shader
 			List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
-			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\draw-vs.glsl", ShaderDescriptor.Source.File));
-			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Graphics\\shaders\\draw-ps.glsl", ShaderDescriptor.Source.File));
+			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "Graphics.shaders.draw-vs.glsl"));
+			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "Graphics.shaders.draw-ps.glsl"));
 			ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
 			theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
@@ -571,8 +574,8 @@ namespace Graphics
 		{
 			//setup the shader
 			List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
-			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\draw-vs.glsl", ShaderDescriptor.Source.File));
-			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Graphics\\shaders\\draw-ps.glsl", ShaderDescriptor.Source.File));
+			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "Graphics.shaders.draw-vs.glsl"));
+			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "Graphics.shaders.draw-ps.glsl"));
 			ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
 			theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
@@ -637,8 +640,8 @@ namespace Graphics
 		{
 			//setup the shader
 			List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
-			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\draw-vs.glsl", ShaderDescriptor.Source.File));
-			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Graphics\\shaders\\draw-ps.glsl", ShaderDescriptor.Source.File));
+			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "Graphics.shaders.draw-vs.glsl"));
+			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "Graphics.shaders.draw-ps.glsl"));
 			ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
 			theShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 

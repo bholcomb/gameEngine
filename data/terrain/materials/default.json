@@ -2,186 +2,186 @@
 	"Materials":[
 		{
 			"name": "grass",
-			"topFilename":"../data/textures/grass_top.png",
-			"sideFilename":"../data/textures/grass_side.png",
-			"bottomFilename":"../data/textures/dirt.png",
+			"topFilename":"../data/textures/terrain/grass_top.png",
+			"sideFilename":"../data/textures/terrain/grass_side.png",
+			"bottomFilename":"../data/textures/terrain/dirt.png",
 			"scale":1.0
 		},
 
 		{
 			"name": "dirt",
-			"topFilename":"../data/textures/dirt.png",
+			"topFilename":"../data/textures/terrain/dirt.png",
 			"scale":1.0
 		},
 
 		{
 			"name": "lava",
-			"topFilename":"../data/textures/lava_1.png",
-			"sideFilename":"../data/textures/lava_2.png",
-			"bottomFilename":"../data/textures/lava_3.png",
+			"topFilename":"../data/textures/terrain/lava_1.png",
+			"sideFilename":"../data/textures/terrain/lava_2.png",
+			"bottomFilename":"../data/textures/terrain/lava_3.png",
 			"scale":1.0,
 		},
 
 		{
 			"name": "bedrock",
-			"topFilename":"../data/textures/bedrock.png",
+			"topFilename":"../data/textures/terrain/bedrock.png",
 			"scale":1.0
 		},
       
 		{
 			"name": "sand",
-			"topFilename":"../data/textures/sand.png",
+			"topFilename":"../data/textures/terrain/sand.png",
 			"scale":1.0
 		},
  
 		{
 			"name": "clay",
-			"topFilename":"../data/textures/clay.png",
+			"topFilename":"../data/textures/terrain/clay.png",
 			"scale":1.0
 		},     
       {
 			"name": "snow",
-			"topFilename":"../data/textures/snow.png",
+			"topFilename":"../data/textures/terrain/snow.png",
 			"scale":1.0
 		},
 
 		{
 			"name": "stone",
-			"topFilename":"../data/textures/stone.png",
+			"topFilename":"../data/textures/terrain/stone.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "stonebrick",
-			"topFilename":"../data/textures/stonebrick.png",
+			"topFilename":"../data/textures/terrain/stonebrick.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "cobblestone",
-			"topFilename":"../data/textures/cobblestone.png",
+			"topFilename":"../data/textures/terrain/cobblestone.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "brick",
-			"topFilename":"../data/textures/brick.png",
+			"topFilename":"../data/textures/terrain/brick.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "emerald_ore",
-			"topFilename":"../data/textures/emerald_ore.png",
+			"topFilename":"../data/textures/terrain/emerald_ore.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "diamond_ore",
-			"topFilename":"../data/textures/diamond_ore.png",
+			"topFilename":"../data/textures/terrain/diamond_ore.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "gold_ore",
-			"topFilename":"../data/textures/gold_ore.png",
+			"topFilename":"../data/textures/terrain/gold_ore.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "iron_ore",
-			"topFilename":"../data/textures/iron_ore.png",
+			"topFilename":"../data/textures/terrain/iron_ore.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "lapis_ore",
-			"topFilename":"../data/textures/lapis_ore.png",
+			"topFilename":"../data/textures/terrain/lapis_ore.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "gravel",
-			"topFilename":"../data/textures/gravel.png",
+			"topFilename":"../data/textures/terrain/gravel.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "log_birch",
-			"topFilename":"../data/textures/log_birch_top.png"
-			"sideFilename":"../data/textures/log_birch.png",
-			"bottomFilename":"../data/textures/log_birch_top.png"
+			"topFilename":"../data/textures/terrain/log_birch_top.png"
+			"sideFilename":"../data/textures/terrain/log_birch.png",
+			"bottomFilename":"../data/textures/terrain/log_birch_top.png"
 			"scale":1.0
 		},
 		
 		{
 			"name": "log_oak",
-			"topFilename":"../data/textures/log_oak_top.png"
-			"sideFilename":"../data/textures/log_oak.png",
-			"bottomFilename":"../data/textures/log_oak_top.png"
+			"topFilename":"../data/textures/terrain/log_oak_top.png"
+			"sideFilename":"../data/textures/terrain/log_oak.png",
+			"bottomFilename":"../data/textures/terrain/log_oak_top.png"
 			"scale":1.0
 		},
 		
 		{
 			"name": "log_spruce",
-			"topFilename":"../data/textures/log_spruce_top.png"
-			"sideFilename":"../data/textures/log_spruce.png",
-			"bottomFilename":"../data/textures/log_spruce_top.png"
+			"topFilename":"../data/textures/terrain/log_spruce_top.png"
+			"sideFilename":"../data/textures/terrain/log_spruce.png",
+			"bottomFilename":"../data/textures/terrain/log_spruce_top.png"
 			"scale":1.0
 		},
 		
 		{
 			"name": "finished_birch",
-			"topFilename":"../data/textures/planks_birch.png",
+			"topFilename":"../data/textures/terrain/planks_birch.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "finished_oak",
-			"topFilename":"../data/textures/planks_oak.png",
+			"topFilename":"../data/textures/terrain/planks_oak.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "finished_spruce",
-			"topFilename":"../data/textures/planks_spruce.png",
+			"topFilename":"../data/textures/terrain/planks_spruce.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "sandstone",
-			"topFilename":"../data/textures/sandstone_smooth.png",
+			"topFilename":"../data/textures/terrain/sandstone_smooth.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "stone_slab",
-			"topFilename":"../data/textures/stone_slab_top.png",
-			"sideFilename":"../data/textures/stone_slab_side.png",
+			"topFilename":"../data/textures/terrain/stone_slab_top.png",
+			"sideFilename":"../data/textures/terrain/stone_slab_side.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "glass",
-			"topFilename":"../data/textures/glass.png",
+			"topFilename":"../data/textures/terrain/glass.png",
 			"scale":1.0,
 			"property": "transparent"
 		},
 		
 		{
 			"name": "marble",
-			"topFilename":"../data/textures/marble.png",
+			"topFilename":"../data/textures/terrain/marble.png",
 			"scale":1.0
 		}
 		,
 		{
 			"name": "marble_tile",
-			"topFilename":"../data/textures/marble_tile.png",
+			"topFilename":"../data/textures/terrain/marble_tile.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "water",
-			"topFilename":"../data/textures/water_1.png",
+			"topFilename":"../data/textures/terrain/water_1.png",
 			"sideFilename":"null",
 			"bottomFilename":"null",
 			"scale":1.0,
@@ -190,37 +190,37 @@
 		
 		{
 			"name": "wool_black",
-			"topFilename":"../data/textures/wool_colored_black.png",
+			"topFilename":"../data/textures/terrain/wool_colored_black.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "wool_blue",
-			"topFilename":"../data/textures/wool_colored_blue.png",
+			"topFilename":"../data/textures/terrain/wool_colored_blue.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "wool_white",
-			"topFilename":"../data/textures/wool_colored_white.png",
+			"topFilename":"../data/textures/terrain/wool_colored_white.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "wool_brown",
-			"topFilename":"../data/textures/wool_colored_brown.png",
+			"topFilename":"../data/textures/terrain/wool_colored_brown.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "wool_green",
-			"topFilename":"../data/textures/wool_colored_lime.png",
+			"topFilename":"../data/textures/terrain/wool_colored_lime.png",
 			"scale":1.0
 		},
 		
 		{
 			"name": "wool_red",
-			"topFilename":"../data/textures/wool_colored_red.png",
+			"topFilename":"../data/textures/terrain/wool_colored_red.png",
 			"scale":1.0
 		},
 		

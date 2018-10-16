@@ -35,7 +35,7 @@ namespace Terrain
    {
 		public Dictionary<UInt64, TerrainRenderable> myRenderables = new Dictionary<ulong, TerrainRenderable>();
 
-		protected BufferMemoryManager myMemory = new BufferMemoryManager(1024 * 1024 * 30); //30MB
+		protected BufferMemoryManager myMemory = new BufferMemoryManager(1024 * 1024 * 300); //300 MB
 		protected Dictionary<UInt64, DrawChunk> myLoadedChunks = new Dictionary<UInt64, DrawChunk>();
 		protected HashSet<UInt64> myRequestedIds = new HashSet<UInt64>();
 		Object myLock = new Object();

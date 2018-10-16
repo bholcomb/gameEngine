@@ -1,0 +1,110 @@
+{
+  "tundra":{
+      "TemperatureRange":{"min":0, "max": 0.33},
+      "MoistureRange":{"min":0, "max": 0.33},
+      "SoilProbability":{
+         "snow":{"min":0, "max": 100}
+         },
+      "TopProbability":{
+         "snow":{"min":0, "max":100}
+      },
+      "VegitationProbability":{
+      }
+   },
+  "grassland": {
+      "TemperatureRange":{"min":0.33, "max": 0.66},
+      "MoistureRange":{"min":0, "max": 0.33},
+      "SoilProbability":{
+         "grass":{"min":0, "max": 100}
+         },
+      "TopProbability":{
+         "grass":{"min":0, "max":100}
+      },
+      "VegitationProbability":{
+      }
+   },
+  "desert": {
+      "TemperatureRange":{"min":0.66, "max": 1.0},
+      "MoistureRange":{"min":0, "max": 0.33},
+      "SoilProbability":{
+         "sand":{"min":0, "max": 100}
+         },
+      "TopProbability":{
+         "sand":{"min":0, "max":100}
+      },
+      "VegitationProbability":{
+      }
+  },
+  "winterWoods":{
+      "TemperatureRange":{"min":0.0, "max": 0.33},
+      "MoistureRange":{"min":0.33, "max": 0.66},
+      "SoilProbability":{
+         "stone":{"min":0, "max": 100}
+         },
+      "TopProbability":{
+         "stone":{"min":0, "max":100}
+      },
+      "VegitationProbability":{
+      }
+  },
+  "deciduousWoods": {
+      "TemperatureRange":{"min":0.33, "max": 0.66},
+      "MoistureRange":{"min":0.33, "max": 0.66},
+        "SoilProbability":{
+         "sandstone":{"min":0, "max": 100}
+         },
+      "TopProbability":{
+         "sandstone":{"min":0, "max":100}
+      },
+      "VegitationProbability":{
+      }
+  }, 
+  "tropicalWoods": {
+      "TemperatureRange":{"min":0.66, "max": 1.0},
+      "MoistureRange":{"min":0.33, "max": 0.66},
+        "SoilProbability":{
+         "gravel":{"min":0, "max": 100}
+         },
+      "TopProbability":{
+         "gravel":{"min":0, "max":100}
+      },
+      "VegitationProbability":{
+      }
+  },
+  "tagia": {
+      "TemperatureRange":{"min":0.0, "max": 0.33},
+      "MoistureRange":{"min":0.66 , "max": 1.0},
+        "SoilProbability":{
+         "dirt":{"min":0, "max": 100}
+         },
+      "TopProbability":{
+         "dirt":{"min":0, "max":100}
+      },
+      "VegitationProbability":{
+      }
+  },
+  "swamp":{
+      "TemperatureRange":{"min":0.33, "max": 0.66},
+      "MoistureRange":{"min":0.66 , "max": 1.0},
+       "SoilProbability":{
+         "log_birch":{"min":0, "max": 100}
+         },
+      "TopProbability":{
+         "log_birch":{"min":0, "max":100}
+      },
+      "VegitationProbability":{
+      }
+  },
+  "rainforest":{
+      "TemperatureRange":{"min":0.66, "max": 1.0},
+      "MoistureRange":{"min":0.66, "max": 1.0},
+        "SoilProbability":{
+         "lava":{"min":0, "max": 100}
+         },
+      "TopProbability":{
+         "lava":{"min":0, "max":100}
+      },
+      "VegitationProbability":{
+      }
+  }
+}

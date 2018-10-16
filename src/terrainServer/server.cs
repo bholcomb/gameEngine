@@ -11,8 +11,8 @@ namespace TerrainServer
       static bool shouldQuit = false;
       public static void Main(String[] args)
       {
-         Initializer init=new Initializer(args);
-         Kernel.init(init);
+         Initializer init = new Initializer(args);
+         Applicatoin.init(init);
          initializeTasks(init);
 
          try

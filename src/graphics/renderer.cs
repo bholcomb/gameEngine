@@ -107,10 +107,10 @@ namespace Graphics
          Info.print("Vendor: {0}", GL.GetString(StringName.Vendor));
          Info.print("Version: {0}", GL.GetString(StringName.Version));
          Info.print("Shader Language Version: {0}", GL.GetString(StringName.ShadingLanguageVersion));
-         Info.print("Extensions:");
+         Debug.print("Extensions:");
          foreach(String s in device.extensions())
          {
-            Info.print(s);
+            Debug.print(s);
          }
 
          Info.print("------------------RENDERER----------------");

@@ -118,8 +118,8 @@ namespace Graphics
 			myVao = new VertexArrayObject();
 
 			List<ShaderDescriptor> desc = new List<ShaderDescriptor>();
-			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "..\\src\\Graphics\\shaders\\debug-vs.glsl", ShaderDescriptor.Source.File));
-			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "..\\src\\Graphics\\shaders\\debug-ps.glsl", ShaderDescriptor.Source.File));
+			desc.Add(new ShaderDescriptor(ShaderType.VertexShader, "Graphics.shaders.debug-vs.glsl"));
+			desc.Add(new ShaderDescriptor(ShaderType.FragmentShader, "Graphics.shaders.debug-ps.glsl"));
 			ShaderProgramDescriptor sd = new ShaderProgramDescriptor(desc);
          myShader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
 
@@ -263,12 +263,22 @@ namespace Graphics
 			if (fill == Fill.TRANSPARENT)
 				color.A = 0.5f;
 
-			addVertex(new Vector3(start), uvSolid, color);
-			addVertex(new Vector3(end), uvSolid, color);
+         Vector2 mid1 = new Vector2(end.X, start.Y);
+         Vector2 mid2 = new Vector2(start.X, end.Y);
 
-			addIndex(cmd, baseVertex);
+			addVertex(new Vector3(start), uvSolid, color);
+         addVertex(new Vector3(mid1), uvSolid, color);
+         addVertex(new Vector3(end), uvSolid, color);
+         addVertex(new Vector3(mid2), uvSolid, color);
+
+         addIndex(cmd, baseVertex);
 			addIndex(cmd, baseVertex + 1);
-		}
+         addIndex(cmd, baseVertex + 2);
+
+         addIndex(cmd, baseVertex);
+         addIndex(cmd, baseVertex + 2);
+         addIndex(cmd, baseVertex + 3);
+      }
 
 		public void addTexture2d(Vector2 start, Vector2 end, Texture t, int layer = 0, bool linearDepth = false)
 		{
@@ -301,12 +311,22 @@ namespace Graphics
 
 			UInt32 baseVertex = (UInt32)myVertCount;
 
-			addVertex(new Vector3(start), uvZero, Color4.White);
-			addVertex(new Vector3(end), uvOne, Color4.White);
+         Vector2 mid1 = new Vector2(end.X, start.Y);
+         Vector2 mid2 = new Vector2(start.X, end.Y);
 
-			addIndex(cmd, baseVertex);
-			addIndex(cmd, baseVertex + 1);
-		}
+         addVertex(new Vector3(start), uvSolid, Color4.White);
+         addVertex(new Vector3(mid1), uvSolid, Color4.White);
+         addVertex(new Vector3(end), uvSolid, Color4.White);
+         addVertex(new Vector3(mid2), uvSolid, Color4.White);
+
+         addIndex(cmd, baseVertex);
+         addIndex(cmd, baseVertex + 1);
+         addIndex(cmd, baseVertex + 2);
+
+         addIndex(cmd, baseVertex);
+         addIndex(cmd, baseVertex + 2);
+         addIndex(cmd, baseVertex + 3);
+      }
 
 		public void addTexture2d(Vector2 start, Vector2 end, TextureBufferObject t, bool LinearDepth)
 		{
@@ -317,12 +337,22 @@ namespace Graphics
 
 			UInt32 baseVertex = (UInt32)myVertCount;
 
-			addVertex(new Vector3(start), uvZero, Color4.White);
-			addVertex(new Vector3(end), uvOne, Color4.White);
+         Vector2 mid1 = new Vector2(end.X, start.Y);
+         Vector2 mid2 = new Vector2(start.X, end.Y);
 
-			addIndex(cmd, baseVertex);
-			addIndex(cmd, baseVertex + 1);
-		}
+         addVertex(new Vector3(start), uvSolid, Color4.White);
+         addVertex(new Vector3(mid1), uvSolid, Color4.White);
+         addVertex(new Vector3(end), uvSolid, Color4.White);
+         addVertex(new Vector3(mid2), uvSolid, Color4.White);
+
+         addIndex(cmd, baseVertex);
+         addIndex(cmd, baseVertex + 1);
+         addIndex(cmd, baseVertex + 2);
+
+         addIndex(cmd, baseVertex);
+         addIndex(cmd, baseVertex + 2);
+         addIndex(cmd, baseVertex + 3);
+      }
 
 		public void addText2d(Vector2 position, String text, Color4 color)
 		{

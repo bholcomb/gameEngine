@@ -154,8 +154,9 @@ namespace Graphics
 
       void getVertexBoneData(Assimp.Mesh mesh)
       {
+         /*
          int weightsPerVertex = 4;
-
+         
          //we should set this once
          if (myModel.boneCount == 0)
          {
@@ -203,6 +204,7 @@ namespace Graphics
                myVerts[weight.VertexID + currVertOffset] = vert;
             }
          }
+         */
       }
 
       void loadBoneData()

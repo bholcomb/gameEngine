@@ -41,7 +41,7 @@ namespace Graphics
          }
 
          //check for time past the last pose
-         if (time >= poses[idx].time)
+         if (time > poses[idx].time)
          {
             return poses[idx];
          }

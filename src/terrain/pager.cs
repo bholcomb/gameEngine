@@ -9,7 +9,7 @@ namespace Terrain
 {
    public class TerrainPager
    {
-      public const int loadedSize = 4;
+      public const int loadedSize = 10;
       public const int elevation = 2;
 
       List<UInt64> myRequestedChunks = new List<UInt64>();
@@ -55,14 +55,15 @@ namespace Terrain
          //determine all the chunks that should be in memory
          for (int x = -loadedSize; x <= loadedSize; x++)
          {
-            for (int y = -2; y < elevation; y++)
+            for (int z = -loadedSize; z <= loadedSize; z++)
             {
-               for (int z = -loadedSize; z <= loadedSize; z++)
-               {
+               for(int y = interestChunk.Y; y >=0; y--)
+               { 
                   Vector3i temp = interestChunk;
                   temp.X += x;
                   temp.Y = y;
                   temp.Z += z;
+
                   UInt64 key = ChunkKey.createKey(temp);
                   myRequestedChunks.Add(key);
                }
@@ -85,10 +86,12 @@ namespace Terrain
       public void purgeExcessChunks()
       {
          List<UInt64> toRemove = new List<UInt64>();
-         foreach (UInt64 key in myChunks.Keys)
+         foreach (Chunk c in myChunks.Values)
          {
-            if (myRequestedChunks.Contains(key) == false)
-               toRemove.Add(key);
+            if((interestPoint - c.myLocation).Length > 2000)
+            {
+               toRemove.Add(c.key);
+            }
          }
 
          foreach (UInt64 key in toRemove)

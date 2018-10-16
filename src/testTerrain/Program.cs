@@ -30,12 +30,10 @@ namespace testRenderer
 		GameWindowCameraEventHandler myCameraEventHandler;
 		GuiEventHandler myUiEventHandler;
 		RenderTarget myRenderTarget;
-		SkinnedModelRenderable mySkinnedModel;
       LightRenderable mySun;
-      LightRenderable myPoint1;
-      LightRenderable myPoint2;
 
       bool myShowRenderStats = true;
+      bool myShowVideoMemory = false;
 
 		World myWorld;
 		TerrainRenderManager myTerrainRenderManager;
@@ -52,7 +50,7 @@ namespace testRenderer
 			myInitializer = new Initializer(new String[] { "testRenderer.lua" });
 			Renderer.init();
 			myViewport = new Viewport(this);
-			myCamera = new Camera(myViewport, 60.0f, 0.1f, 1000.0f);
+			myCamera = new Camera(myViewport, 60.0f, 0.1f, 10000.0f);
 
 			myCameraEventHandler = new GameWindowCameraEventHandler(myCamera, this);
 
@@ -81,6 +79,10 @@ namespace testRenderer
 			{
 				myShowRenderStats = !myShowRenderStats;
 			}
+         if(e.Key == Key.F2)
+         {
+            myShowVideoMemory = !myShowVideoMemory;
+         }
 
 			if (e.Key == Key.F5)
 			{
@@ -94,7 +96,7 @@ namespace testRenderer
 
 			if (e.Key == Key.F10)
 			{
-				//myWorld.newWorld();
+				myWorld.newWorld();
 			}
 		}
 
@@ -121,13 +123,13 @@ namespace testRenderer
          myWorld.init(myInitializer);
          myTerrainRenderManager = new TerrainRenderManager(myWorld);
          myTerrainRenderManager.init(new Vector2(Width, Height));
-         myWorld.newWorld();
+        // myWorld.newWorld();
 
          myTerrainEditor = new Editor.Editor(myWorld, myCamera);
 
          initRenderer();
 
-			myCamera.position = new Vector3(0, 2, 10);
+			myCamera.position = new Vector3(512.0f * 104.2f, 255.0f, 512.0f * 104.2f);
 
 			DebugRenderer.enabled = true;
 		}
@@ -153,14 +155,9 @@ namespace testRenderer
 			//update the camera
 			myCameraEventHandler.tick((float)e.Time);
 
-         //update the animated object
-         mySkinnedModel.update((float)TimeSource.timeThisFrame());
-
          //update the sun and point lights
          double now = TimeSource.currentTime();
          mySun.position = new Vector3((float)Math.Sin(now) * 5.0f, 5.0f, (float)Math.Cos(now) * 5.0f);
-         myPoint1.position = new Vector3(2.5f, 1, 0) + new Vector3(0.0f, (float)Math.Sin(now), (float)Math.Cos(now));
-         myPoint2.position = new Vector3(5.5f, 1, 0) + new Vector3(0.0f, (float)Math.Cos(now), (float)Math.Sin(now));
 
          //high frequency filter on avg fps
          avgFps = (0.99f * avgFps) + (0.01f * (float)TimeSource.fps());
@@ -209,6 +206,11 @@ namespace testRenderer
 
 			//UI.debug();
 			UI.endFrame();
+
+         if(myShowVideoMemory)
+         {
+            myTerrainRenderManager.memoryManager.visualDebug();
+         }
 
 
 			//get any new chunks based on the camera position
@@ -262,6 +264,8 @@ namespace testRenderer
 
 		public void initRenderer()
 		{
+         Renderer.init();
+         FontManager.init();
 			myUiEventHandler = new GuiEventHandler(this);
 
 			//setup the main render target
@@ -271,7 +275,7 @@ namespace testRenderer
          //setup the rendering scene
          Graphics.View v = new Graphics.View("Main View", myCamera, myViewport);
 
-         Pass p = new Pass("environment", "skybox");
+         Pass p = new Pass("environment", "sky");
          p.renderTarget = myRenderTarget;
          p.filter = new TypeFilter(new List<String>() { "skybox" });
          p.clearTarget = true; //false is default setting
@@ -307,61 +311,12 @@ namespace testRenderer
 			skyboxRenderable.model = Renderer.resourceManager.getResource(sbmd) as SkyBox;
 			Renderer.scene.renderables.Add(skyboxRenderable);
 
-			//create a tree instance
-			Random rand = new Random(230877);
-			for (int i = 0; i < 10000; i++)
-			{
-				int size = 500;
-				int halfSize = size / 2;
-				StaticModelRenderable smr = new StaticModelRenderable();
-				ObjModelDescriptor mdesc;
-				if (i % 2 == 0)
-					mdesc = new ObjModelDescriptor("../data/models/vegetation/fir/fir2.obj");
-				else
-					mdesc = new ObjModelDescriptor("../data/models/props/rocks_3_by_nobiax-d6s8l2b/rocks_3.obj");
-
-				smr.model = Renderer.resourceManager.getResource(mdesc) as Model;
-				Renderer.scene.renderables.Add(smr);
-				smr.setPosition(new Vector3((rand.Next() % size) - halfSize, 0, (rand.Next() % size) - halfSize));
-				//smr.model.myMeshes[0].material.myFeatures = Material.Feature.DiffuseMap; //turn off lighting
-			}
-
-			//create a skinned model instance
-			mySkinnedModel = new SkinnedModelRenderable();
-			//MS3DModelDescriptor skmd = new MS3DModelDescriptor("../data/models/characters/zombie/zombie.json");
-			IQModelDescriptor skmd = new IQModelDescriptor("../data/models/characters/mrFixIt/mrFixIt.json");
-			mySkinnedModel.model = Renderer.resourceManager.getResource(skmd) as SkinnedModel;
-			mySkinnedModel.controllers.Add(new AnimationController(mySkinnedModel));
-			Renderer.scene.renderables.Add(mySkinnedModel);
-			mySkinnedModel.setPosition(new Vector3(5, 0, 0));
-			(mySkinnedModel.findController("animation") as AnimationController).startAnimation("idle");
-
          //add a sun for light
          mySun = new LightRenderable();
          mySun.myLightType = LightRenderable.Type.DIRECTIONAL;
          mySun.color = Color4.White;
          mySun.position = new Vector3(5, 5, 5);
          Renderer.scene.renderables.Add(mySun);
-
-         //add a point light
-         myPoint1 = new LightRenderable();
-         myPoint1.myLightType = LightRenderable.Type.POINT;
-         myPoint1.color = Color4.Red;
-         myPoint1.position = new Vector3(2.5f, 1, 0);
-         myPoint1.size = 10;
-         myPoint1.linearAttenuation = 1.0f;
-         myPoint1.quadraticAttenuation = 0.5f;
-         Renderer.scene.renderables.Add(myPoint1);
-
-         //add another point light
-         myPoint2 = new LightRenderable();
-         myPoint2.myLightType = LightRenderable.Type.POINT;
-         myPoint2.color = Color4.Blue;
-         myPoint2.position = new Vector3(5.5f, 1, 0);
-         myPoint2.size = 10;
-         myPoint2.linearAttenuation = 1.0f;
-         myPoint2.quadraticAttenuation = 0.25f;
-         Renderer.scene.renderables.Add(myPoint2);
 
          myViewport.notifier += new Viewport.ViewportNotifier(handleViewportChanged);
 		}

@@ -30,6 +30,9 @@ namespace Terrain
       public int requestCount { get; set; }
 
       public abstract void tick();
+
+      public abstract void workerFunction();
+
       public abstract void forceRebuild(UInt64 id);
       public abstract void shutdown();
       public abstract void reset();
@@ -77,7 +80,7 @@ namespace Terrain
 
       public void startWorkerThread()
       {
-         myWorkerThread = new Thread(tick);
+         myWorkerThread = new Thread(workerFunction);
          myWorkerThread.Name = "Terrain Source Worker thread";
          myWorkerThread.Start();
       }
@@ -115,6 +118,10 @@ namespace Terrain
       }
 
       public override void tick()
+      {
+      }
+      
+      public override void workerFunction()
       {
          while (myShouldQuit == false)
          {
@@ -158,15 +165,22 @@ namespace Terrain
 
       public override void tick()
       {
+         
+      }
+
+      public override void workerFunction()
+      {
          while(myShouldQuit==false)
          {
             UInt64 id;
             while (myRequsetedChunks.TryDequeue(out id) == true && myShouldQuit==false)
             {
-               if(checkDatabase(id)==false)
-                  myGenerator.generateChunk(id);
-            }
-
+               if (checkDatabase(id) == false)
+               {
+                  myGenerator.requestChunk(id);
+               }
+            };
+            
             //clear out anything that the generator has created
             Chunk tc = myGenerator.nextChunk();
             while (tc != null && myShouldQuit==false)
@@ -219,6 +233,11 @@ namespace Terrain
       }
 
       public override void tick()
+      {
+
+      }
+
+      public override void workerFunction()
       {
          while(myShouldQuit==false)
          {
