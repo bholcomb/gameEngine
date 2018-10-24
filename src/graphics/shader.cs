@@ -4,9 +4,9 @@ using Vulkan;
 
 namespace Graphics
 {
-    public unsafe class Renderstate : IDisposable
+    public unsafe class Shader : IDisposable
     {
-        public Renderstate()
+        public Shader()
         {
 
         }
