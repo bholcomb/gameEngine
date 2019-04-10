@@ -9,7 +9,7 @@ using OpenTK.Graphics.OpenGL;
 
 using Util;
 using Graphics;
-using UI;
+using GUI;
 using GpuNoise;
 
 using Planet;
@@ -25,7 +25,7 @@ namespace testNoise
       Viewport myViewport;
       Camera myCamera;
       GameWindowCameraEventHandler myCameraEventHandler;
-      UI.GuiEventHandler myUiEventHandler;
+      GUI.GuiEventHandler myUiEventHandler;
 
       Planet.Planet myPlanet;
       SkyBox mySkybox;
@@ -105,7 +105,7 @@ namespace testNoise
          Renderer.init();
 
          myUiEventHandler = new GuiEventHandler(this);
-         ImGui.displaySize = new Vector2(theWidth, theHeight);
+         UI.displaySize = new Vector2(theWidth, theHeight);
 
          int size = 1024 * 4;
          myNoise = new GpuNoise.GpuNoiseCubeMap(size, size);
@@ -125,7 +125,7 @@ namespace testNoise
          ShaderProgram shader = Renderer.resourceManager.getResource(sd) as ShaderProgram;
          mySkyboxCmd.pipelineState.shaderState.shaderProgram = shader;
          mySkyboxCmd.pipelineState.vaoState.vao = new VertexArrayObject();
-         mySkyboxCmd.pipelineState.vaoState.vao.bindVertexFormat<V3>(shader);
+         mySkyboxCmd.pipelineState.vaoState.vao.bindVertexFormat(shader, V3.bindings());
          mySkyboxCmd.pipelineState.depthTest.enabled = false;
          mySkyboxCmd.pipelineState.depthWrite.enabled = false;
          mySkyboxCmd.pipelineState.culling.enabled = false;
@@ -184,42 +184,42 @@ namespace testNoise
 
 		private void renderUi()
       {
-			ImGui.beginFrame();
+         UI.beginFrame();
 
-         ImGui.beginWindow("Planet");
-         ImGui.setWindowSize(new Vector2(300, 300), SetCondition.Always);
-         ImGui.setWindowPosition(new Vector2(1250, 50), SetCondition.FirstUseEver);
-         ImGui.label("FPS: {0:0.00}", avgFps);
-         ImGui.slider("Minimum Edge Size", ref myPlanet.myMinEdgesize, 0.01f, 1.0f);
-         ImGui.slider("Maximum Height", ref myPlanet.myMaxHeight, 0.0f, 5000.0f);
-         ImGui.label("Height Above Surface: {0:0.00}", myCamera.position.Length - myPlanet.myScale);
-         ImGui.label("Triangle count: {0}", myPlanet.myNextTri);
-         ImGui.label("Index count: {0}", myPlanet.myIndexCount);
-         ImGui.label("Vertex count: {0}", myPlanet.myVertCount);
-         ImGui.checkbox("Freeze Rebuild", ref myPlanet.freezeRebuild);
-         ImGui.checkbox("Draw Wireframe", ref myPlanet.myRenderWireframe);
-         ImGui.endWindow();
+         UI.beginWindow("Planet");
+         UI.setWindowSize(new Vector2(300, 300), SetCondition.Always);
+         UI.setWindowPosition(new Vector2(1250, 50), SetCondition.FirstUseEver);
+         UI.label("FPS: {0:0.00}", avgFps);
+         UI.slider("Minimum Edge Size", ref myPlanet.myMinEdgesize, 0.01f, 1.0f);
+         UI.slider("Maximum Height", ref myPlanet.myMaxHeight, 0.0f, 5000.0f);
+         UI.label("Height Above Surface: {0:0.00}", myCamera.position.Length - myPlanet.myScale);
+         UI.label("Triangle count: {0}", myPlanet.myNextTri);
+         UI.label("Index count: {0}", myPlanet.myIndexCount);
+         UI.label("Vertex count: {0}", myPlanet.myVertCount);
+         UI.checkbox("Freeze Rebuild", ref myPlanet.freezeRebuild);
+         UI.checkbox("Draw Wireframe", ref myPlanet.myRenderWireframe);
+         UI.endWindow();
 
-         ImGui.beginWindow("Noise Editor");
-         ImGui.setWindowSize(new Vector2(300, 400), SetCondition.Always);
-         ImGui.setWindowPosition(new Vector2(1250, 400), SetCondition.FirstUseEver);
+         UI.beginWindow("Noise Editor");
+         UI.setWindowSize(new Vector2(300, 400), SetCondition.Always);
+         UI.setWindowPosition(new Vector2(1250, 400), SetCondition.FirstUseEver);
 
-         ImGui.slider("Function", ref myNoise.function);
-         ImGui.slider("Octaves", ref myNoise.octaves, 1, 10);
-         ImGui.slider("Frequency", ref myNoise.frequency, 0.1f, 10.0f);
-         ImGui.slider("lacunarity", ref myNoise.lacunarity, 1.0f, 3.0f);
-         ImGui.slider("Gain", ref myNoise.gain, 0.01f, 2.0f);
-         ImGui.slider("Offset", ref myNoise.offset, 0.0f, 10.0f);
-         ImGui.slider("H", ref myNoise.H, 0.1f, 2.0f);
-         if (ImGui.button("Capture Cubemap", new Vector2(75, 25)))
+         UI.slider("Function", ref myNoise.function);
+         UI.slider("Octaves", ref myNoise.octaves, 1, 10);
+         UI.slider("Frequency", ref myNoise.frequency, 0.1f, 10.0f);
+         UI.slider("lacunarity", ref myNoise.lacunarity, 1.0f, 3.0f);
+         UI.slider("Gain", ref myNoise.gain, 0.01f, 2.0f);
+         UI.slider("Offset", ref myNoise.offset, 0.0f, 10.0f);
+         UI.slider("H", ref myNoise.H, 0.1f, 2.0f);
+         if (UI.button("Capture Cubemap", new Vector2(75, 25)))
          {
             myNoise.myCubemap.saveData("heightMap");
          }
-         ImGui.endWindow();
+         UI.endWindow();
 
-         ImGui.endFrame();
+         UI.endFrame();
 
-         List<RenderCommand> cmds = ImGui.getRenderCommands();
+         List<RenderCommand> cmds = UI.getRenderCommands();
          foreach (RenderCommand rc in cmds)
          {
 				StatelessRenderCommand src = rc as StatelessRenderCommand;

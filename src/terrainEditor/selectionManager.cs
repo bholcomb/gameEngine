@@ -67,7 +67,7 @@ namespace Editor
                         cmd.pipelineState.culling.enabled = false;
                         cmd.pipelineState.depthTest.enabled = true;
 								cmd.pipelineState.depthTest.depthFunc = DepthFunction.Lequal;
-								cmd.pipelineState.generateId();
+                        cmd.pipelineState.generateId();
 								cmd.renderState.setUniformBuffer(myEditor.camera.uniformBufferId(), 0);
                         pass.postCommands.Add(cmd);
 
@@ -77,9 +77,10 @@ namespace Editor
                            cmd = new RenderTexturedQuadCommand(verts, mySelectTexture);
                            cmd.pipelineState.culling.enabled = false;
                            cmd.pipelineState.depthTest.enabled = false;
-									cmd.renderState.polygonOffset.enableType = PolygonOffset.EnableType.FILL;
-									cmd.renderState.polygonOffset.factor = 1.0f;
-									cmd.renderState.polygonOffset.units = 1.0f;
+                           cmd.pipelineState.depthTest.depthFunc = DepthFunction.Lequal;
+                           cmd.renderState.polygonOffset.enableType = PolygonOffset.EnableType.FILL;
+									cmd.renderState.polygonOffset.factor = -1.0f;
+									cmd.renderState.polygonOffset.units = -1.0f;
 									cmd.pipelineState.generateId();
 									cmd.renderState.setUniformBuffer(myEditor.camera.uniformBufferId(), 0);
                            pass.postCommands.Add(cmd);
@@ -254,7 +255,7 @@ namespace Editor
       #region event handlers
       public void handleInput()
       {
-         if (UI.hoveredWindow == null)
+         if (UI.hoveredWindow == null || UI.hoveredWindow.name == "root")
          {
             handleMouseMove();
             handleButtonDown();

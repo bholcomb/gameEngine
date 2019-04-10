@@ -13,7 +13,7 @@ using OpenTK.Platform;
 
 using Util;
 using Graphics;
-using UI;
+using GUI;
 
 namespace testUi
 {
@@ -25,7 +25,7 @@ namespace testUi
       Viewport myViewport;
       Camera myCamera;
       GameWindowCameraEventHandler myCameraEventHandler;
-      UI.GuiEventHandler myUiEventHandler;
+      GUI.GuiEventHandler myUiEventHandler;
       Canvas myCanvas;
 
       //clear color
@@ -120,7 +120,7 @@ namespace testUi
 
          //canvas draw calls use screen space (bottom left origin)
          myCanvas.reset();
-         myCanvas.setScreenResolution(ImGui.displaySize);
+         myCanvas.setScreenResolution(UI.displaySize);
          myCanvas.setScale(1.0f);
          myCanvas.addCircle(new Vector2(100, 600), 75.0f, Color4.Red);
          myCanvas.addRectFilled(new Rect(300, 500, 600, 800), Color4.Blue, 10.0f);
@@ -132,23 +132,23 @@ namespace testUi
             rc.execute();
          }
 
-         ImGui.beginFrame();
-         ImGui.label("Test");
-         if (ImGui.button("click", new Vector2(100, 50)))
+         UI.beginFrame();
+         UI.label("Test");
+         if (UI.button("click", new Vector2(100, 50)))
          {
             r = 1.0f;
             g = 0.2f;
             b = 0.2f;
          }
 
-         ImGui.slider("R", ref r, 0.0f, 1.0f);
-         ImGui.slider("G", ref g, 0.0f, 1.0f);
-         ImGui.slider("B", ref b, 0.0f, 1.0f);
+         UI.slider("R", ref r, 0.0f, 1.0f);
+         UI.slider("G", ref g, 0.0f, 1.0f);
+         UI.slider("B", ref b, 0.0f, 1.0f);
 
-         ImGui.debug();
-         ImGui.endFrame();
+         UI.debug();
+         UI.endFrame();
 
-         cmds = ImGui.getRenderCommands();
+         cmds = UI.getRenderCommands();
          foreach(RenderCommand rc in cmds)
          {
              rc.execute();
@@ -161,7 +161,7 @@ namespace testUi
       {
          double fps = TimeSource.fps();
          myUiEventHandler = new GuiEventHandler(this);
-         ImGui.displaySize = new Vector2(theWidth, theHeight);
+         UI.displaySize = new Vector2(theWidth, theHeight);
       }
    }
 

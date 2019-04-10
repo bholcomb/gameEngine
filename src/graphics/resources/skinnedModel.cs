@@ -41,12 +41,12 @@ namespace Graphics
          }
 
          //check for time past the last pose
-         if (time > poses[idx].time)
+         if (time > poses[idx].time || idx == 0)
          {
             return poses[idx];
          }
 
-         float interpolation = (time - poses[idx - 1].time) / (poses[idx].time - poses[idx-1].time);
+         float interpolation = (time - poses[idx- 1].time) / (poses[idx].time - poses[idx-1].time);
 
          JointPose ret = new JointPose();
          ret.position = Vector3.Lerp(poses[idx - 1].position, poses[idx].position, interpolation);

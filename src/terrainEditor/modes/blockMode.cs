@@ -21,7 +21,7 @@ namespace Editor
 
       public override void onGui()
       {
-         if (UI.hoveredWindow != null)
+         if (UI.hoveredWindow == null || UI.myHoveredWindow.name != "root")
             return;
 
          if (UI.mouse.buttons[(int)MouseButton.Left].released == true && UI.keyboard.keyPressed(Key.ShiftLeft) == false)

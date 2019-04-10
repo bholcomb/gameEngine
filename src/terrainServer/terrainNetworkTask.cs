@@ -10,7 +10,6 @@ using Engine;
 using Terrain;
 using Util;
 using Network;
-using Events;
 
 namespace TerrainServer
 {
@@ -26,7 +25,7 @@ namespace TerrainServer
          : base("Terrain Server")
       {
          //register for events
-         Kernel.eventManager.addListener(handleTerrainResponse, "terrain.chunk.response");
+         Application.eventManager.addListener(handleTerrainResponse, "terrain.chunk.response");
 
          //setup socket
          int port=init.findDataOr("terrainServer.port", 2377);
@@ -40,7 +39,7 @@ namespace TerrainServer
          myServer.receivedEvent += new TcpMessageServer.EventCallback(
             delegate(Event e, TcpClient client)
             {
-               Kernel.eventManager.queueEvent(e); 
+               Application.eventManager.queueEvent(e); 
                return true; 
             });
 
@@ -93,7 +92,7 @@ namespace TerrainServer
          return true;
       }
 
-      protected override void onUpdate(double dt)
+      public override void onUpdate(double dt)
       {
          Console.Write("\rRequests: {0}  Responses: {1}              ", requests, responses);
       }

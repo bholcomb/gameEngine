@@ -129,8 +129,8 @@ namespace Terrain
 
 		public void newWorld()
 		{
-			reset();
-         /*
+			//reset();
+        
 			Chunk chunk;
 
 			int numChunks = 50;
@@ -153,7 +153,6 @@ namespace Terrain
 					myTerrainSource.chunkCache.updateChunk(chunk);
 				}
 			}
-         */
 		}
 
       public TerrainPager pager { get {return myPager;} }

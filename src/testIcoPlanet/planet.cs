@@ -98,19 +98,17 @@ namespace Planet
 
       public static int stride { get { return theStride; } }
 
-      public static void bindVertexAttribute(String fieldName, int id)
+      static Dictionary<string, BufferBinding> theBindings = null;
+      public static Dictionary<string, BufferBinding> bindings()
       {
-         switch (fieldName)
+         if(theBindings == null)
          {
-            case "position":
-               GL.VertexAttribLFormat(id, 3, VertexAttribDoubleType.Double, 0);
-               break;
-            case "depth":
-               GL.VertexAttribFormat(id, 1, VertexAttribType.Float, false, 24);
-               break;
-            default:
-               throw new Exception(String.Format("Unknown attribute field: {0}", fieldName));
+            theBindings = new Dictionary<string, BufferBinding>();
+            theBindings["position"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Double, dataFormat = (int)VertexAttribType.Double, normalize = false, numElements = 3, offset = 0 };
+            theBindings["depth"] = new BufferBinding() { bufferIndex = 0, dataType = BindingDataType.Float, dataFormat = (int)VertexAttribType.Float, normalize = false, numElements = 1, offset = 24 };
          }
+
+         return theBindings;
       }
    }
 
@@ -142,7 +140,7 @@ namespace Planet
       public int myNextTri = 0;
       public Queue<Tri> mySplitQueue = new Queue<Tri>();
 
-      VertexBufferObject<V3F1> myVBO = new VertexBufferObject<V3F1>(BufferUsageHint.StreamDraw);
+      VertexBufferObject myVBO = new VertexBufferObject(BufferUsageHint.StreamDraw);
       IndexBufferObject myIBO = new IndexBufferObject(BufferUsageHint.StreamDraw);
       StatelessDrawElementsCommand myRenderPlanetCommand;
       StatelessDrawElementsCommand myRenderWaterCommand;
@@ -198,7 +196,7 @@ namespace Planet
          myRenderPlanetCommand = new StatelessDrawElementsCommand(PrimitiveType.Triangles, (int)myIndexCount, 0, IndexBufferObject.IndexBufferDatatype.UnsignedInt);
          myRenderPlanetCommand.pipelineState.shaderState.shaderProgram = shader;
          myRenderPlanetCommand.pipelineState.vaoState.vao = new VertexArrayObject();
-         myRenderPlanetCommand.pipelineState.vaoState.vao.bindVertexFormat<V3F1>(shader);
+         myRenderPlanetCommand.pipelineState.vaoState.vao.bindVertexFormat(shader, V3F1.bindings());
          myRenderPlanetCommand.pipelineState.generateId();
 
          desc.Clear();
@@ -210,7 +208,7 @@ namespace Planet
          myRenderWaterCommand = new StatelessDrawElementsCommand(PrimitiveType.Triangles, (int)myIndexCount, 0, IndexBufferObject.IndexBufferDatatype.UnsignedInt);
          myRenderWaterCommand.pipelineState.shaderState.shaderProgram = shader;
          myRenderWaterCommand.pipelineState.vaoState.vao = new VertexArrayObject();
-         myRenderWaterCommand.pipelineState.vaoState.vao.bindVertexFormat<V3F1>(shader);
+         myRenderWaterCommand.pipelineState.vaoState.vao.bindVertexFormat(shader, V3F1.bindings());
          myRenderWaterCommand.pipelineState.blending.enabled = true;
          myRenderWaterCommand.pipelineState.generateId();
 

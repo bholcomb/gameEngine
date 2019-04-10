@@ -24,7 +24,7 @@ namespace WorldEditor
       public CubemapTexture myBiomeMap;
       public Texture[] myElevationTex = new Texture[6];
       public Texture[] myBiomeTex = new Texture[6];
-      public Fractal[] myElevationFractals = new Fractal[6];
+      public Fractal2d[] myElevationFractals = new Fractal2d[6];
 
       ShaderProgram myApplyElevationShader;
       ShaderProgram myApplyHeatShader;
@@ -40,7 +40,7 @@ namespace WorldEditor
          public float lacunarity = 2.0f;
          public float gain = 1.0f;
          public float H = 1.0f;
-         public Fractal.Function function = Fractal.Function.multiFractal;
+         public Fractal2d.Method function = Fractal2d.Method.multiFractal;
       }
       public ElevationInput elevation = new ElevationInput();
 
@@ -53,7 +53,7 @@ namespace WorldEditor
          public float lacunarity = 2.0f;
          public float gain = 1.0f;
          public float H = 1.0f;
-         public Fractal.Function function = Fractal.Function.multiFractal;
+         public Fractal2d.Method function = Fractal2d.Method.multiFractal;
 
          public float sx0 = 0;
          public float sx1 = 0;
@@ -76,7 +76,7 @@ namespace WorldEditor
          public float lacunarity = 2.0f;
          public float gain = 1.0f;
          public float H = 1.0f;
-         public Fractal.Function function = Fractal.Function.multiFractal;
+         public Fractal2d.Method function = Fractal2d.Method.multiFractal;
       }
       public MoistureInput moisture = new MoistureInput();
 
@@ -118,13 +118,13 @@ namespace WorldEditor
 
          //setup generators
          myElevationGenerator = new ModuleTree(WorldParameters.theWorldTextureSize, WorldParameters.theWorldTextureSize);
-         myElevationFractals[0] = myElevationGenerator.addModule(Module.Type.Fractal, "fractal0") as Fractal;
-         myElevationFractals[1] = myElevationGenerator.addModule(Module.Type.Fractal, "fractal") as Fractal;
-         myElevationFractals[2] = myElevationGenerator.addModule(Module.Type.Fractal, "fractal2") as Fractal;
-         myElevationFractals[3] = myElevationGenerator.addModule(Module.Type.Fractal, "fractal3") as Fractal;
-         myElevationFractals[4] = myElevationGenerator.addModule(Module.Type.Fractal, "fractal4") as Fractal;
-         myElevationFractals[5] = myElevationGenerator.addModule(Module.Type.Fractal, "fractal5") as Fractal;
-         AutoCorrect Eac = myElevationGenerator.addModule(Module.Type.AutoCorect, "autocorrect") as AutoCorrect;
+         myElevationFractals[0] = myElevationGenerator.addModule(Module.Type.Fractal2d, "fractal0") as Fractal2d;
+         myElevationFractals[1] = myElevationGenerator.addModule(Module.Type.Fractal2d, "fractal") as Fractal2d;
+         myElevationFractals[2] = myElevationGenerator.addModule(Module.Type.Fractal2d, "fractal2") as Fractal2d;
+         myElevationFractals[3] = myElevationGenerator.addModule(Module.Type.Fractal2d, "fractal3") as Fractal2d;
+         myElevationFractals[4] = myElevationGenerator.addModule(Module.Type.Fractal2d, "fractal4") as Fractal2d;
+         myElevationFractals[5] = myElevationGenerator.addModule(Module.Type.Fractal2d, "fractal5") as Fractal2d;
+         AutoCorrect Eac = myElevationGenerator.addModule(Module.Type.AutoCorrect, "autocorrect") as AutoCorrect;
 
          myHeatGenerator = createHeatGenerator();
          myMoistureGenerator = createMoistureGenerator();
@@ -150,7 +150,7 @@ namespace WorldEditor
          f.octaves = WorldParameters.theHeatOctaves;
          f.frequency = WorldParameters.theHeatFrequency;
 
-         AutoCorrect ac = generator.addModule(Module.Type.AutoCorect, "autocorrect") as AutoCorrect;
+         AutoCorrect ac = generator.addModule(Module.Type.AutoCorrect, "autocorrect") as AutoCorrect;
          ac.output.setName("Heat Autocorrect");
          ac.source = f;
 

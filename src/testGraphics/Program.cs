@@ -99,7 +99,7 @@ namespace testRenderer
 
          if (e.Key == Key.F10)
          {
-            //myWorld.newWorld();
+            myWorld.newWorld();
          }
       }
 

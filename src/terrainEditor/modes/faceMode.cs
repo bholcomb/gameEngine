@@ -20,7 +20,7 @@ namespace Editor
 
       public override void onGui()
       {
-         if (UI.hoveredWindow != null)
+         if (UI.hoveredWindow == null || UI.myHoveredWindow.name != "root")
             return;
 
 

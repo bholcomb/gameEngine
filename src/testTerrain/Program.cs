@@ -123,15 +123,15 @@ namespace testRenderer
          myWorld.init(myInitializer);
          myTerrainRenderManager = new TerrainRenderManager(myWorld);
          myTerrainRenderManager.init(new Vector2(Width, Height));
-        // myWorld.newWorld();
+         myWorld.newWorld();
 
          myTerrainEditor = new Editor.Editor(myWorld, myCamera);
 
          initRenderer();
 
-			myCamera.position = new Vector3(512.0f * 104.2f, 255.0f, 512.0f * 104.2f);
+         myCamera.position = new Vector3(0, 2, 10);
 
-			DebugRenderer.enabled = true;
+         DebugRenderer.enabled = true;
 		}
 
 		protected override void OnClosing(System.ComponentModel.CancelEventArgs e)

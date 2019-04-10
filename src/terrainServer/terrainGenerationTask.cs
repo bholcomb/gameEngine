@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Engine;
 using Terrain;
 using Util;
-using Events;
 
 namespace TerrainServer
 {
@@ -17,7 +16,8 @@ namespace TerrainServer
       public TerrainGenerationTask(Initializer init)
          : base("Terrain Generation")
       {
-         myWorld = new World(init);
+         myWorld = new World();
+         myWorld.init(init);
          myCache = myWorld.database;
 
          //use a null world for generation
@@ -37,7 +37,7 @@ namespace TerrainServer
          myWorld.shutdown();
       }
 
-      protected override void onUpdate(double dt)
+      public override void onUpdate(double dt)
       {
          Chunk chunk = myWorld.terrainSource.nextChunk();
          while (chunk != null)

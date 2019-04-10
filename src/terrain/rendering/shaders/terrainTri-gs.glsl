@@ -22,16 +22,15 @@ out GeometryStage
 
 vec3 calcNormal()
 {
-   vec3 a = vec3(gl_in[0].gl_Position) - vec3(gl_in[1].gl_Position);
-   vec3 b = vec3(gl_in[2].gl_Position) - vec3(gl_in[1].gl_Position);
+   vec3 a = vec3(gs_in[1].worldVert) - vec3(gs_in[0].worldVert);
+   vec3 b = vec3(gs_in[2].worldVert) - vec3(gs_in[0].worldVert);
    vec3 n = normalize(cross(a, b));
    return gs_in[0].normalMatrix * n;
 }  
 
 void main()
 {
-   gs_out.worldNormal = calcNormal();
-
+    vec3 n = calcNormal();
    //discard if the normal is not facing the camera
 
    for(int i=0; i< 3; i++)
@@ -41,6 +40,7 @@ void main()
       gs_out.worldVert = gs_in[i].worldVert;
       gs_out.texCoord = gs_in[i].texCoord;
       gs_out.texLayer = gs_in[i].texLayer;
+      gs_out.worldNormal = n;
       EmitVertex();
    }
    

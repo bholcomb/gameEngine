@@ -67,34 +67,45 @@ namespace Graphics
          initializeCamaraVisibleLists(activeViews);
 
 #if false
-			foreach (KeyValuePair<Camera, ConcurrentBag<Renderable>> cameraList in myCameraVisibles)
+			foreach (KeyValuePair<Camera, List<Renderable>> cameraList in myCameraVisibles)
 			{
 				//breakup into several tasks
 				var degreeOfParallelism = Environment.ProcessorCount;
-				var tasks = new Task[degreeOfParallelism];
+				var tasks = new Task<List<Renderable>>[degreeOfParallelism];
+            int taskRenderablesCount = renderables.Count / degreeOfParallelism;
 
 				for (int taskNumber = 0; taskNumber < degreeOfParallelism; taskNumber++)
 				{
-					// capturing taskNumber in lambda wouldn't work correctly
+               //get the task number as a local up-value (closure)
 					int taskNumberCopy = taskNumber;
-
+               
 					tasks[taskNumber] = Task.Factory.StartNew(
 						 () =>
 						 {
-							 for (int i = renderables.Count * taskNumberCopy / degreeOfParallelism;
-									i < renderables.Count * (taskNumberCopy + 1) / degreeOfParallelism;
-									i++)
+                      List<Renderable> ret = new List<Renderable>();
+							 for (int i = 0; i < taskRenderablesCount; i++)
 							 {
-								 Renderable r = renderables[i];
-								 if (r.isVisible(cameraList.Key) == true)
-								 {
-									 cameraList.Value.Add(r);
-								 }
+                         int rIdx = i + (taskRenderablesCount * taskNumberCopy);
+                         if(rIdx < renderables.Count)
+                         {
+                            Renderable r = renderables[rIdx];
+                            if(r.isVisible(cameraList.Key) == true)
+                            {
+                               ret.Add(r);
+                               //cameraList.Value.Add(r);
+                            }
+                         }
 							 }
+
+                      return ret;
 						 });
 				}
 
 				Task.WaitAll(tasks);
+            foreach(var t in tasks)
+            {
+               cameraList.Value.AddRange(t.Result);
+            }
 			}
 #endif
 
@@ -123,6 +134,6 @@ namespace Graphics
 				}
 			}
 #endif
-		}
-	}
+      }
+   }
 }
