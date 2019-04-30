@@ -9,7 +9,7 @@ using OpenTK.Graphics.OpenGL;
 
 using Util;
 using Graphics;
-using UI;
+using GUI;
 using GpuNoise;
 
 
@@ -23,7 +23,7 @@ namespace testNoise
       Viewport myViewport;
       Camera myCamera;
       GameWindowCameraEventHandler myCameraEventHandler;
-      UI.GuiEventHandler myUiEventHandler;
+      GUI.GuiEventHandler myUiEventHandler;
 
       //GpuNoise.GpuNoise2dMap myNoise;
       GpuNoise.GpuNoiseCubeMap myNoise;
@@ -39,7 +39,7 @@ namespace testNoise
          myViewport = new Viewport(0, 0, theWidth, theHeight);
          myCamera = new Camera(myViewport, 60.0f, 0.1f, 2000f);
 
-         Keyboard.KeyUp += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardUp);
+         this.KeyUp += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardUp);
 
          this.VSync = VSyncMode.Off;
       }
@@ -91,8 +91,10 @@ namespace testNoise
       public void initRenderer()
       {
          double fps = TimeSource.fps();
+         FontManager.init();
+
          myUiEventHandler = new GuiEventHandler(this);
-         ImGui.displaySize = new Vector2(theWidth, theHeight);
+         UI.displaySize = new Vector2(theWidth, theHeight);
 
          int size = 1024 * 1;
 			//myNoise = new GpuNoise.GpuNoise2dMap(size, size);
@@ -178,40 +180,40 @@ namespace testNoise
 		private void renderUi()
       {
 			avgFps = (0.99f * avgFps) + (0.01f * (float)TimeSource.fps());
-			ImGui.beginFrame();
-         ImGui.label("FPS: {0:0.00}", avgFps);
+			UI.beginFrame();
+         UI.label("FPS: {0:0.00}", avgFps);
 
-         ImGui.beginWindow("Noise Editor");
-         ImGui.setWindowSize(new Vector2(300, 400), SetCondition.Always);
-         ImGui.setWindowPosition(new Vector2(1250, 200), SetCondition.FirstUseEver);
+         UI.beginWindow("Noise Editor");
+         UI.setWindowSize(new Vector2(300, 400), SetCondition.Always);
+         UI.setWindowPosition(new Vector2(1250, 200), SetCondition.FirstUseEver);
 
-         ImGui.slider("Function", ref myNoise.function);
-         ImGui.slider("Octaves", ref myNoise.octaves, 1, 10);
-         ImGui.slider("Frequency", ref myNoise.frequency, 0.1f, 10.0f);
-         ImGui.slider("lacunarity", ref myNoise.lacunarity, 1.0f, 3.0f);
-         ImGui.slider("Gain", ref myNoise.gain, 0.01f, 2.0f);
-         ImGui.slider("Offset", ref myNoise.offset, 0.0f, 10.0f);
-         ImGui.slider("H", ref myNoise.H, 0.1f, 2.0f);
-         if (ImGui.button("Capture Cubemap", new Vector2(75, 25)))
+         UI.slider("Function", ref myNoise.function);
+         UI.slider("Octaves", ref myNoise.octaves, 1, 10);
+         UI.slider("Frequency", ref myNoise.frequency, 0.1f, 10.0f);
+         UI.slider("lacunarity", ref myNoise.lacunarity, 1.0f, 3.0f);
+         UI.slider("Gain", ref myNoise.gain, 0.01f, 2.0f);
+         UI.slider("Offset", ref myNoise.offset, 0.0f, 10.0f);
+         UI.slider("H", ref myNoise.H, 0.1f, 2.0f);
+         if (UI.button("Capture Cubemap", new Vector2(75, 25)))
          { 
             myNoise.myCubemap.saveData("heightMap");
          }
-         ImGui.endWindow();
+         UI.endWindow();
 
-//          ImGui.beginWindow("Planet Preview");
-//          ImGui.setWindowSize(new Vector2(500, 500), SetCondition.Always);
-//          ImGui.setWindowPosition(new Vector2(50, 50), SetCondition.FirstUseEver);
+//          UI.beginWindow("Planet Preview");
+//          UI.setWindowSize(new Vector2(500, 500), SetCondition.Always);
+//          UI.setWindowPosition(new Vector2(50, 50), SetCondition.FirstUseEver);
 // 
 //          RenderTexturedCubeCommand cmd = new RenderTexturedCubeCommand(new Vector3(0, 0, -5), 1.0f, true);
 //          //cmd.renderState.shaderProgram = cubePlanetShader;
 // 
-//          ImGui.currentWindow.canvas.addCustomRenderCommand(cmd);
+//          UI.currentWindow.canvas.addCustomRenderCommand(cmd);
 // 
-//          ImGui.endWindow();
+//          UI.endWindow();
 
-         ImGui.endFrame();
+         UI.endFrame();
 
-         List<RenderCommand> cmds = ImGui.getRenderCommands();
+         List<RenderCommand> cmds = UI.getRenderCommands();
          foreach (RenderCommand rc in cmds)
          {
 				StatelessRenderCommand src = rc as StatelessRenderCommand;

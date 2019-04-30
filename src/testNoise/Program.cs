@@ -9,7 +9,7 @@ using OpenTK.Graphics.OpenGL;
 
 using Util;
 using Graphics;
-using UI;
+using GUI;
 using GpuNoise;
 
 
@@ -23,7 +23,7 @@ namespace testNoise
 		Viewport myViewport;
 		Camera myCamera;
 		GameWindowCameraEventHandler myCameraEventHandler;
-		UI.GuiEventHandler myUiEventHandler;
+		GUI.GuiEventHandler myUiEventHandler;
 
 		ModuleTree myNoiseTree;
 
@@ -38,7 +38,7 @@ namespace testNoise
 			myViewport = new Viewport(0, 0, theWidth, theHeight);
 			myCamera = new Camera(myViewport, 60.0f, 0.1f, 2000f);
 
-			Keyboard.KeyUp += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardUp);
+			this.KeyUp += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardUp);
 
 			this.VSync = VSyncMode.Off;
 		}
@@ -94,24 +94,25 @@ namespace testNoise
 			Console.WriteLine("Max image units: {0}", maxImageUnits);
 
 			double fps = TimeSource.fps();
+         FontManager.init();
 			myUiEventHandler = new GuiEventHandler(this);
-			ImGui.displaySize = new Vector2(theWidth, theHeight);
+			UI.displaySize = new Vector2(theWidth, theHeight);
 
 			//create tree
 			int size = 1024;
 			myNoiseTree = new ModuleTree(size, size);
 
 			//build tree
-			Fractal f = myNoiseTree.addModule(Module.Type.Fractal, "fractal") as Fractal;
-			AutoCorrect ac = myNoiseTree.addModule(Module.Type.AutoCorect, "autocorrect") as AutoCorrect;
-			AutoCorrect ac2 = myNoiseTree.addModule(Module.Type.AutoCorect, "autocorrect2") as AutoCorrect;
+			Fractal2d f = myNoiseTree.addModule(Module.Type.Fractal2d, "fractal") as Fractal2d;
+			AutoCorrect ac = myNoiseTree.addModule(Module.Type.AutoCorrect, "autocorrect") as AutoCorrect;
+			AutoCorrect ac2 = myNoiseTree.addModule(Module.Type.AutoCorrect, "autocorrect2") as AutoCorrect;
 			Combiner comb = myNoiseTree.addModule(Module.Type.Combiner, "combiner") as Combiner;
 			Constant c = myNoiseTree.addModule(Module.Type.Constant, "constant") as Constant;
 			Gradient g = myNoiseTree.addModule(Module.Type.Gradient, "gradient") as Gradient;
 			Scale s = myNoiseTree.addModule(Module.Type.Scale, "scale") as Scale;
 			Constant sc = myNoiseTree.addModule(Module.Type.Constant, "scaleVal") as Constant;
 			Select sel = myNoiseTree.addModule(Module.Type.Select, "select") as Select;
-			Fractal f2 = myNoiseTree.addModule(Module.Type.Fractal, "f2") as Fractal;
+			Fractal2d f2 = myNoiseTree.addModule(Module.Type.Fractal2d, "f2") as Fractal2d;
 			Translate t = myNoiseTree.addModule(Module.Type.Translate, "translate") as Translate;
 			Constant tx = myNoiseTree.addModule(Module.Type.Constant, "tx") as Constant;
 			Constant ty = myNoiseTree.addModule(Module.Type.Constant, "ty") as Constant;
@@ -216,55 +217,55 @@ namespace testNoise
 		private void renderUi()
 		{
 			avgFps = (0.99f * avgFps) + (0.01f * (float)TimeSource.fps());
-			ImGui.beginFrame();
-			ImGui.label("FPS: {0:0.00}", avgFps);
+			UI.beginFrame();
+			UI.label("FPS: {0:0.00}", avgFps);
 
-			ImGui.beginWindow("Noise Editor");
-			ImGui.setWindowSize(new Vector2(300, 800), SetCondition.Always);
-			ImGui.setWindowPosition(new Vector2(1250, 50), SetCondition.FirstUseEver);
+			UI.beginWindow("Noise Editor");
+			UI.setWindowSize(new Vector2(300, 800), SetCondition.Always);
+			UI.setWindowPosition(new Vector2(1250, 50), SetCondition.FirstUseEver);
 
 			Fractal f = myNoiseTree.findModule("fractal") as Fractal;
-			ImGui.label("FractalOne---");
-			ImGui.slider("Function", ref f.function);
-			ImGui.slider("Octaves", ref f.octaves, 1, 10);
-			ImGui.slider("Frequency", ref f.frequency, 0.1f, 10.0f);
-			ImGui.slider("lacunarity", ref f.lacunarity, 1.0f, 3.0f);
-			ImGui.slider("Gain", ref f.gain, 0.01f, 2.0f);
-			ImGui.slider("Offset", ref f.offset, 0.0f, 10.0f);
-			ImGui.slider("H", ref f.H, 0.1f, 2.0f);
-			ImGui.separator();
+			UI.label("FractalOne---");
+			UI.slider("Function", ref f.function);
+			UI.slider("Octaves", ref f.octaves, 1, 10);
+			UI.slider("Frequency", ref f.frequency, 0.1f, 10.0f);
+			UI.slider("lacunarity", ref f.lacunarity, 1.0f, 3.0f);
+			UI.slider("Gain", ref f.gain, 0.01f, 2.0f);
+			UI.slider("Offset", ref f.offset, 0.0f, 10.0f);
+			UI.slider("H", ref f.H, 0.1f, 2.0f);
+			UI.separator();
 
 
 			Fractal f2 = myNoiseTree.findModule("f2") as Fractal;
-			ImGui.label("Fractal Two---");
-			ImGui.slider("Function ", ref f2.function);
-			ImGui.slider("Octaves ", ref f2.octaves, 1, 10);
-			ImGui.slider("Frequency ", ref f2.frequency, 0.1f, 10.0f);
-			ImGui.slider("lacunarity ", ref f2.lacunarity, 1.0f, 3.0f);
-			ImGui.slider("Gain ", ref f2.gain, 0.01f, 2.0f);
-			ImGui.slider("Offset ", ref f2.offset, 0.0f, 10.0f);
-			ImGui.slider("H ", ref f2.H, 0.1f, 2.0f);
-			ImGui.separator();
+			UI.label("Fractal Two---");
+			UI.slider("Function ", ref f2.function);
+			UI.slider("Octaves ", ref f2.octaves, 1, 10);
+			UI.slider("Frequency ", ref f2.frequency, 0.1f, 10.0f);
+			UI.slider("lacunarity ", ref f2.lacunarity, 1.0f, 3.0f);
+			UI.slider("Gain ", ref f2.gain, 0.01f, 2.0f);
+			UI.slider("Offset ", ref f2.offset, 0.0f, 10.0f);
+			UI.slider("H ", ref f2.H, 0.1f, 2.0f);
+			UI.separator();
 
 			Gradient g = myNoiseTree.findModule("gradient") as Gradient;
-			ImGui.label("Gradient---");
-			ImGui.slider("X0", ref g.x0, 0.0f, 1.0f);
-			ImGui.slider("X1", ref g.x1, 0.0f, 1.0f);
-			ImGui.slider("Y0", ref g.y0, 0.0f, 1.0f);
-			ImGui.slider("Y1", ref g.y1, 0.0f, 1.0f);
-			ImGui.separator();
+			UI.label("Gradient---");
+			UI.slider("X0", ref g.x0, 0.0f, 1.0f);
+			UI.slider("X1", ref g.x1, 0.0f, 1.0f);
+			UI.slider("Y0", ref g.y0, 0.0f, 1.0f);
+			UI.slider("Y1", ref g.y1, 0.0f, 1.0f);
+			UI.separator();
 
 			Select s = myNoiseTree.findModule("select") as Select;
-			ImGui.label("Select---");
-			ImGui.slider("Threshold", ref s.threshold, 0.0f, 1.0f);
-			ImGui.slider("Falloff", ref s.falloff, 0.0f, 1.0f);
-			ImGui.separator();
+			UI.label("Select---");
+			UI.slider("Threshold", ref s.threshold, 0.0f, 1.0f);
+			UI.slider("Falloff", ref s.falloff, 0.0f, 1.0f);
+			UI.separator();
 
-			ImGui.endWindow();
+			UI.endWindow();
 
-			ImGui.endFrame();
+			UI.endFrame();
 
-			List<RenderCommand> cmds = ImGui.getRenderCommands();
+			List<RenderCommand> cmds = UI.getRenderCommands();
 			foreach (RenderCommand rc in cmds)
 			{
 				StatelessRenderCommand src = rc as StatelessRenderCommand;

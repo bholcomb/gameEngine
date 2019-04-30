@@ -27,6 +27,7 @@ namespace testUi
       GameWindowCameraEventHandler myCameraEventHandler;
       GUI.GuiEventHandler myUiEventHandler;
       Canvas myCanvas;
+      Graphics.Font myFont;
 
       //clear color
       float r = 0.2f;
@@ -44,7 +45,7 @@ namespace testUi
          myViewport = new Viewport(0, 0, theWidth, theHeight);
          myCamera = new Camera(myViewport, 60.0f, 0.1f, 2000f);
 
-         Keyboard.KeyUp += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardUp);
+         this.KeyUp += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardUp);
 
          this.VSync = VSyncMode.Off;
       }
@@ -80,6 +81,7 @@ namespace testUi
 
          initRenderer();
 
+         myFont = FontManager.findFont("DEFAULT");
          myCanvas = new Canvas();
       }
 
@@ -160,6 +162,8 @@ namespace testUi
       public void initRenderer()
       {
          double fps = TimeSource.fps();
+         FontManager.init();
+
          myUiEventHandler = new GuiEventHandler(this);
          UI.displaySize = new Vector2(theWidth, theHeight);
       }

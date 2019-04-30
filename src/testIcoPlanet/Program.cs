@@ -45,8 +45,9 @@ namespace testNoise
          myCamera = new Camera(myViewport, 60.0f, 0.01f, 100000.0f);
 
          myCameraEventHandler = new GameWindowCameraEventHandler(myCamera, this);
+         myCameraEventHandler.mouseConstrainedUp = false;
 
-         Keyboard.KeyUp += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardUp);
+         this.KeyUp += new EventHandler<KeyboardKeyEventArgs>(handleKeyboardUp);
 
          this.VSync = VSyncMode.Off;
       }
@@ -82,6 +83,8 @@ namespace testNoise
          }
          System.Console.WriteLine("Found OpenGL Version: {0}.{1}", major, minor);
 
+         GL.ClipControl(ClipOrigin.LowerLeft, ClipDepthMode.ZeroToOne);
+
          initRenderer();
       }
 
@@ -104,6 +107,7 @@ namespace testNoise
       {
          Renderer.init();
 
+         FontManager.init();
          myUiEventHandler = new GuiEventHandler(this);
          UI.displaySize = new Vector2(theWidth, theHeight);
 

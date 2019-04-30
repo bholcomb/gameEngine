@@ -159,7 +159,7 @@ namespace Planet
 
       public bool myRenderWireframe = true;
 
-      public float myMinEdgesize = 0.02f;
+      public float myMinEdgesize = 0.04f;
 
       public float myMaxHeight = 5000.0f;
 

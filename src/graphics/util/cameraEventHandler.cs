@@ -15,14 +15,17 @@ namespace Graphics
    {
       Camera myCamera;
       bool myMouseLook = false;
-      float myMouseLookHeading = 0;
-      float myMouseLookPitch = 0;
       bool moveForward = false;
       bool moveBackward = false;
       bool moveLeft = false;
       bool moveRight = false;
       bool moveUp = false;
       bool moveDown = false;
+      bool mouseRotate = false;
+      float mouseHeading = 0.0f;
+      float mousePitch = 0.0f;
+
+      public bool mouseConstrainedUp = true;
 
       Quaternion myViewOri = Quaternion.Identity;
 
@@ -44,7 +47,6 @@ namespace Graphics
       public float defaultStepSize { get; set; }
       public float defaultBigStepSize { get; set; }
       public MouseButton mouseLookButton { get; set; }
-      public float heading { get { return myMouseLookHeading; } }
 
       #region internal handler functions
       public void handleKeyboardUp(Key key)
@@ -85,6 +87,11 @@ namespace Graphics
                {
                   myStepSize = defaultStepSize;
                   shiftDown = false;
+               }
+               break;
+            case Key.ControlLeft:
+               {
+                  mouseRotate = false;
                }
                break;
          }
@@ -134,8 +141,6 @@ namespace Graphics
                {
                   if (shiftDown == true)
                   {
-                     myMouseLookHeading = 0;
-                     myMouseLookPitch = 0;
                      Quaternion q = new Quaternion();
                      q = q.fromHeadingPitchRoll(0, 0, 0);
                      myViewOri = q;
@@ -172,6 +177,11 @@ namespace Graphics
                   if (defaultBigStepSize <= 0) defaultStepSize = 1.0f;
                }
                break;
+            case Key.ControlLeft:
+               {
+                  mouseRotate = true;
+               }
+               break;
          }
       }
 
@@ -198,15 +208,32 @@ namespace Graphics
 
       public void handleMouseMove(int xDelta, int yDelta)
       {
-         if (myMouseLook == true)
+         if(myMouseLook == true)
          {
-            Quaternion q = new Quaternion();
-            myMouseLookHeading += xDelta;
-            myMouseLookPitch += yDelta;
-            myViewOri = q.fromHeadingPitchRoll(myMouseLookHeading, myMouseLookPitch, 0.0f);
+            if(mouseConstrainedUp == true)
+            {
+               Quaternion q = new Quaternion();
+               mouseHeading += xDelta;
+               mousePitch += yDelta;
+               myViewOri = q.fromHeadingPitchRoll(mouseHeading, mousePitch, 0.0f);
+            }
+            else
+            {
+               float scale = 0.01f;
+               if(mouseRotate)
+               {
+                  Quaternion r = Quaternion.FromAxisAngle(myCamera.forward, xDelta * scale);
+                  myViewOri = myViewOri * r;
+               }
+               else
+               {
+                  Quaternion h = Quaternion.FromAxisAngle(myCamera.up, (float)xDelta * scale);
+                  Quaternion p = Quaternion.FromAxisAngle(myCamera.right, (float)yDelta * scale);
+                  myViewOri = myViewOri * h * p;
+               }
+            }
          }
       }
-
 
       #endregion
 
