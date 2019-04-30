@@ -20,8 +20,9 @@ namespace testRenderer
 {
    public class TestRenderer : GameWindow
    {
-      public static int theWidth = 1280;
-      public static int theHeigth = 720;
+      public static int theWidth = 1920;
+      public static int theHeigth = 1080;
+      
 
       Initializer myInitializer;
       Viewport myViewport;
@@ -43,9 +44,10 @@ namespace testRenderer
       Graphics.Font myFont;
 
       float windowScale;
+      int viewportScaleFactor = 1;
 
       public TestRenderer()
-         : base(theWidth, theHeigth, new GraphicsMode(32, 24, 0, 0), "Haven Test", GameWindowFlags.Default, DisplayDevice.Default, 4, 4,
+         : base(theWidth, theHeigth, new GraphicsMode(32, 24, 0, 0), "Haven Test", GameWindowFlags.Default, DisplayDevice.Default, 4, 5,
 #if DEBUG
          GraphicsContextFlags.Debug)
 #else
@@ -54,8 +56,8 @@ namespace testRenderer
       {
          myInitializer = new Initializer(new String[] { "testRenderer.lua" });
          Renderer.init();
-         myViewport = new Viewport(this);
-         myCamera = new Camera(myViewport, 60.0f, 0.1f, 1000.0f);
+         myViewport = new Viewport(0, 0, theWidth/ viewportScaleFactor, theHeigth/ viewportScaleFactor);
+         myCamera = new Camera(myViewport, 60.0f, 0.01f, 100000.0f);
 
          myCameraEventHandler = new GameWindowCameraEventHandler(myCamera, this);
 
@@ -110,13 +112,14 @@ namespace testRenderer
          string version = GL.GetString(StringName.Version);
          int major = System.Convert.ToInt32(version[0].ToString());
          int minor = System.Convert.ToInt32(version[2].ToString());
-         if (major < 4 && minor < 4)
+         if (major < 4 && minor < 5)
          {
-            MessageBox.Show("You need at least OpenGL 4.4 to run this example. Aborting.", "Ooops", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            MessageBox.Show("You need at least OpenGL 4.5 to run this example. Aborting.", "Ooops", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             this.Exit();
          }
          System.Console.WriteLine("Found OpenGL Version: {0}.{1}", major, minor);
 
+         GL.ClipControl(ClipOrigin.LowerLeft, ClipDepthMode.ZeroToOne);
          GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
          GL.ClearDepth(1.0f);
 
@@ -233,8 +236,8 @@ namespace testRenderer
       {
          //init render target
          int x, y;
-         x = myCamera.viewport().width;
-         y = myCamera.viewport().height;
+         x = theWidth / viewportScaleFactor;
+         y = theHeigth / viewportScaleFactor;
 
          List<RenderTargetDescriptor> rtdesc = new List<RenderTargetDescriptor>();
          rtdesc.Add(new RenderTargetDescriptor() { attach = FramebufferAttachment.ColorAttachment0, format = SizedInternalFormat.Rgba32f }); //creates a texture internally
@@ -258,7 +261,7 @@ namespace testRenderer
       void present()
       {
          RenderCommand cmd = new BlitFrameBufferCommand(myRenderTarget, new Rect(0, 0, myRenderTarget.buffers[FramebufferAttachment.ColorAttachment0].width,
-            myRenderTarget.buffers[FramebufferAttachment.ColorAttachment0].height), new Rect(0, 0, myCamera.viewport().width, myCamera.viewport().height));
+            myRenderTarget.buffers[FramebufferAttachment.ColorAttachment0].height), new Rect(0, 0, theWidth, theHeigth));
          cmd.execute();
 
          myFont.print(20, 20, "FPS: {0:0.00}", TimeSource.avgFps());
