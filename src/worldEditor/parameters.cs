@@ -57,7 +57,7 @@ namespace WorldEditor
       public static int theMinRiverLength = 20;
       public static int theMaxRiverIntersections = 2;
 
-      public static int theWorldTextureSize = 1024;
+      public static int theWorldSize = 1024;
 
       public static int theRegionSize = 128;
    }

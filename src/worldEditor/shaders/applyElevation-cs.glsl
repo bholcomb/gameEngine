@@ -3,9 +3,7 @@
 layout(local_size_x = 32, local_size_y = 32) in;
 
 layout(r32f, binding = 0) uniform image2D elvTex;
-layout(rgba32f, binding = 1) uniform image2D faceTex;
-
-layout(location = 2) uniform int face;
+layout(rgba32f, binding = 1) uniform image2D outputTex;
 
 //height values
 #define DeepWaterVal 0.1f
@@ -71,5 +69,5 @@ void main()
    bitfield = setGroupType(bitfield, getGroupType(elev));
    data.a = uintBitsToFloat(bitfield);
 
-   imageStore(faceTex, outPos, data);
+   imageStore(outputTex, outPos, data);
 }

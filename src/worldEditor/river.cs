@@ -11,7 +11,6 @@ namespace WorldEditor
       Bottom
    }
 
-
    public class RiverGroup
    {
       public List<River> Rivers = new List<River>();

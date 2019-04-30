@@ -1,14 +1,11 @@
 #version 430
 
-smooth in vec3 texCoord;
+smooth in vec2 texCoord;
 
-layout(location = 20) uniform samplerCube cubemap;
+layout(location = 20) uniform sampler2D maps;
 
-layout(location = 21) uniform bool showElevation;
+layout(location = 21) uniform int layerSelect;
 layout(location = 22) uniform bool showWater;
-layout(location = 23) uniform bool showHeat;
-layout(location = 24) uniform bool showMoisture;
-layout(location = 25) uniform bool showBiome;
 
 out vec4 FragColor;
 
@@ -81,7 +78,7 @@ vec4 biomeColors[] = {
 
 void main()
 {
-   vec4 data = texture(cubemap, texCoord);
+   vec4 data = texture(maps, texCoord);
 
    float elevation = data.r;
    float heat = data.g;
@@ -96,21 +93,26 @@ void main()
 
    vec4 color = vec4(1,1,1,1);
 
-   if(showBiome)
-      color = biomeColors[biome];
-
-   if(showHeat)
-      color = vec4(heat, heat, heat, 1);
-
-   if(showMoisture)
-      color = vec4(moisture, moisture, moisture, 1);
-
-   if(showElevation)
-      color = vec4(elevation,elevation, elevation, 1);
-
+   switch(layerSelect)
+   {
+      case 0: 
+         color = vec4(elevation,elevation, elevation, 1);
+         break;
+      case 1:
+         color = vec4(heat, heat, heat, 1);
+         break;
+      case 2:
+         color = vec4(moisture, moisture, moisture, 1);
+         break;
+      case 3:
+         color = biomeColors[biome];
+         break;
+   }
+      
    if(showWater && group == Water)
       color = vec4(0,0,1,1);
 
    color.a = 1;
+
    FragColor = color;
 }

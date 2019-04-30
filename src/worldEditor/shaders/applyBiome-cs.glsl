@@ -2,9 +2,7 @@
 
 layout(local_size_x = 32, local_size_y = 32) in;
 
-layout(rgba32f, binding = 0) uniform image2D faceTex;
-
-layout(location = 2) uniform int face;
+layout(rgba32f, binding = 0) uniform image2D outputTex;
 
 #define moistureType(x) bitfieldExtract(x, 4, 4)
 #define heatType(x) bitfieldExtract(x, 8, 4)
@@ -43,13 +41,13 @@ uint getBiomeType(uint temp, uint moist, uint elev)
    if(elev == 2)
       return ShallowOcean;
    
-   return biomes[temp][moist];   
+   return biomes[moist][temp];   
 }
 
 void main()
 {
    ivec2 outPos = ivec2(gl_GlobalInvocationID.xy);
-   vec4 data = imageLoad(faceTex, outPos);
+   vec4 data = imageLoad(outputTex, outPos);
    uint bitfield = floatBitsToUint(data.a);
   
    uint temp = heatType(bitfield);
@@ -59,5 +57,5 @@ void main()
    bitfield = setBiomeType(bitfield, getBiomeType(temp, moist, elev));
    data.a = uintBitsToFloat(bitfield);
 
-   imageStore(faceTex, outPos, data);
+   imageStore(outputTex, outPos, data);
 }

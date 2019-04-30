@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using OpenTK;
 
-using Noise;
+using GpuNoise;
 using Graphics;
 using Terrain;
 
@@ -58,16 +58,16 @@ namespace WorldEditor
 
       public void generateData()
       {
-         /*
-         Parallel.For(0, WorldParameters.regionSize, y =>
-         //for (int y = 0; y < WorldParameters.regionSize; y++)
+         
+         //Parallel.For(0, WorldParameters.regionSize, y =>
+         for (int y = 0; y < WorldParameters.theRegionSize; y++)
          {
-            for (int x = 0; x < WorldParameters.regionSize; x++)
+            for (int x = 0; x < WorldParameters.theRegionSize; x++)
             {
                // WRAP ON BOTH AXIS
                // Sample noise at smaller intervals
-               float s = (x + myX) / (float)myWorld.width;
-               float t = (y + myY) / (float)myWorld.height;
+               float s = (x + myX) / (float)1024; // myWorld.width;
+               float t = (y + myY) / (float)1024; // myWorld.height;
 
                // Calculate our 4D coordinates
                float _2pi = (float)(2 * Math.PI);
@@ -77,9 +77,9 @@ namespace WorldEditor
                float nw = (float)Math.Sin(t * _2pi) / _2pi;
 
                //generate the height/heat/moisture values
-               float elevationData = (float)myGenerator.myElevationGenerator.Get(nx, ny, nz, nw);
-               float heatData = (float)myGenerator.myHeatGenerator.Get(nx, ny, nz, nw);
-               float moistureData = (float)myGenerator.myMoistureGenertator.Get(nx, ny, nz, nw);
+               float elevationData = 0.5f; // (float)myGenerator.myElevationGenerator.Get(nx, ny, nz, nw);
+               float heatData = 0.5f; //(float)myGenerator.myHeatGenerator.Get(nx, ny, nz, nw);
+               float moistureData = 0.5f; //(float)myGenerator.myMoistureGenertator.Get(nx, ny, nz, nw);
 
                //get the current tile
                Tile tile = myTiles[x, y];
@@ -126,8 +126,7 @@ namespace WorldEditor
                tile.setHeat(heatData);
             }
          }
-         );
-         */
+         //);
       }
 
       public void updateNeighbors()
@@ -798,19 +797,19 @@ namespace WorldEditor
 
       Tile getTop(Tile t)
       {
-         return myWorld.findTile(t.X, t.Y - 1);
+         return null; // myWorld.findTile(t.X, t.Y - 1);
       }
       Tile getBottom(Tile t)
       {
-         return myWorld.findTile(t.X, t.Y + 1);
+         return null; // myWorld.findTile(t.X, t.Y + 1);
       }
       Tile getLeft(Tile t)
       {
-         return myWorld.findTile(t.X -1, t.Y);
+         return null; // myWorld.findTile(t.X -1, t.Y);
       }
       Tile getRight(Tile t)
       {
-         return myWorld.findTile(t.X + 1, t.Y);
+         return null; // myWorld.findTile(t.X + 1, t.Y);
       }
    }
 }
