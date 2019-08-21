@@ -272,6 +272,7 @@ namespace Graphics
             deviceFeatures.drawIndirectFirstInstance = myPhysicalDeviceFeatures.drawIndirectFirstInstance;
 
             List<string> deviceExtensions = new List<string>(enumerateDeviceExtensions());
+            if(deviceExtensions.Contains())
 
             {   
                 string extensionName = Util.GetString(properties[property].extensionName);
