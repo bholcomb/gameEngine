@@ -153,7 +153,7 @@ namespace testNoise
          myNoise.update();
 
          myPlanet.update();
-		}
+      }
 
       float avgFps = 0.0f;
 
@@ -186,7 +186,7 @@ namespace testNoise
          SwapBuffers();
       }
 
-		private void renderUi()
+      private void renderUi()
       {
          UI.beginFrame();
 
@@ -226,11 +226,11 @@ namespace testNoise
          List<RenderCommand> cmds = UI.getRenderCommands();
          foreach (RenderCommand rc in cmds)
          {
-				StatelessRenderCommand src = rc as StatelessRenderCommand;
-				if(src != null)
-					src.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
+            StatelessRenderCommand src = rc as StatelessRenderCommand;
+            if(src != null)
+               src.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
 
-				rc.execute();
+            rc.execute();
          }
       }
    }

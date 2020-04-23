@@ -97,15 +97,15 @@ namespace testNoise
          UI.displaySize = new Vector2(theWidth, theHeight);
 
          int size = 1024 * 1;
-			//myNoise = new GpuNoise.GpuNoise2dMap(size, size);
-			myNoise = new GpuNoise.GpuNoiseCubeMap(size, size);
+         //myNoise = new GpuNoise.GpuNoise2dMap(size, size);
+         myNoise = new GpuNoise.GpuNoiseCubeMap(size, size);
       }
 
       protected override void OnUpdateFrame(FrameEventArgs e)
       {
          base.OnUpdateFrame(e);
-			myCamera.updateCameraUniformBuffer();
-		}
+         myCamera.updateCameraUniformBuffer();
+      }
 
       protected override void OnRenderFrame(FrameEventArgs e)
       {
@@ -116,9 +116,9 @@ namespace testNoise
 
          myNoise.update();
 
-			//clear renderstate (especially scissor)
-			RenderState rs = new RenderState();
-			rs.apply();
+         //clear renderstate (especially scissor)
+         RenderState rs = new RenderState();
+         rs.apply();
 
          GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
          GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -133,54 +133,54 @@ namespace testNoise
 
          //-x left
          cmd = new RenderTexture2dCommand(new Vector2(posX, posY), new Vector2(posX + size, posY + size), myNoise.myTextures[1]);
-			cmd.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
+         cmd.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
          cmd.execute();
 
          //-z front
          posX += size;
          cmd = new RenderTexture2dCommand(new Vector2(posX, posY), new Vector2(posX + size, posY + size), myNoise.myTextures[4]);
-			cmd.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-			cmd.execute();
+         cmd.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
+         cmd.execute();
 
          //+Y  top
          posY += size;
          cmd = new RenderTexture2dCommand(new Vector2(posX, posY), new Vector2(posX + size, posY + size), myNoise.myTextures[3]);
-			cmd.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-			cmd.execute();
+         cmd.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
+         cmd.execute();
 
          //-Y  bottom
          posY -= size * 2;
          cmd = new RenderTexture2dCommand(new Vector2(posX, posY), new Vector2(posX + size, posY + size), myNoise.myTextures[2]);
-			cmd.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-			cmd.execute();
+         cmd.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
+         cmd.execute();
 
          //+x  right
          posX += size;
          posY += size;
          cmd = new RenderTexture2dCommand(new Vector2(posX, posY), new Vector2(posX + size, posY + size), myNoise.myTextures[0]);
-			cmd.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-			cmd.execute();
+         cmd.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
+         cmd.execute();
 
          //+z  back
          posX += size;
          cmd = new RenderTexture2dCommand(new Vector2(posX, posY), new Vector2(posX + size, posY + size), myNoise.myTextures[5]);
-			cmd.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-			cmd.execute();
+         cmd.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
+         cmd.execute();
 
          renderUi();
 
-			RenderCubemapSphere cmd2 = new RenderCubemapSphere(new Vector3(0, 0, -5), 2.0f,  myNoise.myCubemap, true);
-			cmd2.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
-			cmd2.execute();
+         RenderCubemapSphere cmd2 = new RenderCubemapSphere(new Vector3(0, 0, -5), 2.0f,  myNoise.myCubemap, true);
+         cmd2.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
+         cmd2.execute();
 
-			SwapBuffers();
+         SwapBuffers();
       }
 
-		float avgFps = 0;
-		private void renderUi()
+      float avgFps = 0;
+      private void renderUi()
       {
-			avgFps = (0.99f * avgFps) + (0.01f * (float)TimeSource.fps());
-			UI.beginFrame();
+         avgFps = (0.99f * avgFps) + (0.01f * (float)TimeSource.fps());
+         UI.beginFrame();
          UI.label("FPS: {0:0.00}", avgFps);
 
          UI.beginWindow("Noise Editor");
@@ -216,11 +216,11 @@ namespace testNoise
          List<RenderCommand> cmds = UI.getRenderCommands();
          foreach (RenderCommand rc in cmds)
          {
-				StatelessRenderCommand src = rc as StatelessRenderCommand;
-				if(src != null)
-					src.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
+            StatelessRenderCommand src = rc as StatelessRenderCommand;
+            if(src != null)
+               src.renderState.setUniformBuffer(myCamera.uniformBufferId(), 0);
 
-				rc.execute();
+            rc.execute();
          }
       }
    }
